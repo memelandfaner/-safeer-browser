@@ -110,6 +110,11 @@ object ThreatBlockEngine {
     }
 
     /**
+     * Pomožna funkcija za hitro preverjanje, ali je URL grožnja.
+     */
+    fun isThreat(url: String): Boolean = checkThreat(url) != null
+
+    /**
      * Odobri domeno za to sejo (uporabnik je izbral 'Nadaljuj na lastno odgovornost').
      */
     fun allowForSession(domain: String) {

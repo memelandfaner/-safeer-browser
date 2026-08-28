@@ -2,7 +2,8 @@ package com.example.safeerbrowser
 
 /**
  * 🎨 CosmeticFilterEngine
- * Generira in injicira EasyList CSS element hiding pravila v spletne strani za popolno odstranitev praznih oglasnih okvirjev.
+ * Generira in injicira EasyList CSS element hiding pravila v spletne strani za popolno odstranitev praznih oglasnih okvirjev,
+ * lažnih gumbov za prenos (Fake Download Buttons), oglasnih srcdoc okvirjev in lebdečih promocijskih pripomočkov (Reward Zone / Floating Popups).
  */
 object CosmeticFilterEngine {
 
@@ -18,9 +19,16 @@ object CosmeticFilterEngine {
         ".taboola", ".outbrain", ".trc_rbox_container", "[data-ad]", "[data-ad-unit]",
         ".sponsored-post", ".sponsored-content", ".promoted-tweet", ".promoted-post",
         
-        // Popunder & Banner elementi
+        // Popunder, Banner, In-Page Push & Floating Ad elementi
         ".pop-under", ".ad-banner", ".banner-ad", ".sticky-ad", ".floating-banner",
         ".monetag-banner", ".richpush-banner", ".interstitial-ad",
+        "[class*='reward-zone']", "[id*='reward-zone']", "[class*='floating-ad']",
+        "[class*='gamify-ad']", "[class*='coin-chest']", "[class*='ad-floating']",
+        "iframe[srcdoc]", "iframe[src*='about:srcdoc']", "iframe[style*='fixed']",
+        
+        // Lažni gumbi za prenos (Fake Download Ads)
+        "[class*='fake-download']", "[id*='fake-download']", ".download-button-ad",
+        "div[class*='download-arrow']", "div:has(> a[href*='onclick'])",
         
         // YouTube elementi
         ".ytp-ad-overlay-container", ".ytp-ad-message-container", ".ytp-ad-text",

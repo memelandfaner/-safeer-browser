@@ -96,6 +96,16 @@ class ChromiumEngineView @JvmOverloads constructor(
 
     private fun setupClients() {
         webChromeClient = object : WebChromeClient() {
+            override fun onCreateWindow(
+                view: WebView?,
+                isDialog: Boolean,
+                isUserGesture: Boolean,
+                resultMsg: android.os.Message?
+            ): Boolean {
+                // 🛑 Popolna zaščita pred pojavnimi okni in ugrabitvijo oken
+                return false
+            }
+
             override fun onProgressChanged(view: WebView?, newProgress: Int) {
                 super.onProgressChanged(view, newProgress)
                 onProgressUpdate?.invoke(newProgress)
@@ -134,12 +144,25 @@ class ChromiumEngineView @JvmOverloads constructor(
             override fun onPermissionRequest(request: PermissionRequest?) {
                 request?.grant(request.resources)
             }
+
+            override fun onConsoleMessage(consoleMessage: android.webkit.ConsoleMessage?): Boolean {
+                val msg = consoleMessage?.message() ?: ""
+                val line = consoleMessage?.lineNumber() ?: 0
+                val src = consoleMessage?.sourceId() ?: ""
+                android.util.Log.d("SafeerConsole", "[$src:$line] $msg")
+                return true
+            }
         }
 
         webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val uri = request?.url ?: return false
                 val urlStr = uri.toString()
+                val isMainFrame = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    request.isForMainFrame
+                } else {
+                    true
+                }
 
                 // 1. Odklep nevarne domene na lastno odgovornost (iz varnostnega opozorila)
                 if (urlStr.startsWith("safeer://bypass-threat", ignoreCase = true)) {
@@ -154,12 +177,31 @@ class ChromiumEngineView @JvmOverloads constructor(
                     return true
                 }
 
-                // 2. Top-Frame Lock za stavniške & popunder domene
-                if (AdBlockEngine.shouldBlockUrl(urlStr)) {
+                // 2. Top-Frame Lock za oglasne, stavniške & C2 domene
+                if (AdBlockEngine.shouldBlockUrl(urlStr) || ThreatBlockEngine.isThreat(urlStr)) {
                     return true
                 }
 
-                // 3. Odpri posebne sheme v ustreznih aplikacijah
+                // 3. Top-Frame Lock & Origin Guard za pretočne portale (npr. streamex.sh)
+                val currentUrlStr = view?.url ?: ""
+                val curHost = try { Uri.parse(currentUrlStr).host?.lowercase()?.trim() ?: "" } catch (_: Exception) { "" }
+                val destHost = uri.host?.lowercase()?.trim() ?: ""
+
+                if (isMainFrame && curHost.isNotEmpty() && destHost.isNotEmpty() &&
+                    curHost != destHost && !destHost.endsWith(".$curHost") && !curHost.endsWith(".$destHost")) {
+
+                    // Če smo na pretočnem portalu in koda poskuša ugrabiti cel zaslon na zunanjo domeno (npr. YouTube / Ad / Redirect)
+                    if (AdBlockEngine.isStreamingOrMediaHost(curHost) && !AdBlockEngine.isStreamingOrMediaHost(destHost)) {
+                        return true
+                    }
+
+                    // Če je ciljna domena sumljiva (vsebuje stavne, popunder ali affiliate vzorce)
+                    if (AdBlockEngine.isSuspiciousRedirect(destHost, urlStr)) {
+                        return true
+                    }
+                }
+
+                // 4. Odpri posebne sheme v ustreznih aplikacijah
                 val scheme = uri.scheme?.lowercase() ?: ""
                 if (scheme != "http" && scheme != "https" && scheme != "file" && scheme != "about") {
                     try {
@@ -201,7 +243,7 @@ class ChromiumEngineView @JvmOverloads constructor(
                     return threatResponse
                 }
 
-                // ⚡ 2. Napredni AdBlock & Sledilci (Suffix Trie & Path Rules)
+                // ⚡ 2. Napredni AdBlock & Sledilci (Suffix Trie, Streaming Guard & Path Rules)
                 return AdBlockEngine.handleIntercept(url)
             }
 

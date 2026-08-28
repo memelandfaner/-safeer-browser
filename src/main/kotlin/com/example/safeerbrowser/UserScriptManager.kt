@@ -12,6 +12,189 @@ object UserScriptManager {
         }
     """
 
+    private const val ANTI_POPUNDER_SHIELD_JS = """
+        /* 🛡️ Safeer Anti-Popunder, Anti-Clickjacking & Streaming Shield Engine */
+        (function() {
+            if (window._safeer_popunder_shield_active) return;
+            window._safeer_popunder_shield_active = true;
+
+            // 🚫 1. Popolna nevtralizacija window.open popunderjev
+            try {
+                window.open = function(url, target, features) {
+                    console.log('[Safeer AdBlock] Preprečen window.open:', url);
+                    return null;
+                };
+            } catch(e) {}
+
+            // 🚫 2. Zaščita pred ugrabitvijo top.location iz vdelanih okvirjev (iframes)
+            try {
+                if (window.top !== window.self) {
+                    Object.defineProperty(window, 'top', {
+                        get: function() { return window.self; },
+                        set: function() {},
+                        configurable: true
+                    });
+                    Object.defineProperty(window, 'parent', {
+                        get: function() { return window.self; },
+                        set: function() {},
+                        configurable: true
+                    });
+                }
+            } catch(e) {}
+
+            // 🚫 3. Nevtralizacija umetnih klikov na skrite <a> povezave (Shadow Click-Jacking)
+            try {
+                var origAnchorClick = HTMLAnchorElement.prototype.click;
+                HTMLAnchorElement.prototype.click = function() {
+                    var href = (this.href || '').trim().toLowerCase();
+                    if (href && (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('//'))) {
+                        try {
+                            var dest = new URL(href, window.location.href);
+                            var curHost = window.location.hostname.toLowerCase();
+                            var destHost = dest.hostname.toLowerCase();
+                            if (destHost !== curHost && !destHost.endsWith('.' + curHost)) {
+                                console.log('[Safeer AdBlock] Blokiran umeten klik na povezavo:', href);
+                                return;
+                            }
+                        } catch(e) {}
+                    }
+                    return origAnchorClick.apply(this, arguments);
+                };
+            } catch(e) {}
+
+            // 🚫 4. Samodejno odstranjevanje lažnih opozoril, vsiljenih modalov, dating oglasov in lažnih gumbov
+            function cleanAllAdOverlays() {
+                try {
+                    // Preišči vse elemente na strani
+                    var all = document.querySelectorAll('div, section, dialog, [role="dialog"], [role="alertdialog"], span, a, button, p');
+                    for (var i = 0; i < all.length; i++) {
+                        var el = all[i];
+                        var tag = el.tagName.toLowerCase();
+                        if (tag === 'html' || tag === 'body' || tag === 'head' || tag === 'script' || tag === 'style') continue;
+
+                        var txt = (el.innerText || el.textContent || '').trim().toLowerCase();
+                        var cls = (el.className || '').toString().toLowerCase();
+                        var id = (el.id || '').toLowerCase();
+
+                        // 1. Zaznaj nezaželena sporočila (Whatsapp za seks, Lara, Attention, Fake confirm, Reward Zone)
+                        var isUnwanted = (
+                            txt.includes('whatsapp za seks') ||
+                            txt.includes('lara (2 km') ||
+                            txt.includes('jebi me zastonj') ||
+                            txt.includes('whatsapp za') ||
+                            (txt.includes('whatsapp') && (txt.includes('seks') || txt.includes('sex') || txt.includes('zastonj') || txt.includes('lara'))) ||
+                            txt.includes('jebi me') ||
+                            txt.includes('kurbe') ||
+                            txt.includes('reward zone') ||
+                            cls.includes('reward-zone') ||
+                            id.includes('reward-zone') ||
+                            (txt.includes('attention') && txt.includes('confirm to continue')) ||
+                            (txt.includes('please confirm') && txt.includes('continue')) ||
+                            (txt.includes('click allow') || txt.includes('press allow')) ||
+                            (txt.includes('disable your ad blocker') || txt.includes('turn off adblock')) ||
+                            (txt.includes('vpn recommended') || txt.includes('battery damaged') || txt.includes('virus detected'))
+                        );
+
+                        if (isUnwanted) {
+                            // Poišči krovni plavajoči dialog
+                            var topDialog = el;
+                            while (topDialog.parentElement && topDialog.parentElement !== document.body && topDialog.parentElement !== document.documentElement) {
+                                var pStyle = window.getComputedStyle(topDialog.parentElement);
+                                if (pStyle.position === 'fixed' || pStyle.position === 'absolute' || parseInt(pStyle.zIndex, 10) > 10) {
+                                    topDialog = topDialog.parentElement;
+                                } else {
+                                    break;
+                                }
+                            }
+                            topDialog.remove();
+                            continue;
+                        }
+
+                        // 2. Odstrani lažne lebdeče gumbe za prenos
+                        if ((txt === 'download' || txt === 'prenesi') && (el.querySelectorAll('video, iframe, form').length === 0)) {
+                            var s = window.getComputedStyle(el);
+                            if (s.position === 'fixed' || parseInt(s.zIndex, 10) > 50) {
+                                el.remove();
+                            }
+                        }
+                    }
+
+                    // 3. Odstrani oglasne iframe okvirje (srcdoc ali lebdeče overlay iframe-e)
+                    var iframes = document.querySelectorAll('iframe');
+                    for (var k = 0; k < iframes.length; k++) {
+                        var ifr = iframes[k];
+                        var src = (ifr.getAttribute('src') || ifr.src || '').toLowerCase();
+                        var srcdoc = ifr.getAttribute('srcdoc');
+                        var isFixed = false;
+                        try {
+                            var ifStyle = window.getComputedStyle(ifr);
+                            if (ifStyle.position === 'fixed' || (ifStyle.position === 'absolute' && parseInt(ifStyle.zIndex, 10) > 20)) {
+                                isFixed = true;
+                            }
+                        } catch(e) {}
+
+                        if (srcdoc != null || src.includes('srcdoc') || (isFixed && !src.includes('embed') && !src.includes('player') && !src.includes('streamex') && !src.includes('vidgod'))) {
+                            ifr.remove();
+                        }
+                    }
+
+                    // 4. Odstrani nevidne prekrivne plasti (Invisible Click-Jacking Overlays)
+                    var allFixed = document.querySelectorAll('div, a, span, button');
+                    var winW = window.innerWidth || 1000;
+                    var winH = window.innerHeight || 800;
+                    for (var j = 0; j < allFixed.length; j++) {
+                        var fx = allFixed[j];
+                        try {
+                            var style = window.getComputedStyle(fx);
+                            if (style.position === 'fixed' || style.position === 'absolute') {
+                                var z = parseInt(style.zIndex, 10) || 0;
+                                var op = parseFloat(style.opacity);
+                                var rect = fx.getBoundingClientRect();
+                                if (z >= 99 && (op === 0 || style.visibility === 'hidden') && rect.width >= winW * 0.5 && rect.height >= winH * 0.5) {
+                                    if (fx.querySelectorAll('video, iframe, form').length === 0) {
+                                        fx.remove();
+                                    }
+                                }
+                            }
+                        } catch(e) {}
+                    }
+                } catch(e) {}
+            }
+
+            // 🚫 5. Blokada klikov na zunanje oglasne povezave
+            document.addEventListener('click', function(e) {
+                var target = e.target;
+                var a = target.closest ? target.closest('a') : null;
+                if (a && a.href) {
+                    var h = a.href.toLowerCase();
+                    if (h.includes('doubleclick') || h.includes('googleads') || h.includes('monetag') ||
+                        h.includes('onclick') || h.includes('adsterra') || h.includes('popads') ||
+                        h.includes('popcash') || h.includes('hilltop') || h.includes('propu.sh') ||
+                        h.includes('highperformance') || h.includes('deloplen') || h.includes('20bet') ||
+                        h.includes('1xbet') || h.includes('casino') || h.includes('pussing') ||
+                        h.includes('effectivegate') || h.includes('dating') || h.includes('stripchat')) {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        a.remove();
+                    }
+                }
+            }, true);
+
+            // Zagon čistilca
+            cleanAllAdOverlays();
+            setInterval(cleanAllAdOverlays, 200);
+
+            var observer = new MutationObserver(cleanAllAdOverlays);
+            if (document.body) {
+                observer.observe(document.body, { childList: true, subtree: true });
+            } else {
+                document.addEventListener('DOMContentLoaded', function() {
+                    if (document.body) observer.observe(document.body, { childList: true, subtree: true });
+                });
+            }
+        })();
+    """
+
     private const val YOUTUBE_FREEDOM_MOBILE_JS = """
         (function initYouTubeFreedom() {
             if (window._safeer_yt_initialized) return;
@@ -296,11 +479,6 @@ object UserScriptManager {
                     v.setAttribute('playsinline', 'true');
                     v.setAttribute('webkit-playsinline', 'true');
                 }
-
-                window.open = function(url) {
-                    console.log('Safeer Popunder blocked:', url);
-                    return null;
-                };
             } catch(e) {}
         })();
     """
@@ -308,6 +486,7 @@ object UserScriptManager {
     fun injectEarlyScript(webView: WebView) {
         val cosmeticCss = CosmeticFilterEngine.buildCosmeticCss()
         injectCss(webView, cosmeticCss, "safeer-cosmetic-filter")
+        webView.evaluateJavascript(ANTI_POPUNDER_SHIELD_JS, null)
         webView.evaluateJavascript(BACKGROUND_PLAYBACK_JS, null)
         webView.evaluateJavascript(YOUTUBE_FREEDOM_MOBILE_JS, null)
     }
@@ -315,6 +494,7 @@ object UserScriptManager {
     fun injectOnPageFinished(webView: WebView, isDarkMode: Boolean) {
         val cosmeticCss = CosmeticFilterEngine.buildCosmeticCss()
         injectCss(webView, cosmeticCss, "safeer-cosmetic-filter")
+        webView.evaluateJavascript(ANTI_POPUNDER_SHIELD_JS, null)
         webView.evaluateJavascript(BACKGROUND_PLAYBACK_JS, null)
         webView.evaluateJavascript(YOUTUBE_FREEDOM_MOBILE_JS, null)
 
@@ -336,17 +516,21 @@ object UserScriptManager {
     }
 
     private fun injectCss(webView: WebView, css: String, elementId: String? = null) {
-        val minified = css.replace("\n", "").replace("'", "\\'")
-        val idAttr = if (elementId != null) "style.id = '$elementId';" else ""
+        val base64 = android.util.Base64.encodeToString(css.toByteArray(Charsets.UTF_8), android.util.Base64.NO_WRAP)
+        val idStr = elementId ?: "custom-css"
         val js = """
             (function() {
-                var parent = document.head || document.documentElement;
-                ${if (elementId != null) "var old = document.getElementById('$elementId'); if (old) old.remove();" else ""}
-                var style = document.createElement('style');
-                style.type = 'text/css';
-                $idAttr
-                style.textContent = '$minified';
-                parent.appendChild(style);
+                try {
+                    var parent = document.head || document.documentElement;
+                    if (!parent) return;
+                    var old = document.getElementById('$idStr');
+                    if (old) old.remove();
+                    var style = document.createElement('style');
+                    style.id = '$idStr';
+                    style.type = 'text/css';
+                    style.textContent = atob('$base64');
+                    parent.appendChild(style);
+                } catch(e) {}
             })();
         """.trimIndent()
         webView.evaluateJavascript(js, null)
