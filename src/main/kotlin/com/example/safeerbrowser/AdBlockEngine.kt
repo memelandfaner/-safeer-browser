@@ -106,10 +106,18 @@ object AdBlockEngine {
             return true
         }
 
-        // 2. YouTube & Google Video legitimni viri
-        if (lower.contains("googlevideo.com") ||
-            lower.contains("youtube.com/s/player") ||
-            lower.contains("youtube.com/youtubei")) {
+        // 🎬 Video Media Guard: Nikoli ne blokiraj veljavnih HLS tokov, segmentov ali YouTube video predvajalnika
+        if (lower.contains(".m3u8") || lower.contains(".ts") || lower.contains("/hls/") || 
+            lower.contains("/embed/") || lower.contains("googlevideo.com") ||
+            lower.contains("youtube.com/youtubei") || lower.contains("youtube.com/s/player") ||
+            lower.contains("youtube.com/watch") || lower.contains("youtube.com/api/") ||
+            lower.contains("youtube.com/results") || lower.contains("ytimg.com") ||
+            lower.contains("youtube.com/ptracking") == false && lower.contains("youtube.com")) {
+            // Če je specifičen oglasni strežnik na YouTubu, ga blokiraj
+            if (lower.contains("googleads") || lower.contains("pagead") || lower.contains("adservice") ||
+                lower.contains("doubleclick") || lower.contains("ad.youtube.com") || lower.contains("ads.youtube.com")) {
+                return true
+            }
             return false
         }
 

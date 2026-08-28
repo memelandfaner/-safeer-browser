@@ -24,11 +24,10 @@ object CosmeticFilterEngine {
         ".monetag-banner", ".richpush-banner", ".interstitial-ad",
         "[class*='reward-zone']", "[id*='reward-zone']", "[class*='floating-ad']",
         "[class*='gamify-ad']", "[class*='coin-chest']", "[class*='ad-floating']",
-        "iframe[srcdoc]", "iframe[src*='about:srcdoc']", "iframe[style*='fixed']",
         
         // Lažni gumbi za prenos (Fake Download Ads)
         "[class*='fake-download']", "[id*='fake-download']", ".download-button-ad",
-        "div[class*='download-arrow']", "div:has(> a[href*='onclick'])",
+        "div[class*='download-arrow']",
         
         // YouTube elementi
         ".ytp-ad-overlay-container", ".ytp-ad-message-container", ".ytp-ad-text",

@@ -236,7 +236,7 @@ object UserScriptManager {
                 } catch(e) {}
             }
 
-            // 🛡️ 3. Zanesljiv Ad-Skipper & Auto-FastForward
+            // 🛡️ 3. Zanesljiv Ad-Skipper brez motenja avtorskih videov
             function processYouTubeAds() {
                 removeOpenAppElements();
                 try {
@@ -244,33 +244,26 @@ object UserScriptManager {
                     var moviePlayer = document.getElementById('movie_player') ||
                                       document.querySelector('.html5-video-player');
 
-                    // Preveri aktivne oznake oglasov
-                    var isAd = document.querySelector(
-                        '.ad-showing, .ad-interrupting, .ytp-ad-player-overlay, ' +
-                        '.ytp-ad-text, .ytp-ad-preview-container, .ytp-ad-simple-ad-badge, ' +
-                        '[class*="ad-showing"], [class*="ad-interrupting"], div.video-ads.ytp-ad-module > *, ' +
-                        '.ytp-ad-duration-remaining, .ytp-ad-overlay-container, .ytm-ad-slot-renderer, ' +
-                        'div[class*="ad-container"], div[class*="ad-div"], .ytp-ad-action-interstitial'
-                    );
-
-                    if (!isAd && moviePlayer && moviePlayer.classList) {
+                    // Preveri izključno aktivne oznake predvajanega oglasa
+                    var isAd = false;
+                    if (moviePlayer && moviePlayer.classList) {
                         if (moviePlayer.classList.contains('ad-showing') || moviePlayer.classList.contains('ad-interrupting')) {
-                            isAd = moviePlayer;
+                            isAd = true;
+                        }
+                    }
+                    if (!isAd) {
+                        var adBadge = document.querySelector('.ytp-ad-player-overlay, .ytp-ad-simple-ad-badge, .ytp-ad-text');
+                        if (adBadge && adBadge.offsetParent !== null) {
+                            isAd = true;
                         }
                     }
 
                     if (isAd && video) {
-                        // 1. Utišaj zvok oglasa
+                        // 1. Utišaj zvok med oglasom
                         try { video.muted = true; } catch(e) {}
-                        // 2. Pospeši oglas na 16x hitrost
+                        // 2. Pospeši oglas na 16x hitrost za hipen preskok
                         try { video.playbackRate = 16.0; } catch(e) {}
-                        // 3. Varno preskoči na konec trajanja oglasa
-                        try {
-                            if (isFinite(video.duration) && video.duration > 0) {
-                                video.currentTime = video.duration;
-                            }
-                        } catch(e) {}
-                        // 4. Sproži skipAd na predvajalniku
+                        // 3. Sproži skipAd na predvajalniku, če obstaja
                         if (moviePlayer && typeof moviePlayer.skipAd === 'function') {
                             try { moviePlayer.skipAd(); } catch(e) {}
                         }
