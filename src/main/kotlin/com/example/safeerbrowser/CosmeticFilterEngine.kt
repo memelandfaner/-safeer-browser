@@ -29,10 +29,11 @@ object CosmeticFilterEngine {
         "[class*='fake-download']", "[id*='fake-download']", ".download-button-ad",
         "div[class*='download-arrow']",
         
-        // YouTube elementi
+        // YouTube elementi & samodejni vklop zvoka (skrit mute gumb)
         ".ytp-ad-overlay-container", ".ytp-ad-message-container", ".ytp-ad-text",
         ".ytd-ad-slot-renderer", "ytd-in-feed-ad-layout-renderer", "ytd-banner-promo-renderer",
         "ytd-player-legacy-desktop-watch-ads-renderer", ".ytd-display-ad-renderer",
+        ".ytp-unmute", ".ytp-unmute-inner", ".ytp-unmute-animated", "button[aria-label*='Vklopite zvok']",
         
         // AdBlock opozorila in prekrivna okna
         ".fc-ab-root", ".adblock-overlay", "#adblock-modal", ".ad-block-warning"

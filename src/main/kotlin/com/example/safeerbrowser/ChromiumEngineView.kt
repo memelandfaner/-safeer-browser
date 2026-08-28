@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.media.AudioManager
 import android.net.Uri
 import android.net.http.SslError
 import android.os.Build
@@ -55,6 +56,13 @@ class ChromiumEngineView @JvmOverloads constructor(
 
     private fun setupSettings() {
         setLayerType(View.LAYER_TYPE_HARDWARE, null)
+
+        // 🔊 100% Native Strojni Vklop Zvoka (Unmute STREAM_MUSIC)
+        try {
+            val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+            audioManager?.setStreamMute(AudioManager.STREAM_MUSIC, false)
+            audioManager?.mode = AudioManager.MODE_NORMAL
+        } catch (_: Exception) {}
 
         val cm = CookieManager.getInstance()
         cm.setAcceptCookie(true)

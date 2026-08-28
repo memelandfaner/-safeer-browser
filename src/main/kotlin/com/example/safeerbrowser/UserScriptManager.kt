@@ -352,6 +352,26 @@ object UserScriptManager {
                     if (skipBtn) {
                         forceClick(skipBtn);
                     }
+
+                    // 🔊 100% Samodejni vklop zvoka (Unmute) za YouTube
+                    if (video && !isAd) {
+                        if (video.muted) {
+                            video.muted = false;
+                        }
+                        if (video.volume < 1.0) {
+                            video.volume = 1.0;
+                        }
+                    }
+
+                    var unmuteBtns = document.querySelectorAll(
+                        '.ytp-unmute, .ytp-unmute-inner, .ytp-unmute-animated, ' +
+                        'button[aria-label*="Vklopite zvok"], button[aria-label*="zvok"], ' +
+                        'button[aria-label*="Unmute"], button[aria-label*="unmute"], ' +
+                        '.ytp-mute-button[title*="zvok"], .ytp-mute-button[title*="Unmute"]'
+                    );
+                    for (var u = 0; u < unmuteBtns.length; u++) {
+                        forceClick(unmuteBtns[u]);
+                    }
                 } catch(e) {}
             }
 
