@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/accent_cyan_glow" />
+            <stroke android:width="2dp" android:color="@color/accent_cyan" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/badge_tab_bg" />
+            <stroke android:width="1.8dp" android:color="@color/badge_tab_border" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+</selector>

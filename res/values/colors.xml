@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- AMOLED Deep Dark & True Pitch Black -->
+    <color name="bg_primary">#06090F</color>
+    <color name="bg_pure_black">#000000</color>
+    <color name="bg_secondary">#0E1626</color>
+    <color name="bg_card">#111C30</color>
+    <color name="bg_card_active">#16243E</color>
+    
+    <!-- Omnibox URL Bar -->
+    <color name="bg_omnibox">#131D31</color>
+    <color name="bg_omnibox_focus">#182640</color>
+    <color name="border_omnibox">#1E293B</color>
+    <color name="border_omnibox_focus">#00D2FF</color>
+    
+    <!-- Neon Accents -->
+    <color name="accent_cyan">#00D2FF</color>
+    <color name="accent_cyan_glow">#8000D2FF</color>
+    <color name="accent_blue">#3B82F6</color>
+    <color name="accent_purple">#8B5CF6</color>
+    
+    <!-- Text Colors -->
+    <color name="text_primary">#F8FAFC</color>
+    <color name="text_secondary">#94A3B8</color>
+    <color name="text_dim">#64748B</color>
+    
+    <!-- Badges & Status -->
+    <color name="security_green">#10B981</color>
+    <color name="warning_orange">#F59E0B</color>
+    <color name="danger_red">#EF4444</color>
+    
+    <!-- Tab Badge -->
+    <color name="badge_tab_bg">#111C30</color>
+    <color name="badge_tab_border">#00D2FF</color>
+    <color name="badge_tab_text">#00D2FF</color>
+    
+    <!-- Touch Ripples & Overlays -->
+    <color name="ripple_color">#2600D2FF</color>
+    <color name="overlay_backdrop">#CC04060A</color>
+</resources>

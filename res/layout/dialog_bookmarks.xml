@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_mobile_menu_dialog"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="⭐ Zaznamki in Hitri Portali"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnCloseBookmarks"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_mobile_icon_button"
+            android:text="✕"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginVertical="8dp"
+        android:background="@color/border_omnibox" />
+
+    <!-- List of Bookmarks -->
+    <ListView
+        android:id="@+id/bookmarksListView"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:divider="@color/border_omnibox"
+        android:dividerHeight="1dp" />
+
+</LinearLayout>
