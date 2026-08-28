@@ -42,27 +42,7 @@ object UserScriptManager {
                 }
             } catch(e) {}
 
-            // 🚫 3. Nevtralizacija umetnih klikov na skrite <a> povezave (Shadow Click-Jacking)
-            try {
-                var origAnchorClick = HTMLAnchorElement.prototype.click;
-                HTMLAnchorElement.prototype.click = function() {
-                    var href = (this.href || '').trim().toLowerCase();
-                    if (href && (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('//'))) {
-                        try {
-                            var dest = new URL(href, window.location.href);
-                            var curHost = window.location.hostname.toLowerCase();
-                            var destHost = dest.hostname.toLowerCase();
-                            if (destHost !== curHost && !destHost.endsWith('.' + curHost)) {
-                                console.log('[Safeer AdBlock] Blokiran umeten klik na povezavo:', href);
-                                return;
-                            }
-                        } catch(e) {}
-                    }
-                    return origAnchorClick.apply(this, arguments);
-                };
-            } catch(e) {}
-
-            // 🚫 4. Samodejno odstranjevanje lažnih opozoril, vsiljenih modalov, dating oglasov in lažnih gumbov
+            // 🚫 3. Samodejno odstranjevanje lažnih opozoril, vsiljenih modalov, dating oglasov in lažnih gumbov
             function cleanAllAdOverlays() {
                 try {
                     // Preišči vse elemente na strani

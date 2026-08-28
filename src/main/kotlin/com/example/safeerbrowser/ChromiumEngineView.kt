@@ -177,31 +177,25 @@ class ChromiumEngineView @JvmOverloads constructor(
                     return true
                 }
 
-                // 2. Top-Frame Lock za oglasne, stavniške & C2 domene
-                if (AdBlockEngine.shouldBlockUrl(urlStr) || ThreatBlockEngine.isThreat(urlStr)) {
+                // 2. Blokiraj le resnične botnet/malware grožnje in znane oglasne domene
+                val host = uri.host?.lowercase()?.trim() ?: ""
+                if (ThreatBlockEngine.isThreat(urlStr)) {
+                    view?.let { wv ->
+                        val match = ThreatBlockEngine.checkThreat(urlStr)
+                        if (match != null) {
+                            val html = ThreatBlockEngine.createSecurityInterstitialHtml(urlStr, match)
+                            wv.loadDataWithBaseURL("https://$host", html, "text/html", "UTF-8", null)
+                        }
+                    }
                     return true
                 }
 
-                // 3. Top-Frame Lock & Origin Guard za pretočne portale (npr. streamex.sh)
-                val currentUrlStr = view?.url ?: ""
-                val curHost = try { Uri.parse(currentUrlStr).host?.lowercase()?.trim() ?: "" } catch (_: Exception) { "" }
-                val destHost = uri.host?.lowercase()?.trim() ?: ""
-
-                if (isMainFrame && curHost.isNotEmpty() && destHost.isNotEmpty() &&
-                    curHost != destHost && !destHost.endsWith(".$curHost") && !curHost.endsWith(".$destHost")) {
-
-                    // Če smo na pretočnem portalu in koda poskuša ugrabiti cel zaslon na zunanjo domeno (npr. YouTube / Ad / Redirect)
-                    if (AdBlockEngine.isStreamingOrMediaHost(curHost) && !AdBlockEngine.isStreamingOrMediaHost(destHost)) {
-                        return true
-                    }
-
-                    // Če je ciljna domena sumljiva (vsebuje stavne, popunder ali affiliate vzorce)
-                    if (AdBlockEngine.isSuspiciousRedirect(destHost, urlStr)) {
-                        return true
-                    }
+                // Blokiraj klik na znana oglasna omrežja (popunderji)
+                if (AdBlockEngine.shouldBlockUrl(urlStr)) {
+                    return true
                 }
 
-                // 4. Odpri posebne sheme v ustreznih aplikacijah
+                // 3. Odpri posebne sheme v ustreznih aplikacijah
                 val scheme = uri.scheme?.lowercase() ?: ""
                 if (scheme != "http" && scheme != "https" && scheme != "file" && scheme != "about") {
                     try {
@@ -226,6 +220,7 @@ class ChromiumEngineView @JvmOverloads constructor(
                     return true
                 }
 
+                // Za vsa legitimna spletna mesta dovoli normalno odpiranje
                 return false
             }
 

@@ -7,8 +7,8 @@ import java.util.concurrent.atomic.AtomicLong
 
 /**
  * ⚡ AdBlockEngine
- * Napredno jedro za blokiranje oglasov s pomočjo Domain Suffix Trie podatkovne strukture,
- * preverjanja poti (Path Rules), Top-Frame Lock zaščite in preprečevanja popunder / in-page push preusmeritev.
+ * Visoko-zmogljivo jedro za blokiranje oglasov s pomočjo Domain Suffix Trie podatkovne strukture,
+ * preverjanja poti (Path Rules) in preprečevanja popunder / in-page push oglasnih omrežij brez motenja normalne navigacije.
  */
 object AdBlockEngine {
 
@@ -23,34 +23,12 @@ object AdBlockEngine {
     // Suffix Trie za strogo preverjene varne domene (Bela lista)
     private val whitelistTrie = DomainSuffixTrie()
 
-    // Potrjeni pretočni strežniki in portali
-    private val VERIFIED_STREAMING_HOSTS = hashSetOf(
-        "streamex.sh", "vidlink.pro", "vidsrc.me", "vidsrc.in", "vidsrc.pm", "vidsrc.net", "vidsrc.to", "vidsrc.xyz",
-        "autoembed.co", "autoembed.cc", "multiembed.mov", "2embed.cc", "111movies.com", "hydrahd.ws",
-        "megacloud.tv", "rabbitstream.net", "dokicloud.one", "vizcloud.online", "filemoon.sx", "streamtape.com",
-        "vidgod.me", "peach.stream", "cinemanos.com", "core.streamex.sh", "streamwish.to", "doodstream.com"
-    )
-
-    // Vzorci oglasnih, sledilnih in in-page push poti (Top Path Rules)
+    // Vzorci oglasnih, sledilnih in analitičnih poti (Path Rules)
     private val BLOCKED_PATH_PATTERNS = listOf(
         "/pagead/", "/api/stats/ads", "/ptracking", "/get_midroll_info",
         "/ads.js", "/ad.js", "/adservice.", "/pixel.", "collect?v=",
         "/metrika", "/watch.js", "/tag.js", "/monetag/", "/popunder",
-        "disable-devtool", "devtools-detector", "adsystem.com", "/delivery/",
-        "/propu.sh", "/onclick", "/adsterra", "/hilltopads", "/inpage",
-        "/push", "deloplen", "highperformancegate", "effectivegate", "pussing",
-        "whosamung", "creativecdn"
-    )
-
-    // Sumljivi vzorci v domenah, ki se uporabljajo za popunderje, in-page push in preusmeritve
-    private val SUSPICIOUS_DOMAIN_KEYWORDS = listOf(
-        "bet", "casino", "poker", "slot", "popad", "popcash", "monetag", "click",
-        "gate", "redirect", "adsterra", "hilltop", "exoclick", "propeller",
-        "deloplen", "highperformance", "effectivegate", "pussing", "propu",
-        "richpush", "pushground", "admaven", "rollerads", "juicyads", "trafficfactory",
-        "realsrv", "onclickalgo", "onclickmega", "onclickgate", "doublepimp",
-        "dating", "adult", "sex", "seks", "cam", "flirt", "stripchat", "chaturbate",
-        "bongacams", "livejasmin", "camsoda", "fleshlight", "cam4", "track"
+        "disable-devtool", "devtools-detector"
     )
 
     init {
@@ -59,7 +37,6 @@ object AdBlockEngine {
     }
 
     private fun initializeWhitelist() {
-        // Stroga bela lista - samo specifične varne storitve (brez krovnih CDN-jev kot cloudflare.com/cloudfront.net)
         val trusted = listOf(
             "google.com", "google.si", "gstatic.com", "googleapis.com", "googleusercontent.com",
             "duckduckgo.com", "bing.com", "yahoo.com", "wikipedia.org", "wikimedia.org",
@@ -70,10 +47,13 @@ object AdBlockEngine {
             "bks-bank.si", "unicreditbank.si", "lon.si", "gorenjska-banka.si",
             "rtvslo.si", "24ur.com", "siol.net", "github.com",
             "themoviedb.org", "tmdb.org", "image.tmdb.org", "api.themoviedb.org",
-            "streamex.sh"
+            "streamex.sh", "streamex.ws", "vidlink.pro", "vidsrc.me", "vidsrc.in", "vidsrc.pm",
+            "vidsrc.net", "vidsrc.to", "vidsrc.xyz", "autoembed.co", "autoembed.cc", "multiembed.mov",
+            "2embed.cc", "111movies.com", "hydrahd.ws", "megacloud.tv", "rabbitstream.net",
+            "dokicloud.one", "vizcloud.online", "filemoon.sx", "streamtape.com", "vidgod.me",
+            "peach.stream", "cinemanos.com", "core.streamex.sh", "streamwish.to", "doodstream.com"
         )
         for (d in trusted) whitelistTrie.insert(d)
-        for (d in VERIFIED_STREAMING_HOSTS) whitelistTrie.insert(d)
     }
 
     private fun initializeBlockedDomains() {
@@ -93,8 +73,7 @@ object AdBlockEngine {
             "onclickmega.com", "onclickgate.com", "syndication.exoclick.com", "syndication.realsrv.com",
             "delivery.trafficjunky.net", "engine.phn.doublepimp.com", "deloplen.com", "highperformancegate.com",
             "effectivegate.com", "pussing.com", "propu.sh", "creativecdn.com", "whosamung.us",
-            "vidoza.net", "doodstream.com", "streamwish.to", "trafficstars.com", "livejasmin.com",
-            "bongacams.com", "chaturbate.com", "stripchat.com", "cam4.com",
+            "trafficstars.com", "livejasmin.com", "bongacams.com", "chaturbate.com", "stripchat.com", "cam4.com",
 
             // Oglasni strežniki in sledilci
             "doubleclick.net", "googleads.g.doubleclick.net", "static.doubleclick.net",
@@ -109,20 +88,6 @@ object AdBlockEngine {
     }
 
     /**
-     * Preveri, ali je domena potrjen pretočni portal ali strežnik.
-     */
-    fun isStreamingOrMediaHost(host: String): Boolean {
-        val cleanHost = host.lowercase().trim()
-        if (cleanHost.isEmpty()) return false
-        for (sh in VERIFIED_STREAMING_HOSTS) {
-            if (cleanHost == sh || cleanHost.endsWith(".$sh")) {
-                return true
-            }
-        }
-        return false
-    }
-
-    /**
      * Preveri, ali je domena na strogi beli listi.
      */
     fun isWhitelisted(host: String): Boolean {
@@ -130,21 +95,7 @@ object AdBlockEngine {
     }
 
     /**
-     * Preveri, ali ciljna domena vsebuje sumljive popunder/ad/in-page push vzorce.
-     */
-    fun isSuspiciousRedirect(destHost: String, url: String): Boolean {
-        val h = destHost.lowercase()
-        val u = url.lowercase()
-        for (kw in SUSPICIOUS_DOMAIN_KEYWORDS) {
-            if (h.contains(kw) || u.contains("/$kw") || u.contains("-$kw") || u.contains(".$kw")) {
-                return true
-            }
-        }
-        return false
-    }
-
-    /**
-     * Preveri, ali URL ustreza oglasu, sledilcu, in-page push ali blokirani domeni.
+     * Preveri, ali URL ustreza oglasu, sledilcu ali blokirani domeni.
      */
     fun shouldBlockUrl(url: String): Boolean {
         if (!isEnabled || url.isEmpty()) return false
@@ -169,7 +120,7 @@ object AdBlockEngine {
             }
         }
 
-        // 4. Strogo preverjanje potrjenih pretočnih strežnikov (brez splošnih lukenj za poljubne domene)
+        // 4. Domensko preverjanje v Trie (O(k))
         try {
             val uri = Uri.parse(lower)
             val host = uri.host?.lowercase()?.trim() ?: ""
@@ -182,11 +133,6 @@ object AdBlockEngine {
 
                 // Preveri blokirane domene v Trie (O(k))
                 if (blockedTrie.matches(host)) {
-                    return true
-                }
-
-                // Preveri sumljive vzorce domen
-                if (isSuspiciousRedirect(host, lower)) {
                     return true
                 }
             }
