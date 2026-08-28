@@ -180,7 +180,106 @@ object UserScriptManager {
             if (window._safeer_yt_initialized) return;
             window._safeer_yt_initialized = true;
 
-            // 🛡️ 1. Globoki strojni klik na gumb za preskok
+            // 🎯 1. Odstrani oglasne bloke iz predvajalnih podatkov (Network & JSON Level Ad Stripping)
+            function cleanYtData(data) {
+                if (!data || typeof data !== 'object') return data;
+                try {
+                    if (data.adPlacements) delete data.adPlacements;
+                    if (data.adSlots) delete data.adSlots;
+                    if (data.playerAds) delete data.playerAds;
+                    if (data.adBreakHeartbeatParams) delete data.adBreakHeartbeatParams;
+                    if (data.playbackTracking) {
+                        delete data.playbackTracking.videostatsPlaybackUrl;
+                        delete data.playbackTracking.videostatsDelayplayUrl;
+                        delete data.playbackTracking.videostatsWatchtimeUrl;
+                        delete data.playbackTracking.ptrackingUrl;
+                        delete data.playbackTracking.qoeUrl;
+                        delete data.playbackTracking.atrUrl;
+                    }
+                } catch(e) {}
+                return data;
+            }
+
+            // Hook window.ytInitialPlayerResponse
+            try {
+                var _realPlayerResp = window.ytInitialPlayerResponse;
+                Object.defineProperty(window, 'ytInitialPlayerResponse', {
+                    get: function() { return _realPlayerResp; },
+                    set: function(val) { _realPlayerResp = cleanYtData(val); },
+                    configurable: true
+                });
+                if (window.ytInitialPlayerResponse) {
+                    window.ytInitialPlayerResponse = cleanYtData(window.ytInitialPlayerResponse);
+                }
+            } catch(e) {}
+
+            // Hook window.fetch za /youtubei/v1/player in /next
+            try {
+                var origFetch = window.fetch;
+                window.fetch = function(input, init) {
+                    var url = typeof input === 'string' ? input : (input && input.url ? input.url : '');
+                    if (url && (url.indexOf('/youtubei/v1/player') !== -1 || url.indexOf('/youtubei/v1/next') !== -1 || url.indexOf('/youtubei/v1/browse') !== -1)) {
+                        return origFetch.apply(this, arguments).then(function(res) {
+                            var cloned = res.clone();
+                            return cloned.json().then(function(json) {
+                                var cleaned = cleanYtData(json);
+                                return new Response(JSON.stringify(cleaned), {
+                                    status: res.status,
+                                    statusText: res.statusText,
+                                    headers: res.headers
+                                });
+                            }).catch(function() {
+                                return res;
+                            });
+                        });
+                    }
+                    return origFetch.apply(this, arguments);
+                };
+            } catch(e) {}
+
+            // Hook XMLHttpRequest
+            try {
+                var origOpen = XMLHttpRequest.prototype.open;
+                var origSend = XMLHttpRequest.prototype.send;
+                XMLHttpRequest.prototype.open = function(method, url) {
+                    this._safeer_yt_url = url;
+                    return origOpen.apply(this, arguments);
+                };
+                XMLHttpRequest.prototype.send = function() {
+                    var xhr = this;
+                    if (xhr._safeer_yt_url && (xhr._safeer_yt_url.indexOf('/youtubei/v1/player') !== -1 || xhr._safeer_yt_url.indexOf('/youtubei/v1/next') !== -1)) {
+                        var origStateChange = xhr.onreadystatechange;
+                        xhr.onreadystatechange = function() {
+                            if (xhr.readyState === 4 && xhr.status === 200) {
+                                try {
+                                    var data = JSON.parse(xhr.responseText);
+                                    var cleaned = cleanYtData(data);
+                                    Object.defineProperty(xhr, 'responseText', { value: JSON.stringify(cleaned), configurable: true });
+                                    Object.defineProperty(xhr, 'response', { value: JSON.stringify(cleaned), configurable: true });
+                                } catch(e) {}
+                            }
+                            if (origStateChange) origStateChange.apply(this, arguments);
+                        };
+                    }
+                    return origSend.apply(this, arguments);
+                };
+            } catch(e) {}
+
+            // Hook JSON.parse
+            try {
+                var origParse = JSON.parse;
+                JSON.parse = function(text, reviver) {
+                    var res = origParse.apply(this, arguments);
+                    if (res && typeof res === 'object') {
+                        if (res.adPlacements || res.adSlots || res.playerAds) {
+                            cleanYtData(res);
+                        }
+                    }
+                    return res;
+                };
+            } catch(e) {}
+
+            // 🛡️ 2. Globoki strojni klik na gumb za preskok
             function forceClick(el) {
                 if (!el) return;
                 var target = el.querySelector('button') || el;
@@ -194,22 +293,10 @@ object UserScriptManager {
                     target.dispatchEvent(new MouseEvent('mousedown', evtParams));
                     target.dispatchEvent(new MouseEvent('mouseup', evtParams));
                     target.dispatchEvent(new MouseEvent('click', evtParams));
-                    if (window.TouchEvent) {
-                        try {
-                            var touch = new Touch({
-                                identifier: Date.now(),
-                                target: target,
-                                clientX: 0,
-                                clientY: 0
-                            });
-                            target.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, cancelable: true, touches: [touch] }));
-                            target.dispatchEvent(new TouchEvent('touchend', { bubbles: true, cancelable: true, touches: [touch] }));
-                        } catch(te) {}
-                    }
                 } catch(e) {}
             }
 
-            // 🚫 2. Odstrani gumb "Odpri aplikacijo" in promocijske pasice
+            // 🚫 3. Odstrani gumb "Odpri aplikacijo" in promocijske pasice
             function removeOpenAppElements() {
                 try {
                     var appBtns = document.querySelectorAll(
@@ -222,21 +309,10 @@ object UserScriptManager {
                     for (var b = 0; b < appBtns.length; b++) {
                         appBtns[b].remove();
                     }
-
-                    var topActions = document.querySelectorAll('ytm-mobile-topbar-renderer .topbar-actions *');
-                    for (var t = 0; t < topActions.length; t++) {
-                        var el = topActions[t];
-                        var txt = (el.innerText || el.textContent || '').trim().toLowerCase();
-                        var aria = (el.getAttribute('aria-label') || '').toLowerCase();
-                        if (txt.includes('odpri aplikacijo') || txt.includes('open app') || aria.includes('odpri aplikacijo') || aria.includes('open app') || aria.includes('aplikacij')) {
-                            var target = el.closest('c3-icon-button') || el.closest('ytm-button-renderer') || el.closest('yt-button-shape') || el;
-                            target.remove();
-                        }
-                    }
                 } catch(e) {}
             }
 
-            // 🛡️ 3. Zanesljiv Ad-Skipper brez motenja avtorskih videov
+            // ⚡ 4. 0-sekundni hipni preskok morebitnih oglasnih sekvenc
             function processYouTubeAds() {
                 removeOpenAppElements();
                 try {
@@ -244,92 +320,42 @@ object UserScriptManager {
                     var moviePlayer = document.getElementById('movie_player') ||
                                       document.querySelector('.html5-video-player');
 
-                    // Preveri izključno aktivne oznake predvajanega oglasa
+                    // Preveri aktivno oglasno stanje predvajalnika
                     var isAd = false;
                     if (moviePlayer && moviePlayer.classList) {
                         if (moviePlayer.classList.contains('ad-showing') || moviePlayer.classList.contains('ad-interrupting')) {
                             isAd = true;
                         }
                     }
-                    if (!isAd) {
-                        var adBadge = document.querySelector('.ytp-ad-player-overlay, .ytp-ad-simple-ad-badge, .ytp-ad-text');
-                        if (adBadge && adBadge.offsetParent !== null) {
-                            isAd = true;
-                        }
-                    }
 
                     if (isAd && video) {
-                        // 1. Utišaj zvok med oglasom
+                        // Hipni preskok: utišaj, pospeši in takoj sproži skipAd
                         try { video.muted = true; } catch(e) {}
-                        // 2. Pospeši oglas na 16x hitrost za hipen preskok
                         try { video.playbackRate = 16.0; } catch(e) {}
-                        // 3. Sproži skipAd na predvajalniku, če obstaja
                         if (moviePlayer && typeof moviePlayer.skipAd === 'function') {
                             try { moviePlayer.skipAd(); } catch(e) {}
                         }
                     } else if (!isAd && video) {
-                        // Prava avtorska vsebina: povrni normalno hitrost in zvok
                         if (video.playbackRate > 2.0) {
                             video.playbackRate = 1.0;
                             video.muted = false;
                         }
                     }
 
-                    // Samodejni klik na VSE gumbe za preskok
-                    var skipButtons = document.querySelectorAll(
+                    // Samodejni klik na gumbe za preskok
+                    var skipBtn = document.querySelector(
                         '.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button, ' +
                         '.ytp-ad-overlay-close-button, button.ytp-ad-skip-button-text, ' +
-                        '.ytp-ad-skip-button-slot button, .ytp-ad-preview-container, ' +
-                        'button[aria-label*="Preskoči"], button[aria-label*="Skip"], ' +
-                        'button[aria-label*="skip"], .ytp-ad-skip-button-container button, ' +
-                        '.ytp-ad-skip-button-container, [id^="ad-text"], [id^="skip-button"], ' +
-                        'button.ytp-ad-preview-container, .ytp-ad-image-overlay button'
+                        '.ytp-ad-skip-button-slot button, [id^="skip-button"], ' +
+                        'button[aria-label*="Preskoči"], button[aria-label*="Skip"]'
                     );
-                    for (var i = 0; i < skipButtons.length; i++) {
-                        forceClick(skipButtons[i]);
-                    }
-
-                    // Samodejni odklep zvoka
-                    var unmuteBtns = document.querySelectorAll(
-                        '.ytp-unmute, .ytp-mute-button, button[aria-label*="Vklopite zvok"], ' +
-                        'button[aria-label*="zvok"], button[aria-label*="Unmute"], .ytp-volume-panel'
-                    );
-                    for (var u = 0; u < unmuteBtns.length; u++) {
-                        forceClick(unmuteBtns[u]);
-                    }
-
-                    // Odstrani spremljajoče oglasne kartice in promocije
-                    var badSelectors = [
-                        '.badge-style-type-ad',
-                        'ytd-ad-slot-renderer',
-                        'ytm-ad-slot-renderer',
-                        'ytd-in-feed-ad-layout-renderer',
-                        'ytm-promoted-sparkles-web-renderer',
-                        'ytm-promoted-video-renderer',
-                        'ytd-promoted-video-renderer',
-                        'ytm-companion-ad-renderer',
-                        'ytm-search-pyv-renderer',
-                        'ytm-mealbar-promo-renderer',
-                        'ytm-app-promo-renderer',
-                        'ytm-upsell-dialog-renderer',
-                        '#about-this-ad',
-                        '#clarify-box',
-                        '#about-this-result'
-                    ];
-                    for (var b = 0; b < badSelectors.length; b++) {
-                        var badEls = document.querySelectorAll(badSelectors[b]);
-                        for (var j = 0; j < badEls.length; j++) {
-                            var item = badEls[j].closest('ytm-rich-item-renderer, ytm-video-with-context-renderer, ytm-item-section-renderer, ytd-rich-item-renderer') || badEls[j];
-                            try { item.remove(); } catch(e) {}
-                        }
+                    if (skipBtn) {
+                        forceClick(skipBtn);
                     }
                 } catch(e) {}
             }
 
-            // Visoko-odzivni pregled vsakih 50ms
-            setInterval(processYouTubeAds, 50);
-
-            // YouTube SPA dogodki
+            setInterval(processYouTubeAds, 25);
             window.addEventListener('yt-navigate-finish', processYouTubeAds);
             window.addEventListener('yt-page-data-updated', processYouTubeAds);
             window.addEventListener('popstate', processYouTubeAds);
