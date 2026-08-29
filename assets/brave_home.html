@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Safeer Browser - Začetna stran</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: #05070d;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(255, 85, 0, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 10% 30%, rgba(120, 40, 200, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 60%, rgba(0, 210, 255, 0.08) 0%, transparent 40%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px 40px 16px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* 🦁 Brave Shield Privacy Card */
+        .shield-card {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 16px 18px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .shield-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .shield-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            color: #ffffff;
+        }
+
+        .shield-icon {
+            font-size: 18px;
+            background: linear-gradient(135deg, #ff5500, #ff8800);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .shield-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: rgba(0, 230, 118, 0.15);
+            color: #00e676;
+            border: 1px solid rgba(0, 230, 118, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .stat-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 10px 6px;
+        }
+
+        .stat-val {
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 2px;
+        }
+
+        .stat-val.ads {
+            background: linear-gradient(135deg, #ff5500, #ff9100);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-val.data {
+            background: linear-gradient(135deg, #00d2ff, #0088ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-val.time {
+            background: linear-gradient(135deg, #00e676, #00b0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-lbl {
+            font-size: 10px;
+            font-weight: 600;
+            color: #8b9bb4;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        /* 🕒 Clock & Date Widget */
+        .clock-widget {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 6px 0;
+        }
+
+        .clock-time {
+            font-size: 46px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: #ffffff;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+            line-height: 1.1;
+        }
+
+        .clock-date {
+            font-size: 13px;
+            font-weight: 500;
+            color: #9aa8bd;
+            text-transform: capitalize;
+            letter-spacing: 0.3px;
+            margin-top: 2px;
+        }
+
+        /* 🔍 Search Widget */
+        .search-card {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .search-bar-wrapper {
+            position: relative;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 28px;
+            padding: 4px 6px 4px 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+            transition: all 0.2s ease;
+        }
+
+        .search-bar-wrapper:focus-within {
+            border-color: #ff5500;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(255, 85, 0, 0.35);
+        }
+
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 8px 0;
+            user-select: text;
+        }
+
+        .search-input::placeholder {
+            color: #7b8a9e;
+        }
+
+        .search-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff5500, #ff7700);
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(255, 85, 0, 0.4);
+            transition: transform 0.15s ease;
+        }
+
+        .search-btn:active {
+            transform: scale(0.9);
+        }
+
+        .engine-chips {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .engine-chip {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #8c9ba8;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .engine-chip.active {
+            background: rgba(255, 85, 0, 0.2);
+            border-color: #ff5500;
+            color: #ff8833;
+        }
+
+        /* ⭐ Top Sites / Speed Dial Grid */
+        .section-header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 6px;
+            padding: 0 4px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #7f91a8;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .favorites-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px 10px;
+        }
+
+        .favorite-tile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.15s ease;
+        }
+
+        .favorite-tile:active {
+            transform: scale(0.92);
+        }
+
+        .tile-icon-wrapper {
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .favorite-tile:hover .tile-icon-wrapper {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tile-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: #d1dbe8;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 68px;
+        }
+
+        /* 🛡️ Footer Security Status */
+        .footer-badge {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #5c6c80;
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00e676;
+            box-shadow: 0 0 8px #00e676;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- 🦁 1. Brave Shield Dashboard Stats -->
+    <div class="shield-card">
+        <div class="shield-header">
+            <div class="shield-title">
+                <span class="shield-icon">🦁</span>
+                <span>Safeer Shield</span>
+            </div>
+            <span class="shield-badge">Zaščita aktivna</span>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-val ads" id="valAds">1.430</div>
+                <div class="stat-lbl">Blokirano</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-val data" id="valData">21.4 MB</div>
+                <div class="stat-lbl">Prihranek</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-val time" id="valTime">1.6 min</div>
+                <div class="stat-lbl">Prihranjen čas</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🕒 2. Clock & Date Widget -->
+    <div class="clock-widget">
+        <div class="clock-time" id="clockTime">13:15</div>
+        <div class="clock-date" id="clockDate">sobota, 29. avgust 2026</div>
+    </div>
+
+    <!-- 🔍 3. Omnibox / Search Widget -->
+    <div class="search-card">
+        <form class="search-bar-wrapper" id="searchForm" onsubmit="return handleSearch(event)">
+            <input type="text" class="search-input" id="searchInput" placeholder="Iščite ali vnesite naslov spleta..." autocomplete="off" autocorrect="off">
+            <button type="submit" class="search-btn">🔍</button>
+        </form>
+        <div class="engine-chips">
+            <div class="engine-chip active" onclick="setEngine('google', this)">Google</div>
+            <div class="engine-chip" onclick="setEngine('duckduckgo', this)">DuckDuckGo</div>
+            <div class="engine-chip" onclick="setEngine('youtube', this)">YouTube</div>
+            <div class="engine-chip" onclick="setEngine('brave', this)">Brave Search</div>
+            <div class="engine-chip" onclick="setEngine('streamnexus', this)">StreamNexus</div>
+        </div>
+    </div>
+
+    <!-- ⭐ 4. Priljubljene strani (Speed Dial) -->
+    <div class="section-header">
+        <div class="section-title">Priljubljene strani</div>
+    </div>
+
+    <div class="favorites-grid" id="favoritesGrid">
+        <div class="favorite-tile" onclick="openUrl('https://www.youtube.com')">
+            <div class="tile-icon-wrapper" style="background: rgba(255, 0, 0, 0.15); border-color: rgba(255, 0, 0, 0.3);">📺</div>
+            <div class="tile-name">YouTube</div>
+        </div>
+        <div class="favorite-tile" onclick="openUrl('https://hydrahd.ws/')">
+            <div class="tile-icon-wrapper" style="background: rgba(0, 210, 255, 0.15); border-color: rgba(0, 210, 255, 0.3);">🎬</div>
+            <div class="tile-name">Filmi</div>
+        </div>
+        <div class="favorite-tile" onclick="openUrl('https://www.google.com')">
+            <div class="tile-icon-wrapper" style="background: rgba(66, 133, 244, 0.15); border-color: rgba(66, 133, 244, 0.3);">🔍</div>
+            <div class="tile-name">Google</div>
+        </div>
+        <div class="favorite-tile" onclick="openUrl('https://chatgpt.com')">
+            <div class="tile-icon-wrapper" style="background: rgba(16, 163, 127, 0.15); border-color: rgba(16, 163, 127, 0.3);">💬</div>
+            <div class="tile-name">ChatGPT</div>
+        </div>
+        <div class="favorite-tile" onclick="openUrl('https://www.24ur.com')">
+            <div class="tile-icon-wrapper" style="background: rgba(0, 102, 204, 0.15); border-color: rgba(0, 102, 204, 0.3);">📰</div>
+            <div class="tile-name">24ur</div>
+        </div>
+        <div class="favorite-tile" onclick="openUrl('https://www.rtvslo.si')">
+            <div class="tile-icon-wrapper" style="background: rgba(0, 150, 255, 0.15); border-color: rgba(0, 150, 255, 0.3);">📡</div>
+            <div class="tile-name">RTV SLO</div>
+        </div>
+        <div class="favorite-tile" onclick="openUrl('https://cryptoquant.com')">
+            <div class="tile-icon-wrapper" style="background: rgba(255, 170, 0, 0.15); border-color: rgba(255, 170, 0, 0.3);">🪙</div>
+            <div class="tile-name">Kripto</div>
+        </div>
+        <div class="favorite-tile" onclick="openUrl('https://sl.wikipedia.org')">
+            <div class="tile-icon-wrapper" style="background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2);">📖</div>
+            <div class="tile-name">Wikipedija</div>
+        </div>
+        <div class="favorite-tile" onclick="openUrl('https://www.reddit.com')">
+            <div class="tile-icon-wrapper" style="background: rgba(255, 69, 0, 0.15); border-color: rgba(255, 69, 0, 0.3);">📱</div>
+            <div class="tile-name">Reddit</div>
+        </div>
+        <div class="favorite-tile" onclick="openUrl('https://github.com')">
+            <div class="tile-icon-wrapper" style="background: rgba(140, 140, 140, 0.15); border-color: rgba(140, 140, 140, 0.3);">🐙</div>
+            <div class="tile-name">GitHub</div>
+        </div>
+        <div class="favorite-tile" onclick="openUrl('https://www.speedtest.net')">
+            <div class="tile-icon-wrapper" style="background: rgba(0, 230, 118, 0.15); border-color: rgba(0, 230, 118, 0.3);">⚡</div>
+            <div class="tile-name">Hitrost</div>
+        </div>
+        <div class="favorite-tile" onclick="addNewFavorite()">
+            <div class="tile-icon-wrapper" style="background: rgba(255, 85, 0, 0.15); border-color: rgba(255, 85, 0, 0.4); color: #ff7700;">➕</div>
+            <div class="tile-name">Dodaj</div>
+        </div>
+    </div>
+
+    <!-- 🛡️ Footer -->
+    <div class="footer-badge">
+        <div class="pulse-dot"></div>
+        <span>Brave-Style Safeer Shield & Anti-Threat Engine</span>
+    </div>
+
+</div>
+
+<script>
+    var currentEngine = 'google';
+
+    function setEngine(engine, el) {
+        currentEngine = engine;
+        var chips = document.querySelectorAll('.engine-chip');
+        chips.forEach(function(c) { c.classList.remove('active'); });
+        if (el) el.classList.add('active');
+        
+        var input = document.getElementById('searchInput');
+        if (engine === 'youtube') input.placeholder = 'Išči na YouTube...';
+        else if (engine === 'streamnexus') input.placeholder = 'Išči filme in serije...';
+        else if (engine === 'duckduckgo') input.placeholder = 'Zasebno iskanje DuckDuckGo...';
+        else if (engine === 'brave') input.placeholder = 'Brave Search...';
+        else input.placeholder = 'Iščite ali vnesite naslov spleta...';
+        input.focus();
+    }
+
+    function handleSearch(e) {
+        if (e) e.preventDefault();
+        var q = document.getElementById('searchInput').value.trim();
+        if (!q) return false;
+
+        var targetUrl = '';
+        if (q.startsWith('http://') || q.startsWith('https://')) {
+            targetUrl = q;
+        } else if (q.includes('.') && !q.includes(' ')) {
+            targetUrl = 'https://' + q;
+        } else {
+            if (currentEngine === 'youtube') {
+                targetUrl = 'https://m.youtube.com/results?search_query=' + encodeURIComponent(q);
+            } else if (currentEngine === 'duckduckgo') {
+                targetUrl = 'https://duckduckgo.com/?q=' + encodeURIComponent(q);
+            } else if (currentEngine === 'brave') {
+                targetUrl = 'https://search.brave.com/search?q=' + encodeURIComponent(q);
+            } else if (currentEngine === 'streamnexus') {
+                targetUrl = 'https://hydrahd.ws/search/' + encodeURIComponent(q);
+            } else {
+                targetUrl = 'https://www.google.com/search?q=' + encodeURIComponent(q);
+            }
+        }
+        openUrl(targetUrl);
+        return false;
+    }
+
+    function openUrl(url) {
+        if (window.SafeerBridge && typeof window.SafeerBridge.navigate === 'function') {
+            window.SafeerBridge.navigate(url);
+        } else {
+            window.location.href = url;
+        }
+    }
+
+    function addNewFavorite() {
+        var url = prompt('Vnesite URL spletnega mesta (npr. https://siol.net):', 'https://');
+        if (url && url !== 'https://') {
+            var name = prompt('Vnesite ime zaznamka:', 'Priljubljeno');
+            if (name) {
+                var grid = document.getElementById('favoritesGrid');
+                var addBtn = grid.lastElementChild;
+                var tile = document.createElement('div');
+                tile.className = 'favorite-tile';
+                tile.onclick = function() { openUrl(url); };
+                tile.innerHTML = '<div class="tile-icon-wrapper">⭐</div><div class="tile-name">' + name + '</div>';
+                grid.insertBefore(tile, addBtn);
+            }
+        }
+    }
+
+    // Posodobi uro in datum v slovenščini
+    function updateClock() {
+        var now = new Date();
+        var hrs = String(now.getHours()).padStart(2, '0');
+        var mins = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('clockTime').textContent = hrs + ':' + mins;
+
+        var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        var dateStr = now.toLocaleDateString('sl-SI', options);
+        document.getElementById('clockDate').textContent = dateStr;
+    }
+
+    // Posodobi statistiko Safeer Shielda
+    function updateStats() {
+        try {
+            if (window.SafeerBridge && typeof window.SafeerBridge.getStats === 'function') {
+                var jsonStr = window.SafeerBridge.getStats();
+                var s = JSON.parse(jsonStr);
+                document.getElementById('valAds').textContent = s.ads.toLocaleString('sl-SI');
+                document.getElementById('valData').textContent = s.dataMb;
+                document.getElementById('valTime').textContent = s.timeMin;
+            }
+        } catch(e) {}
+    }
+
+    setInterval(updateClock, 1000);
+    setInterval(updateStats, 2000);
+    updateClock();
+    updateStats();
+</script>
+
+</body>
+</html>

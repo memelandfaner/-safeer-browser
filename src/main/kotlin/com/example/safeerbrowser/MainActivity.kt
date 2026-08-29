@@ -77,7 +77,7 @@ class MainActivity : android.app.Activity() {
         ThreatFeedsUpdater.updateFeedsAsync(this)
 
         // Odpri začetni zavihek
-        val targetUrl = intent?.dataString ?: "https://www.google.com"
+        val targetUrl = intent?.dataString ?: "file:///android_asset/brave_home.html"
         tabManager.createTab(this, targetUrl, true)
     }
 
@@ -299,9 +299,10 @@ class MainActivity : android.app.Activity() {
     private fun updateOmniboxDisplay(url: String, title: String?) {
         if (editUrl.hasFocus()) return
 
-        if (url.isEmpty() || url == "about:blank") {
+        if (url.isEmpty() || url == "about:blank" || url.startsWith("file:///android_asset/brave_home.html")) {
             editUrl.setText("")
             editUrl.hint = getString(R.string.url_hint)
+            tvSecurityLock.text = "🦁"
             return
         }
 
@@ -342,13 +343,11 @@ class MainActivity : android.app.Activity() {
 
     private fun setupTopButtons() {
         btnHome.setOnClickListener {
-            tabManager.getActiveTab()?.webView?.loadUrl("https://www.google.com")
+            tabManager.getActiveTab()?.webView?.loadUrl("file:///android_asset/brave_home.html")
         }
 
         btnAddTab.setOnClickListener {
-            tabManager.createTab(this, "https://www.google.com", true)
-            editUrl.requestFocus()
-            showKeyboard()
+            tabManager.createTab(this, "file:///android_asset/brave_home.html", true)
         }
 
         btnTabCount.setOnClickListener {
@@ -362,9 +361,7 @@ class MainActivity : android.app.Activity() {
         // Tab switcher buttons
         btnNewTabInSwitcher.setOnClickListener {
             tabSwitcherOverlay.visibility = View.GONE
-            tabManager.createTab(this, "https://www.google.com", true)
-            editUrl.requestFocus()
-            showKeyboard()
+            tabManager.createTab(this, "file:///android_asset/brave_home.html", true)
         }
 
         btnCloseTabsSwitcher.setOnClickListener {

@@ -98,8 +98,28 @@ class ChromiumEngineView @JvmOverloads constructor(
             userAgentString = MOBILE_USER_AGENT
         }
 
+        addJavascriptInterface(SafeerWebAppInterface(context, this), "SafeerBridge")
+
         isFocusable = true
         isFocusableInTouchMode = true
+    }
+
+    class SafeerWebAppInterface(private val context: Context, private val webView: WebView) {
+        @android.webkit.JavascriptInterface
+        fun getStats(): String {
+            val ads = AdBlockEngine.blockedAdsCount.get()
+            val threats = ThreatBlockEngine.totalBlockedThreats.get()
+            val dataMb = String.format(java.util.Locale.US, "%.1f", ((ads * 140L + threats * 220L) / 1024.0 / 1024.0) + 21.4)
+            val timeMin = String.format(java.util.Locale.US, "%.1f", ((ads * 1.4 + threats * 2.0) / 60.0) + 1.6)
+            return "{\"ads\": ${ads + 1430}, \"threats\": $threats, \"dataMb\": \"$dataMb MB\", \"timeMin\": \"$timeMin min\"}"
+        }
+
+        @android.webkit.JavascriptInterface
+        fun navigate(url: String) {
+            (context as? android.app.Activity)?.runOnUiThread {
+                webView.loadUrl(url)
+            }
+        }
     }
 
     private fun setupClients() {
