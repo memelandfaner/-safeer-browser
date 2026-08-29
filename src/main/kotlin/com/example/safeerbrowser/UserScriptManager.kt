@@ -197,7 +197,20 @@ object UserScriptManager {
             if (window._safeer_yt_agent_installed) return;
             window._safeer_yt_agent_installed = true;
 
-            // 🧠 1. Safeer YouTube Stream Accelerator & Learning Agent
+            // 🚫 1. Popolna blokada samodejnega predvajanja predogledov na iskalni in domači strani (Stop Feed Autoplay)
+            try {
+                var origPlay = HTMLMediaElement.prototype.play;
+                HTMLMediaElement.prototype.play = function() {
+                    var isWatch = location.pathname.indexOf('/watch') !== -1 || location.pathname.indexOf('/shorts') !== -1;
+                    if (!isWatch && location.hostname.indexOf('youtube.com') !== -1) {
+                        try { this.pause(); } catch(_) {}
+                        return Promise.reject(new DOMException('Feed autoplay blocked by Safeer', 'AbortError'));
+                    }
+                    return origPlay.apply(this, arguments);
+                };
+            } catch(e) {}
+
+            // 🧠 2. Safeer YouTube Stream Accelerator & Learning Agent
             var ytAgent = {
                 learnedProfiles: {},
                 lastVideoId: null,
@@ -228,12 +241,31 @@ object UserScriptManager {
                     } catch(e) {}
                 },
 
-                // ⚡ Samodejno pospeši predvajanje in odpravi nepotrebno čakanje
+                // 🛑 Zaustavi morebitne samodejne predoglede v iskanju in domači strani
+                stopFeedAutoplay: function() {
+                    try {
+                        var isWatch = location.pathname.indexOf('/watch') !== -1 || location.pathname.indexOf('/shorts') !== -1;
+                        if (!isWatch) {
+                            var videos = document.querySelectorAll('video');
+                            for (var i = 0; i < videos.length; i++) {
+                                var v = videos[i];
+                                if (!v.paused) {
+                                    v.pause();
+                                }
+                            }
+                        }
+                    } catch(e) {}
+                },
+
+                // ⚡ Samodejno pospeši predvajanje in odpravi nepotrebno čakanje na /watch in /shorts
                 boostPlayback: function() {
                     try {
                         // 🎯 Zaženi pospeševalnik le na dejanskih straneh z videom (/watch ali /shorts)
                         var isWatchPage = location.pathname.indexOf('/watch') !== -1 || location.pathname.indexOf('/shorts') !== -1;
-                        if (!isWatchPage) return;
+                        if (!isWatchPage) {
+                            this.stopFeedAutoplay();
+                            return;
+                        }
 
                         var video = document.querySelector('video');
                         var moviePlayer = document.getElementById('movie_player') ||
@@ -318,6 +350,9 @@ object UserScriptManager {
                 // 🛡️ Samodejno zdravljenje napak (Anti-"Prišlo je do težave" Auto-Healer)
                 healErrors: function() {
                     try {
+                        var isWatchPage = location.pathname.indexOf('/watch') !== -1 || location.pathname.indexOf('/shorts') !== -1;
+                        if (!isWatchPage) return;
+
                         var errorContainer = document.querySelector('.ytp-error, .yt-playability-error-supported-renderers, ytm-player-error-message-renderer');
                         var retryBtn = document.querySelector('button[aria-label*="znova"], button[aria-label*="retry"], .ytp-error-content button, ytm-player-error-message-renderer button');
 
