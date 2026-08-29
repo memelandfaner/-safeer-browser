@@ -231,11 +231,28 @@ object UserScriptManager {
                 // ⚡ Samodejno pospeši predvajanje in odpravi nepotrebno čakanje
                 boostPlayback: function() {
                     try {
+                        // 🎯 Zaženi pospeševalnik le na dejanskih straneh z videom (/watch ali /shorts)
+                        var isWatchPage = location.pathname.indexOf('/watch') !== -1 || location.pathname.indexOf('/shorts') !== -1;
+                        if (!isWatchPage) return;
+
                         var video = document.querySelector('video');
                         var moviePlayer = document.getElementById('movie_player') ||
                                           document.querySelector('.html5-video-player');
 
                         if (!video) return;
+
+                        // Poslušaj ročne pavze uporabnika, da ne vsiljujemo predvajanja, če si je uporabnik sam ustavil video
+                        if (!video._safeer_pause_hooked) {
+                            video._safeer_pause_hooked = true;
+                            video.addEventListener('pause', function() {
+                                if (!video.ended && video.readyState >= 2) {
+                                    video._safeer_user_paused = true;
+                                }
+                            });
+                            video.addEventListener('play', function() {
+                                video._safeer_user_paused = false;
+                            });
+                        }
 
                         var isAd = false;
                         if (moviePlayer && moviePlayer.classList) {
@@ -266,8 +283,8 @@ object UserScriptManager {
                                 video.volume = 1.0;
                             }
 
-                            // 🚀 Samodejni zagon ob čakanju/pavzi brez odvečnega čakanja
-                            if (video.paused && video.readyState >= 2 && !video.ended) {
+                            // 🚀 Samodejni zagon ob čakanju/bufferingu brez odvečnega čakanja (če ni uporabnik sam kliknil pavze)
+                            if (video.paused && video.readyState >= 2 && !video.ended && !video._safeer_user_paused) {
                                 var playPromise = video.play();
                                 if (playPromise !== undefined) {
                                     playPromise.catch(function() {});
