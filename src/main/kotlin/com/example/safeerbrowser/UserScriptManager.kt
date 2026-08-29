@@ -49,14 +49,13 @@ object UserScriptManager {
                         '.reward-zone', '#reward-zone', '.fc-ab-root', '.adblock-overlay', '#adblock-modal',
                         '[class*="dating-popup"]', '[id*="dating-popup"]', '[class*="fake-download"]',
                         '.download-button-ad', 'div[class*="download-arrow"]',
-                        '.mgp_adOverlay', '.mgp_adSkip', '.mgp_adMarker', '.mgp_commercial', '.mgp_adContainer',
-                        '.mgp_adPlaying', '.adBlockContainer', 'div[class*="adOverlay"]', 'div[class*="adSkip"]',
+                        '.mgp_adOverlay', '.mgp_adSkip', '.mgp_adMarker', '.mgp_commercial',
+                        '.adBlockContainer', 'div[class*="adSkip"]',
                         '.mgp_skipAdButton', 'a[class*="adLink"]', 'div[class*="adInformation"]', '.adInformation',
                         'div[class*="mgp_ad"]', '.removeAds', 'a[href*="casino"]', '.topAd', '.bottomAd',
-                        '.wideBanner', '.underPlayerAd', '.commercial-unit', '.ad-zone', '.player-ad',
+                        '.wideBanner', '.underPlayerAd', '.commercial-unit', '.ad-zone',
                         '[class*="ad-banner"]', '[class*="player-advertisement"]', '[id*="player-advertisement"]',
-                        '.ad-banner-overlay', '.jw-ad-container', '.plyr__ad', '.vjs-ad', '.video-ad-overlay',
-                        '.ytp-ad-overlay-container', '.ytp-ad-message-container', '.ytp-ad-player-overlay'
+                        '.ad-banner-overlay', '.jw-ad-container', '.plyr__ad', '.vjs-ad', '.video-ad-overlay'
                     ].join(', ');
                     
                     var adElements = document.querySelectorAll(adSelectors);
@@ -123,30 +122,31 @@ object UserScriptManager {
                 try {
                     // Klikni gumb za preskok oglasa takoj ko se pojavi
                     var skipButtons = document.querySelectorAll(
-                        '.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button, ' +
                         '.videoAdUiSkipButton, .mgp_skipAdButton, .mgp_adSkip, [class*="skipAd"], ' +
                         '[class*="SkipAd"], [class*="adSkip"], [class*="ad-skip"], .video-ad-skip, ' +
                         'button[class*="skip-ad"], .skip-button, .ad-skip-button'
                     );
                     skipButtons.forEach(function(btn) {
                         if (btn && (btn.offsetWidth > 0 || btn.offsetHeight > 0)) {
-                            btn.click();
+                            try { btn.click(); } catch(_) {}
                         }
                     });
 
-                    // Če teče oglasni video posnetek, ga v hipu previj do konca (16x hitrost / seek to duration)
-                    var isAdActive = document.querySelector('.ad-showing, .ad-interrupting, .mgp_adPlaying, [class*="adPlaying"], .ytp-ad-player-overlay');
-                    if (isAdActive) {
-                        var videos = document.querySelectorAll('video');
-                        videos.forEach(function(v) {
-                            if (v && !v.paused) {
-                                if (isFinite(v.duration) && v.duration > 0) {
-                                    v.currentTime = v.duration;
+                    // Če teče oglasni video posnetek na spletnih straneh (NE na YouTube, kjer deluje namenski YouTube Freedom)
+                    if (location.hostname.indexOf('youtube.com') === -1) {
+                        var isAdActive = document.querySelector('.mgp_adPlaying, [class*="adPlaying"]');
+                        if (isAdActive) {
+                            var adVideos = document.querySelectorAll('.mgp_adContainer video, .ad-container video, video.ad-video');
+                            adVideos.forEach(function(v) {
+                                if (v && !v.paused) {
+                                    if (isFinite(v.duration) && v.duration > 0) {
+                                        try { v.currentTime = v.duration; } catch(_) {}
+                                    }
+                                    try { v.playbackRate = 16.0; } catch(_) {}
+                                    try { v.muted = true; } catch(_) {}
                                 }
-                                v.playbackRate = 16.0;
-                                v.muted = true;
-                            }
-                        });
+                            });
+                        }
                     }
                 } catch(e) {}
             }
