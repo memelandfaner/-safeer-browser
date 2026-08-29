@@ -66,21 +66,22 @@ object AdBlockEngine {
             "rabona.com", "fezbet.com", "librabet.com", "nomini.com", "wazamba.com", "sportaza.com",
             "greatwin.com", "casinia.com", "spinanga.com", "boomerang-casino.com", "pin-up.casino",
 
-            // Popunderji, In-Page Push & Agresivna oglasna omrežja
+            // Popunderji, In-Page Push & Agresivna oglasna omrežja (vključno z video preroll & bannerji)
             "popads.net", "popcash.net", "monetag.com", "adcash.com", "propellerads.com",
-            "exoclick.com", "trafficjunky.com", "trafficjunky.net", "clickadu.com", "adsterra.com", "adxad.com",
+            "exoclick.com", "trafficjunky.com", "trafficjunky.net", "ads.trafficjunky.net", "delivery.trafficjunky.net",
+            "tsyndicate.com", "et-code.com", "ero-advertising.com", "clickadu.com", "adsterra.com", "adxad.com",
             "hilltopads.com", "hilltopads.net", "richpush.co", "pushground.com", "admaven.com", "rollerads.com",
             "juicyads.com", "trafficfactory.biz", "realsrv.com", "onclickalgo.com", "onclickperformance.com",
             "onclickmega.com", "onclickgate.com", "syndication.exoclick.com", "syndication.realsrv.com",
-            "delivery.trafficjunky.net", "engine.phn.doublepimp.com", "deloplen.com", "highperformancegate.com",
-            "effectivegate.com", "pussing.com", "propu.sh", "creativecdn.com", "whosamung.us",
+            "doublepimp.com", "deloplen.com", "highperformancegate.com", "effectivegate.com", "pussing.com",
+            "propu.sh", "creativecdn.com", "whosamung.us", "traffichaus.com", "bngpt.com", "adnxs.com",
             "trafficstars.com", "livejasmin.com", "bongacams.com", "chaturbate.com", "stripchat.com", "cam4.com",
 
             // Oglasni strežniki in sledilci
             "doubleclick.net", "googleads.g.doubleclick.net", "static.doubleclick.net",
             "googlesyndication.com", "pagead2.googlesyndication.com", "googleadservices.com",
             "adservice.google.com", "adservice.google.si", "amazon-adsystem.com",
-            "taboola.com", "outbrain.com", "criteo.com", "adnxs.com", "rubiconproject.com",
+            "taboola.com", "outbrain.com", "criteo.com", "rubiconproject.com",
             "pubmatic.com", "openx.net", "smartadserver.com", "bidswitch.net", "casalemedia.com",
             "scorecardresearch.com", "quantserve.com", "hotjar.com", "clarity.ms",
             "mc.yandex.ru", "metrika.yandex.ru", "an.yandex.ru"
@@ -107,45 +108,46 @@ object AdBlockEngine {
             return true
         }
 
-        // 🎬 Video Media Guard: Nikoli ne blokiraj veljavnih HLS tokov, segmentov ali YouTube video predvajalnika
-        if (lower.contains(".m3u8") || lower.contains(".ts") || lower.contains("/hls/") || 
-            lower.contains("/embed/") || lower.contains("googlevideo.com") ||
-            lower.contains("youtube.com/youtubei") || lower.contains("youtube.com/s/player") ||
-            lower.contains("youtube.com/watch") || lower.contains("youtube.com/api/") ||
-            lower.contains("youtube.com/results") || lower.contains("ytimg.com") ||
-            lower.contains("youtube.com/ptracking") == false && lower.contains("youtube.com")) {
-            // Če je specifičen oglasni strežnik na YouTubu, ga blokiraj
-            if (lower.contains("googleads") || lower.contains("pagead") || lower.contains("adservice") ||
-                lower.contains("doubleclick") || lower.contains("ad.youtube.com") || lower.contains("ads.youtube.com")) {
-                return true
-            }
-            return false
-        }
-
-        // 3. Preverjanje poti (Path Rules)
+        // 2. Preverjanje poti (Path Rules)
         for (pattern in BLOCKED_PATH_PATTERNS) {
             if (lower.contains(pattern)) {
                 return true
             }
         }
 
-        // 4. Domensko preverjanje v Trie (O(k))
+        // 3. Domensko preverjanje v Trie (O(k))
         try {
             val uri = Uri.parse(lower)
             val host = uri.host?.lowercase()?.trim() ?: ""
 
             if (host.isNotEmpty()) {
-                // Če je na beli listi in ni oglasne poti, dovoli
-                if (whitelistTrie.matches(host)) {
-                    return false
-                }
-
-                // Preveri blokirane domene v Trie (O(k))
+                // Če je blokirana domena v Trie (tudi če ponuja .m3u8 ali .mp4 oglas), blokiraj takoj!
                 if (blockedTrie.matches(host)) {
                     return true
                 }
+
+                // Če je na beli listi, dovoli
+                if (whitelistTrie.matches(host)) {
+                    return false
+                }
             }
         } catch (_: Exception) {}
+
+        // 4. 🎬 Video Media Guard: Dovoli veljavne video toke in segmente preverjenih medijskih strežnikov
+        if (lower.contains(".m3u8") || lower.contains(".ts") || lower.contains("/hls/") || 
+            lower.contains("/embed/") || lower.contains("googlevideo.com") ||
+            lower.contains("youtube.com/youtubei") || lower.contains("youtube.com/s/player") ||
+            lower.contains("youtube.com/watch") || lower.contains("youtube.com/api/") ||
+            lower.contains("youtube.com/results") || lower.contains("ytimg.com") ||
+            lower.contains("phncdn.com") || lower.contains("phncdn.net")) {
+            // Če je specifičen oglasni strežnik, ga blokiraj
+            if (lower.contains("googleads") || lower.contains("pagead") || lower.contains("adservice") ||
+                lower.contains("doubleclick") || lower.contains("ad.youtube.com") || lower.contains("ads.youtube.com") ||
+                lower.contains("trafficjunky") || lower.contains("tsyndicate")) {
+                return true
+            }
+            return false
+        }
 
         return false
     }

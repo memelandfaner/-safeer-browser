@@ -42,13 +42,21 @@ object UserScriptManager {
                 }
             } catch(e) {}
 
-            // 🚫 3. Samodejno odstranjevanje lažnih opozoril, vsiljenih modalov in lažnih gumbov
+            // 🚫 3. Samodejno odstranjevanje lažnih opozoril, vsiljenih modalov in video oglasnih prekrivk
             function cleanAllAdOverlays() {
                 try {
                     var adSelectors = [
                         '.reward-zone', '#reward-zone', '.fc-ab-root', '.adblock-overlay', '#adblock-modal',
                         '[class*="dating-popup"]', '[id*="dating-popup"]', '[class*="fake-download"]',
-                        '.download-button-ad', 'div[class*="download-arrow"]'
+                        '.download-button-ad', 'div[class*="download-arrow"]',
+                        '.mgp_adOverlay', '.mgp_adSkip', '.mgp_adMarker', '.mgp_commercial', '.mgp_adContainer',
+                        '.mgp_adPlaying', '.adBlockContainer', 'div[class*="adOverlay"]', 'div[class*="adSkip"]',
+                        '.mgp_skipAdButton', 'a[class*="adLink"]', 'div[class*="adInformation"]', '.adInformation',
+                        'div[class*="mgp_ad"]', '.removeAds', 'a[href*="casino"]', '.topAd', '.bottomAd',
+                        '.wideBanner', '.underPlayerAd', '.commercial-unit', '.ad-zone', '.player-ad',
+                        '[class*="ad-banner"]', '[class*="player-advertisement"]', '[id*="player-advertisement"]',
+                        '.ad-banner-overlay', '.jw-ad-container', '.plyr__ad', '.vjs-ad', '.video-ad-overlay',
+                        '.ytp-ad-overlay-container', '.ytp-ad-message-container', '.ytp-ad-player-overlay'
                     ].join(', ');
                     
                     var adElements = document.querySelectorAll(adSelectors);
@@ -67,10 +75,8 @@ object UserScriptManager {
                             try { d.remove(); } catch(e) {}
                         }
                     }
-                } catch(e) {}
-            }
 
-                    // 3. Odstrani oglasne iframe okvirje (srcdoc ali lebdeče overlay iframe-e)
+                    // Odstrani oglasne iframe okvirje (srcdoc ali lebdeče overlay iframe-e)
                     var iframes = document.querySelectorAll('iframe');
                     for (var k = 0; k < iframes.length; k++) {
                         var ifr = iframes[k];
@@ -89,7 +95,7 @@ object UserScriptManager {
                         }
                     }
 
-                    // 4. Odstrani nevidne prekrivne plasti (Invisible Click-Jacking Overlays)
+                    // Odstrani nevidne prekrivne plasti (Invisible Click-Jacking Overlays)
                     var allFixed = document.querySelectorAll('div, a, span, button');
                     var winW = window.innerWidth || 1000;
                     var winH = window.innerHeight || 800;
@@ -108,6 +114,39 @@ object UserScriptManager {
                                 }
                             }
                         } catch(e) {}
+                    }
+                } catch(e) {}
+            }
+
+            // ⚡ 4. Samodejno preskakovanje video oglasov (Instant Video Ad Skipper)
+            function autoSkipVideoAds() {
+                try {
+                    // Klikni gumb za preskok oglasa takoj ko se pojavi
+                    var skipButtons = document.querySelectorAll(
+                        '.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button, ' +
+                        '.videoAdUiSkipButton, .mgp_skipAdButton, .mgp_adSkip, [class*="skipAd"], ' +
+                        '[class*="SkipAd"], [class*="adSkip"], [class*="ad-skip"], .video-ad-skip, ' +
+                        'button[class*="skip-ad"], .skip-button, .ad-skip-button'
+                    );
+                    skipButtons.forEach(function(btn) {
+                        if (btn && (btn.offsetWidth > 0 || btn.offsetHeight > 0)) {
+                            btn.click();
+                        }
+                    });
+
+                    // Če teče oglasni video posnetek, ga v hipu previj do konca (16x hitrost / seek to duration)
+                    var isAdActive = document.querySelector('.ad-showing, .ad-interrupting, .mgp_adPlaying, [class*="adPlaying"], .ytp-ad-player-overlay');
+                    if (isAdActive) {
+                        var videos = document.querySelectorAll('video');
+                        videos.forEach(function(v) {
+                            if (v && !v.paused) {
+                                if (isFinite(v.duration) && v.duration > 0) {
+                                    v.currentTime = v.duration;
+                                }
+                                v.playbackRate = 16.0;
+                                v.muted = true;
+                            }
+                        });
                     }
                 } catch(e) {}
             }
@@ -131,11 +170,18 @@ object UserScriptManager {
                 }
             }, true);
 
-            // Zagon čistilca
+            // Zagon čistilcev in samodejnega preskakovanja
             cleanAllAdOverlays();
-            setInterval(cleanAllAdOverlays, 200);
+            autoSkipVideoAds();
+            setInterval(function() {
+                cleanAllAdOverlays();
+                autoSkipVideoAds();
+            }, 200);
 
-            var observer = new MutationObserver(cleanAllAdOverlays);
+            var observer = new MutationObserver(function() {
+                cleanAllAdOverlays();
+                autoSkipVideoAds();
+            });
             if (document.body) {
                 observer.observe(document.body, { childList: true, subtree: true });
             } else {

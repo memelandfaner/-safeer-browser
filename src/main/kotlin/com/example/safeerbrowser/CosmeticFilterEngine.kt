@@ -34,6 +34,15 @@ object CosmeticFilterEngine {
         ".ytd-ad-slot-renderer", "ytd-in-feed-ad-layout-renderer", "ytd-banner-promo-renderer",
         "ytd-player-legacy-desktop-watch-ads-renderer", ".ytd-display-ad-renderer",
         ".ytp-unmute", ".ytp-unmute-inner", ".ytp-unmute-animated", "button[aria-label*='Vklopite zvok']",
+
+        // 🎬 In-Video Preroll & Streaming Ad Overlays (Pornhub, HTML5, Casino)
+        ".mgp_adOverlay", ".mgp_adSkip", ".mgp_adMarker", ".mgp_commercial", ".mgp_adContainer",
+        ".mgp_adPlaying", ".adBlockContainer", "div[class*='adOverlay']", "div[class*='adSkip']",
+        ".mgp_skipAdButton", "a[class*='adLink']", "div[class*='adInformation']", ".adInformation",
+        "div[class*='mgp_ad']", ".removeAds", "a[href*='casino']", ".topAd", ".bottomAd",
+        ".wideBanner", ".underPlayerAd", ".commercial-unit", ".ad-zone", ".player-ad",
+        "[class*='ad-banner']", "[class*='player-advertisement']", "[id*='player-advertisement']",
+        ".ad-banner-overlay", ".jw-ad-container", ".plyr__ad", ".vjs-ad", ".video-ad-overlay",
         
         // AdBlock opozorila in prekrivna okna
         ".fc-ab-root", ".adblock-overlay", "#adblock-modal", ".ad-block-warning"
