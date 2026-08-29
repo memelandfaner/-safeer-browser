@@ -197,32 +197,12 @@ object UserScriptManager {
             if (window._safeer_yt_agent_installed) return;
             window._safeer_yt_agent_installed = true;
 
-            // 🚫 1. Popolna blokada samodejnega predvajanja predogledov na iskalni in domači strani (Stop Feed Autoplay)
-            try {
-                var origPlay = HTMLMediaElement.prototype.play;
-                HTMLMediaElement.prototype.play = function() {
-                    var isWatch = location.pathname.indexOf('/watch') !== -1 || location.pathname.indexOf('/shorts') !== -1;
-                    if (!isWatch && location.hostname.indexOf('youtube.com') !== -1) {
-                        try { this.pause(); } catch(_) {}
-                        return Promise.reject(new DOMException('Feed autoplay blocked by Safeer', 'AbortError'));
-                    }
-                    return origPlay.apply(this, arguments);
-                };
-            } catch(e) {}
-
-            // 🧠 2. Safeer YouTube Stream Accelerator & Learning Agent
+            // 🧠 Safeer YouTube Instant Song Accelerator & Track Transition Agent
             var ytAgent = {
-                learnedProfiles: {},
-                lastVideoId: null,
-                retryCount: 0,
+                lastHref: location.href,
+                lastTriggerTime: 0,
                 
-                // Naloži shranjene profile predvajanja za takojšen zagon
                 init: function() {
-                    try {
-                        var saved = localStorage.getItem('_safeer_yt_agent_profile');
-                        if (saved) this.learnedProfiles = JSON.parse(saved);
-                    } catch(e) {}
-                    
                     this.injectPerformanceHints();
                     this.startSupervision();
                 },
@@ -241,47 +221,42 @@ object UserScriptManager {
                     } catch(e) {}
                 },
 
-                // 🛑 Zaustavi morebitne samodejne predoglede v iskanju in domači strani
-                stopFeedAutoplay: function() {
-                    try {
-                        var isWatch = location.pathname.indexOf('/watch') !== -1 || location.pathname.indexOf('/shorts') !== -1;
-                        if (!isWatch) {
-                            var videos = document.querySelectorAll('video');
-                            for (var i = 0; i < videos.length; i++) {
-                                var v = videos[i];
-                                if (!v.paused) {
-                                    v.pause();
-                                }
-                            }
-                        }
-                    } catch(e) {}
-                },
-
-                // ⚡ Samodejno pospeši predvajanje in odpravi nepotrebno čakanje na /watch in /shorts
+                // ⚡ Bliskovito pospeši predvajanje nove skladbe brez zakasnitev
                 boostPlayback: function() {
                     try {
-                        // 🎯 Zaženi pospeševalnik le na dejanskih straneh z videom (/watch ali /shorts)
                         var isWatchPage = location.pathname.indexOf('/watch') !== -1 || location.pathname.indexOf('/shorts') !== -1;
-                        if (!isWatchPage) {
-                            this.stopFeedAutoplay();
-                            return;
+                        if (!isWatchPage) return;
+
+                        // 🔄 Zaznaj zamenjavo pesmi (New Song Transition) in hipno ponastavi stanje
+                        if (location.href !== this.lastHref) {
+                            this.lastHref = location.href;
+                            var v = document.querySelector('video');
+                            if (v) {
+                                v._safeer_user_paused = false;
+                                v.preload = 'auto';
+                            }
                         }
 
                         var video = document.querySelector('video');
                         var moviePlayer = document.getElementById('movie_player') ||
                                           document.querySelector('.html5-video-player');
 
-                        // 🚀 1. Hipno sproži gumbe za predvajanje (Instant Play-Trigger)
-                        var playTriggers = document.querySelectorAll(
-                            '.ytp-large-play-button, .player-control-overlay, .ytp-cued-thumbnail-overlay, ' +
-                            'button.ytp-play-button[aria-label*="Predvajaj"], button.ytp-play-button[aria-label*="Play"], ' +
-                            '.ytp-cued-thumbnail-overlay-image'
-                        );
-                        for (var t = 0; t < playTriggers.length; t++) {
-                            try { playTriggers[t].click(); } catch(_) {}
+                        var now = Date.now();
+
+                        // 🚀 Enkraten zagon predvajanja ob začetku nove skladbe (brez preobremenitve)
+                        if (now - this.lastTriggerTime > 300) {
+                            var playTriggers = document.querySelectorAll(
+                                '.ytp-large-play-button, .player-control-overlay, .ytp-cued-thumbnail-overlay, ' +
+                                'button.ytp-play-button[aria-label*="Predvajaj"], button.ytp-play-button[aria-label*="Play"], ' +
+                                '.ytp-cued-thumbnail-overlay-image'
+                            );
+                            for (var t = 0; t < playTriggers.length; t++) {
+                                try { playTriggers[t].click(); } catch(_) {}
+                            }
+                            this.lastTriggerTime = now;
                         }
 
-                        if (moviePlayer && typeof moviePlayer.playVideo === 'function') {
+                        if (moviePlayer && typeof moviePlayer.playVideo === 'function' && video && video.paused && !video._safeer_user_paused) {
                             try { moviePlayer.playVideo(); } catch(_) {}
                         }
 
@@ -291,11 +266,10 @@ object UserScriptManager {
                         video.setAttribute('playsinline', 'true');
                         video.setAttribute('webkit-playsinline', 'true');
 
-                        // Poslušaj ročne pavze uporabnika, da ne vsiljujemo predvajanja, če si je uporabnik sam ustavil video
                         if (!video._safeer_pause_hooked) {
                             video._safeer_pause_hooked = true;
                             video.addEventListener('pause', function() {
-                                if (!video.ended && video.readyState >= 2) {
+                                if (!video.ended && video.readyState >= 2 && location.href === ytAgent.lastHref) {
                                     video._safeer_user_paused = true;
                                 }
                             });
@@ -310,7 +284,7 @@ object UserScriptManager {
                                    moviePlayer.classList.contains('ad-interrupting');
                         }
 
-                        // 🚫 Če se pojavi oglas, ga v 0 sekundah preskoči
+                        // 🚫 Takojšen preskok oglasa v 0s
                         if (isAd) {
                             video.muted = true;
                             if (isFinite(video.duration) && video.duration > 0) {
@@ -321,7 +295,7 @@ object UserScriptManager {
                                 try { moviePlayer.skipAd(); } catch(_) {}
                             }
                         } else {
-                            // ✅ Normalen video: povrni originalno hitrost in vklopi zvok
+                            // ✅ Normalna skladba: povrni hitrost in vklopi zvok
                             if (video.playbackRate > 2.0) {
                                 video.playbackRate = 1.0;
                                 video.muted = false;
@@ -333,7 +307,7 @@ object UserScriptManager {
                                 video.volume = 1.0;
                             }
 
-                            // 🚀 Hipen zagon predvajanja brez odvečnega čakanja
+                            // 🚀 Bliskovit vžig skladbe
                             if (video.paused && !video.ended && !video._safeer_user_paused) {
                                 var playPromise = video.play();
                                 if (playPromise !== undefined) {
@@ -342,30 +316,27 @@ object UserScriptManager {
                             }
                         }
 
-                        // 🎯 Klik na gumb za preskok oglasa
+                        // 🎯 Preskok oglasnih gumbov
                         var skipBtn = document.querySelector(
                             '.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button, ' +
                             '.ytp-ad-overlay-close-button, button.ytp-ad-skip-button-text, ' +
                             '.ytp-ad-skip-button-slot button, [id^="skip-button"], ' +
                             'button[aria-label*="Preskoči"], button[aria-label*="Skip"]'
                         );
-                        if (skipBtn) {
-                            skipBtn.click();
-                        }
+                        if (skipBtn) skipBtn.click();
 
-                        // 🔊 Odstrani YouTube mute prekrivke
+                        // 🔊 Vklop zvoka
                         var unmuteBtns = document.querySelectorAll(
                             '.ytp-unmute, .ytp-unmute-inner, .ytp-unmute-animated, ' +
                             'button[aria-label*="Vklopite zvok"], button[aria-label*="zvok"], ' +
                             'button[aria-label*="Unmute"], button[aria-label*="unmute"]'
                         );
-                        for (var u = 0; u < unmuteBtns.length; u++) {
-                            unmuteBtns[u].click();
-                        }
+                        for (var u = 0; u < unmuteBtns.length; u++) unmuteBtns[u].click();
+
                     } catch(e) {}
                 },
 
-                // 🛡️ Samodejno zdravljenje napak (Anti-"Prišlo je do težave" Auto-Healer)
+                // 🛡️ Samodejno zdravljenje napak
                 healErrors: function() {
                     try {
                         var isWatchPage = location.pathname.indexOf('/watch') !== -1 || location.pathname.indexOf('/shorts') !== -1;
@@ -377,14 +348,6 @@ object UserScriptManager {
                         if (errorContainer || retryBtn) {
                             if (retryBtn) {
                                 retryBtn.click();
-                            } else {
-                                var video = document.querySelector('video');
-                                if (video && isFinite(video.currentTime) && video.currentTime > 0) {
-                                    var savedTime = video.currentTime;
-                                    video.load();
-                                    video.currentTime = savedTime;
-                                    video.play().catch(function() {});
-                                }
                             }
                         }
 
@@ -397,15 +360,8 @@ object UserScriptManager {
                         for (var p = 0; p < appPromos.length; p++) {
                             try { appPromos[p].style.display = 'none'; appPromos[p].remove(); } catch(_) {}
                         }
-                        var topBtns = document.querySelectorAll('ytm-mobile-topbar-renderer button, ytm-mobile-topbar-renderer a');
-                        for (var tb = 0; tb < topBtns.length; tb++) {
-                            var tVal = (topBtns[tb].textContent || '').trim().toLowerCase();
-                            if (tVal.indexOf('odpri') !== -1 || tVal.indexOf('open') !== -1) {
-                                try { topBtns[tb].style.display = 'none'; topBtns[tb].remove(); } catch(_) {}
-                            }
-                        }
 
-                        // 🚫 3. Samodejno zapri vsiljena pojavna okna seznamov predvajanja / miksov (Auto-dismiss Mix/Playlist Drawer Popup)
+                        // 🚫 Samodejno zapri vsiljena pojavna okna seznamov predvajanja / miksov
                         var playlistCloseBtns = document.querySelectorAll(
                             'ytm-engagement-panel-section-list-renderer button.header-close-button, ' +
                             'ytm-engagement-panel-section-list-renderer button[aria-label*="Zapri"], ' +
@@ -418,7 +374,7 @@ object UserScriptManager {
                             try { playlistCloseBtns[pcb].click(); } catch(_) {}
                         }
 
-                        // 🚫 Odstrani zatemnitev in zameglitev videa (Backdrop Dimming)
+                        // 🚫 Odstrani zatemnitev in zameglitev videa
                         var backdrops = document.querySelectorAll('.engagement-panel-backdrop, ytm-bottom-sheet-renderer.backdrop');
                         for (var bd = 0; bd < backdrops.length; bd++) {
                             try {
@@ -430,13 +386,13 @@ object UserScriptManager {
                     } catch(e) {}
                 },
 
-                // Stalni nadzorni cikel agenta (bliskovita 25ms zanka)
+                // Stalni nadzorni cikel agenta
                 startSupervision: function() {
                     var self = this;
                     setInterval(function() {
                         self.boostPlayback();
                         self.healErrors();
-                    }, 25);
+                    }, 50);
 
                     window.addEventListener('yt-navigate-finish', function() { self.boostPlayback(); });
                     window.addEventListener('yt-page-data-updated', function() { self.boostPlayback(); });
@@ -480,6 +436,7 @@ object UserScriptManager {
 
             var lastUserInteractionTime = Date.now();
             var userExplicitlyPaused = false;
+            var lastBgHref = location.href;
 
             var userActionEvents = ['click', 'touchstart', 'touchend', 'pointerdown', 'pointerup', 'keydown'];
             for (var u = 0; u < userActionEvents.length; u++) {
@@ -490,11 +447,12 @@ object UserScriptManager {
 
             HTMLMediaElement.prototype.pause = function() {
                 var elapsed = Date.now() - lastUserInteractionTime;
-                // Če se je video končal, dovoli naraven prehod na naslednjo skladbo v seznamu/miksu
-                if (this.ended || (isFinite(this.duration) && this.duration > 0 && Math.abs(this.currentTime - this.duration) < 1.0)) {
+                // Če se menja pesem ali je video končan, dovoli naravno pavzo za zagon nove skladbe
+                if (location.href !== lastBgHref || this.ended || this.readyState < 2 || (isFinite(this.duration) && this.duration > 0 && Math.abs(this.currentTime - this.duration) < 1.0)) {
+                    lastBgHref = location.href;
                     return origPause.apply(this, arguments);
                 }
-                // Če je pavza sprožena brez neposrednega klika (npr. preklop aplikacije ali ugasnjen zaslon), jo prezri!
+                // Če je pavza sprožena brez neposrednega klika uporabnika, jo ignoriraj za predvajanje v ozadju
                 if (elapsed > 800) {
                     return;
                 }
@@ -504,6 +462,7 @@ object UserScriptManager {
 
             HTMLMediaElement.prototype.play = function() {
                 userExplicitlyPaused = false;
+                lastBgHref = location.href;
                 return origPlay.apply(this, arguments);
             };
 
@@ -516,7 +475,8 @@ object UserScriptManager {
                         player.pauseVideo = function() {
                             var elapsed = Date.now() - lastUserInteractionTime;
                             var v = document.querySelector('video');
-                            if (v && (v.ended || (isFinite(v.duration) && v.duration > 0 && Math.abs(v.currentTime - v.duration) < 1.0))) {
+                            if (location.href !== lastBgHref || (v && (v.ended || v.readyState < 2 || (isFinite(v.duration) && v.duration > 0 && Math.abs(v.currentTime - v.duration) < 1.0)))) {
+                                lastBgHref = location.href;
                                 return origPauseVideo.apply(this, arguments);
                             }
                             if (elapsed > 800) {
