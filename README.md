@@ -31,15 +31,27 @@
 
 ---
 
-## 📲 Hitra Namestitev na Telefon
+## ⚡ Hitra 1-Klik Namestitev & Kratke Povezave (Quick Install)
 
+### 🚀 1. Kratka povezava za vpis v brskalnik na telefonu:
+Vnesite v poljuben brskalnik na telefonu za takojšen prenos APK:
+* 👉 **`tinyurl.com/safeer-apk`** (ali `https://tinyurl.com/safeer-apk`)
+* 👉 Alternativa: **`tinyurl.com/safeer-mobi`**
+* 👉 Rezervna povezava: **`da.gd/xfcGi`**
+
+### 📲 2. 1-Vrstični samodejni namestitveni ukaz prek terminala:
 ```bash
-./install_mobile.sh
+curl -sL https://tinyurl.com/install-safeer | bash
 ```
+*(Ali z uradne GitHub povezave: `curl -sL https://raw.githubusercontent.com/memelandfaner/-safeer-browser/main/install_safeer.sh | bash`)*
 
-Ali ročna namestitev zgrajenega paketa `Safeer-Browser.apk`:
+### 📥 3. Neposredna povezava do uradne APK datoteke:
+* **Najnovejši Release APK**: [Safeer-Browser.apk](https://raw.githubusercontent.com/memelandfaner/-safeer-browser/main/Safeer-Browser.apk)
+* **Release Artifact**: [safeer-browser-release.apk](https://raw.githubusercontent.com/memelandfaner/-safeer-browser/main/Release/Artifacts/safeer-browser-release.apk)
+
+### 📱 4. Lokalna namestitev prek ADB:
 ```bash
-adb install -r Safeer-Browser.apk
+adb -s 192.168.0.216:34527 install -r Safeer-Browser.apk
 ```
 
 ---
