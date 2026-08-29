@@ -201,6 +201,7 @@ object UserScriptManager {
             var ytAgent = {
                 lastHref: location.href,
                 lastTriggerTime: 0,
+                initialPlayDone: false,
                 
                 init: function() {
                     this.injectPerformanceHints();
@@ -230,6 +231,7 @@ object UserScriptManager {
                         // 🔄 Zaznaj zamenjavo pesmi (New Song Transition) in hipno ponastavi stanje
                         if (location.href !== this.lastHref) {
                             this.lastHref = location.href;
+                            this.initialPlayDone = false;
                             var v = document.querySelector('video');
                             if (v) {
                                 v._safeer_user_paused = false;
@@ -244,21 +246,31 @@ object UserScriptManager {
                         var now = Date.now();
 
                         // 🚀 Enkraten zagon predvajanja ob začetku nove skladbe (brez motenja predvajalnika)
-                        if (video && video.paused && !video._safeer_user_paused) {
-                            if (now - this.lastTriggerTime > 500) {
+                        if ((!video || (video.paused && !video._safeer_user_paused)) && !this.initialPlayDone) {
+                            if (now - this.lastTriggerTime > 600) {
                                 this.lastTriggerTime = now;
-                                try { video.play().catch(function() {}); } catch(_) {}
+                                if (video) {
+                                    try { video.play().catch(function() {}); } catch(_) {}
+                                }
                                 if (moviePlayer && typeof moviePlayer.playVideo === 'function') {
                                     try { moviePlayer.playVideo(); } catch(_) {}
                                 }
                                 var playTriggers = document.querySelectorAll(
-                                    '.ytp-large-play-button, .ytp-cued-thumbnail-overlay, ' +
-                                    'button.ytp-play-button[aria-label*="Predvajaj"], button.ytp-play-button[aria-label*="Play"]'
+                                    '.ytp-large-play-button, .ytp-cued-thumbnail-overlay, .ytp-cued-thumbnail-overlay-image, ' +
+                                    'button.ytp-play-button[aria-label*="Predvajaj"], button.ytp-play-button[aria-label*="Play"], ' +
+                                    'div.player-container, #player-control-container, ytm-player-microformat-renderer'
                                 );
                                 for (var t = 0; t < playTriggers.length; t++) {
-                                    try { playTriggers[t].click(); } catch(_) {}
+                                    try {
+                                        playTriggers[t].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+                                        playTriggers[t].click();
+                                    } catch(_) {}
                                 }
                             }
+                        }
+
+                        if (video && !video.paused && video.currentTime > 0.5) {
+                            this.initialPlayDone = true;
                         }
 
                         if (!video) return;
@@ -394,7 +406,7 @@ object UserScriptManager {
                     setInterval(function() {
                         self.boostPlayback();
                         self.healErrors();
-                    }, 50);
+                    }, 200);
 
                     window.addEventListener('yt-navigate-finish', function() { self.boostPlayback(); });
                     window.addEventListener('yt-page-data-updated', function() { self.boostPlayback(); });

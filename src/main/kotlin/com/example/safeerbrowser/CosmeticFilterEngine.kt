@@ -42,11 +42,15 @@ object CosmeticFilterEngine {
         "ytm-mobile-topbar-renderer [aria-label*='Odpri']", "ytm-mobile-topbar-renderer [aria-label*='Open']",
         "a[href*='app_redirect']", "a[href*='open_in_app']", "button[title*='Odpri']", "button[title*='Open']",
 
-        // 🎵 YouTube Mix / Playlist Obstructing Popup Overlays & Dimming Backdrops (Bugfix)
+        // 🎵 YouTube Mix / Playlist Obstructing Popup Overlays, Autonav & Dimming Backdrops (Bugfix)
         ".engagement-panel-backdrop", "ytm-bottom-sheet-renderer", "ytm-bottom-sheet-renderer.backdrop",
         "ytm-playlist-panel-renderer", "ytm-macro-markers-list-item-renderer", "ytm-chapter-renderer",
         "ytm-engagement-panel-section-list-renderer[target-id='engagement-panel-playlist-panel']",
         "ytm-engagement-panel-section-list-renderer .engagement-panel-header-container",
+        "ytm-autonav-bar-renderer", ".ytm-autonav-bar", "ytm-autonav-toggle",
+        ".ytp-pause-overlay", ".ytp-pause-overlay-container",
+        "ytm-fullscreen-engagement-overlay-renderer", "ytm-companion-ad-renderer",
+        "ytm-promoted-sparkles-web-renderer", "ytm-paid-content-overlay-renderer",
 
         // 🎬 In-Video Preroll & Streaming Ad Overlays (Pornhub, HTML5, Casino)
         ".mgp_adOverlay", ".mgp_adSkip", ".mgp_adMarker", ".mgp_commercial", ".mgp_adContainer",
