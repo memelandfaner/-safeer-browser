@@ -33,7 +33,7 @@ object CosmeticFilterEngine {
         ".ytp-ad-overlay-container", ".ytp-ad-message-container", ".ytp-ad-text",
         ".ytd-ad-slot-renderer", "ytd-in-feed-ad-layout-renderer", "ytd-banner-promo-renderer",
         "ytd-player-legacy-desktop-watch-ads-renderer", ".ytd-display-ad-renderer",
-        ".ytp-unmute", ".ytp-unmute-inner", ".ytp-unmute-animated", "button[aria-label*='Vklopite zvok']",
+        ".ytp-unmute", ".ytp-unmute-inner", ".ytp-unmute-animated", ".ytp-unmute-box", "button[aria-label*='Vklopite zvok']", "button[aria-label*='Unmute']",
         "ytm-open-app-button", "ytm-app-promo-renderer", "ytm-mealbar-promo-renderer", "ytm-upsell-dialog-renderer",
         "button[aria-label*='Odpri aplikacijo']", "button[aria-label*='Odpri v aplikaciji']", "button[aria-label*='Odpri']",
         "button[aria-label*='Open app']", "button[aria-label*='Open in app']",
@@ -43,7 +43,8 @@ object CosmeticFilterEngine {
         "a[href*='app_redirect']", "a[href*='open_in_app']", "button[title*='Odpri']", "button[title*='Open']",
 
         // 🎵 YouTube Mix / Playlist Obstructing Popup Overlays & Dimming Backdrops (Bugfix)
-        ".engagement-panel-backdrop", "ytm-bottom-sheet-renderer.backdrop",
+        ".engagement-panel-backdrop", "ytm-bottom-sheet-renderer", "ytm-bottom-sheet-renderer.backdrop",
+        "ytm-playlist-panel-renderer", "ytm-macro-markers-list-item-renderer", "ytm-chapter-renderer",
         "ytm-engagement-panel-section-list-renderer[target-id='engagement-panel-playlist-panel']",
         "ytm-engagement-panel-section-list-renderer .engagement-panel-header-container",
 

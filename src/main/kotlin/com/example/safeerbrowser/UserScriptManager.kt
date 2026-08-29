@@ -243,21 +243,22 @@ object UserScriptManager {
 
                         var now = Date.now();
 
-                        // 🚀 Enkraten zagon predvajanja ob začetku nove skladbe (brez preobremenitve)
-                        if (now - this.lastTriggerTime > 300) {
-                            var playTriggers = document.querySelectorAll(
-                                '.ytp-large-play-button, .player-control-overlay, .ytp-cued-thumbnail-overlay, ' +
-                                'button.ytp-play-button[aria-label*="Predvajaj"], button.ytp-play-button[aria-label*="Play"], ' +
-                                '.ytp-cued-thumbnail-overlay-image'
-                            );
-                            for (var t = 0; t < playTriggers.length; t++) {
-                                try { playTriggers[t].click(); } catch(_) {}
+                        // 🚀 Enkraten zagon predvajanja ob začetku nove skladbe (brez motenja predvajalnika)
+                        if (video && video.paused && !video._safeer_user_paused) {
+                            if (now - this.lastTriggerTime > 500) {
+                                this.lastTriggerTime = now;
+                                try { video.play().catch(function() {}); } catch(_) {}
+                                if (moviePlayer && typeof moviePlayer.playVideo === 'function') {
+                                    try { moviePlayer.playVideo(); } catch(_) {}
+                                }
+                                var playTriggers = document.querySelectorAll(
+                                    '.ytp-large-play-button, .ytp-cued-thumbnail-overlay, ' +
+                                    'button.ytp-play-button[aria-label*="Predvajaj"], button.ytp-play-button[aria-label*="Play"]'
+                                );
+                                for (var t = 0; t < playTriggers.length; t++) {
+                                    try { playTriggers[t].click(); } catch(_) {}
+                                }
                             }
-                            this.lastTriggerTime = now;
-                        }
-
-                        if (moviePlayer && typeof moviePlayer.playVideo === 'function' && video && video.paused && !video._safeer_user_paused) {
-                            try { moviePlayer.playVideo(); } catch(_) {}
                         }
 
                         if (!video) return;
@@ -325,13 +326,14 @@ object UserScriptManager {
                         );
                         if (skipBtn) skipBtn.click();
 
-                        // 🔊 Vklop zvoka
+                        // 🔊 Vklop zvoka in takojšen izbris Mute gumba
                         var unmuteBtns = document.querySelectorAll(
-                            '.ytp-unmute, .ytp-unmute-inner, .ytp-unmute-animated, ' +
-                            'button[aria-label*="Vklopite zvok"], button[aria-label*="zvok"], ' +
-                            'button[aria-label*="Unmute"], button[aria-label*="unmute"]'
+                            '.ytp-unmute, .ytp-unmute-inner, .ytp-unmute-animated, .ytp-unmute-box, ' +
+                            'button[aria-label*="Vklopite zvok"], button[aria-label*="Unmute"]'
                         );
-                        for (var u = 0; u < unmuteBtns.length; u++) unmuteBtns[u].click();
+                        for (var u = 0; u < unmuteBtns.length; u++) {
+                            try { unmuteBtns[u].click(); unmuteBtns[u].remove(); } catch(_) {}
+                        }
 
                     } catch(e) {}
                 },
