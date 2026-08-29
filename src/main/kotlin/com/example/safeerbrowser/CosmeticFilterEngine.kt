@@ -34,6 +34,9 @@ object CosmeticFilterEngine {
         ".ytd-ad-slot-renderer", "ytd-in-feed-ad-layout-renderer", "ytd-banner-promo-renderer",
         "ytd-player-legacy-desktop-watch-ads-renderer", ".ytd-display-ad-renderer",
         ".ytp-unmute", ".ytp-unmute-inner", ".ytp-unmute-animated", "button[aria-label*='Vklopite zvok']",
+        "ytm-open-app-button", "ytm-app-promo-renderer", "ytm-mealbar-promo-renderer",
+        "button[aria-label*='Odpri aplikacijo']", "button[aria-label*='Open app']",
+        ".topbar-action-buttons ytm-open-app-button",
 
         // 🎬 In-Video Preroll & Streaming Ad Overlays (Pornhub, HTML5, Casino)
         ".mgp_adOverlay", ".mgp_adSkip", ".mgp_adMarker", ".mgp_commercial", ".mgp_adContainer",
