@@ -29,14 +29,18 @@ object CosmeticFilterEngine {
         "[class*='fake-download']", "[id*='fake-download']", ".download-button-ad",
         "div[class*='download-arrow']",
         
-        // YouTube elementi & samodejni vklop zvoka (skrit mute gumb)
+        // YouTube elementi & samodejni vklop zvoka (skrit mute gumb & popolnoma odstranjen Odpri aplikacijo gumb)
         ".ytp-ad-overlay-container", ".ytp-ad-message-container", ".ytp-ad-text",
         ".ytd-ad-slot-renderer", "ytd-in-feed-ad-layout-renderer", "ytd-banner-promo-renderer",
         "ytd-player-legacy-desktop-watch-ads-renderer", ".ytd-display-ad-renderer",
         ".ytp-unmute", ".ytp-unmute-inner", ".ytp-unmute-animated", "button[aria-label*='Vklopite zvok']",
-        "ytm-open-app-button", "ytm-app-promo-renderer", "ytm-mealbar-promo-renderer",
-        "button[aria-label*='Odpri aplikacijo']", "button[aria-label*='Open app']",
-        ".topbar-action-buttons ytm-open-app-button",
+        "ytm-open-app-button", "ytm-app-promo-renderer", "ytm-mealbar-promo-renderer", "ytm-upsell-dialog-renderer",
+        "button[aria-label*='Odpri aplikacijo']", "button[aria-label*='Odpri v aplikaciji']", "button[aria-label*='Odpri']",
+        "button[aria-label*='Open app']", "button[aria-label*='Open in app']",
+        ".topbar-action-buttons", ".topbar-action-buttons ytm-open-app-button", ".topbar-action-buttons button",
+        "ytm-mobile-topbar-renderer .topbar-action-buttons", "ytm-mobile-topbar-renderer ytm-open-app-button",
+        "ytm-mobile-topbar-renderer [aria-label*='Odpri']", "ytm-mobile-topbar-renderer [aria-label*='Open']",
+        "a[href*='app_redirect']", "a[href*='open_in_app']", "button[title*='Odpri']", "button[title*='Open']",
 
         // 🎬 In-Video Preroll & Streaming Ad Overlays (Pornhub, HTML5, Casino)
         ".mgp_adOverlay", ".mgp_adSkip", ".mgp_adMarker", ".mgp_commercial", ".mgp_adContainer",

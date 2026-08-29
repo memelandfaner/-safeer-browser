@@ -388,10 +388,21 @@ object UserScriptManager {
                             }
                         }
 
-                        // Odstrani opozorila o aplikaciji in modalna okna
-                        var appPromos = document.querySelectorAll('ytm-open-app-button, ytm-app-promo-renderer, ytm-upsell-dialog-renderer');
+                        // Odstrani gumb "Odpri aplikacijo", promocije aplikacije in modalna okna
+                        var appPromos = document.querySelectorAll(
+                            'ytm-open-app-button, ytm-app-promo-renderer, ytm-mealbar-promo-renderer, ytm-upsell-dialog-renderer, ' +
+                            '.topbar-action-buttons, button[aria-label*="Odpri aplikacijo"], button[aria-label*="Open app"], ' +
+                            '[aria-label*="Odpri"], [aria-label*="Open in app"]'
+                        );
                         for (var p = 0; p < appPromos.length; p++) {
-                            appPromos[p].remove();
+                            try { appPromos[p].style.display = 'none'; appPromos[p].remove(); } catch(_) {}
+                        }
+                        var topBtns = document.querySelectorAll('ytm-mobile-topbar-renderer button, ytm-mobile-topbar-renderer a');
+                        for (var tb = 0; tb < topBtns.length; tb++) {
+                            var tVal = (topBtns[tb].textContent || '').trim().toLowerCase();
+                            if (tVal.indexOf('odpri') !== -1 || tVal.indexOf('open') !== -1) {
+                                try { topBtns[tb].style.display = 'none'; topBtns[tb].remove(); } catch(_) {}
+                            }
                         }
                     } catch(e) {}
                 },
