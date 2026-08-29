@@ -74,7 +74,7 @@ object ThreatBlockEngine {
         val stevenBlackMalware = listOf(
             "20bet.top", "20bet-aff.com", "1xbet.mobi", "1xbet-partner.com", "vulkanvegas-play.top",
             "parimatch-aff.com", "monetag-loader.com", "richpush-ads.co", "onclickalgo.com",
-            "syndication.exoclick.com", "engine.phn.doublepimp.com"
+            "syndication.exoclick.com"
         )
         for (d in stevenBlackMalware) threatTrie.insert(d, category = "Nevarno oglasno/stavno omrežje", sourceFeed = "StevenBlack Unified")
     }

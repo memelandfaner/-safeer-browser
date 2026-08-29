@@ -42,62 +42,33 @@ object UserScriptManager {
                 }
             } catch(e) {}
 
-            // 🚫 3. Samodejno odstranjevanje lažnih opozoril, vsiljenih modalov, dating oglasov in lažnih gumbov
+            // 🚫 3. Samodejno odstranjevanje lažnih opozoril, vsiljenih modalov in lažnih gumbov
             function cleanAllAdOverlays() {
                 try {
-                    // Preišči vse elemente na strani
-                    var all = document.querySelectorAll('div, section, dialog, [role="dialog"], [role="alertdialog"], span, a, button, p');
-                    for (var i = 0; i < all.length; i++) {
-                        var el = all[i];
-                        var tag = el.tagName.toLowerCase();
-                        if (tag === 'html' || tag === 'body' || tag === 'head' || tag === 'script' || tag === 'style') continue;
+                    var adSelectors = [
+                        '.reward-zone', '#reward-zone', '.fc-ab-root', '.adblock-overlay', '#adblock-modal',
+                        '[class*="dating-popup"]', '[id*="dating-popup"]', '[class*="fake-download"]',
+                        '.download-button-ad', 'div[class*="download-arrow"]'
+                    ].join(', ');
+                    
+                    var adElements = document.querySelectorAll(adSelectors);
+                    adElements.forEach(function(el) {
+                        try { el.remove(); } catch(e) {}
+                    });
 
-                        var txt = (el.innerText || el.textContent || '').trim().toLowerCase();
-                        var cls = (el.className || '').toString().toLowerCase();
-                        var id = (el.id || '').toLowerCase();
-
-                        // 1. Zaznaj nezaželena sporočila (Whatsapp za seks, Lara, Attention, Fake confirm, Reward Zone)
-                        var isUnwanted = (
-                            txt.includes('whatsapp za seks') ||
-                            txt.includes('lara (2 km') ||
-                            txt.includes('jebi me zastonj') ||
-                            txt.includes('whatsapp za') ||
-                            (txt.includes('whatsapp') && (txt.includes('seks') || txt.includes('sex') || txt.includes('zastonj') || txt.includes('lara'))) ||
-                            txt.includes('jebi me') ||
-                            txt.includes('kurbe') ||
-                            txt.includes('reward zone') ||
-                            cls.includes('reward-zone') ||
-                            id.includes('reward-zone') ||
-                            (txt.includes('attention') && txt.includes('confirm to continue')) ||
-                            (txt.includes('please confirm') && txt.includes('continue')) ||
-                            (txt.includes('click allow') || txt.includes('press allow')) ||
-                            (txt.includes('disable your ad blocker') || txt.includes('turn off adblock')) ||
-                            (txt.includes('vpn recommended') || txt.includes('battery damaged') || txt.includes('virus detected'))
-                        );
-
-                        if (isUnwanted) {
-                            // Poišči krovni plavajoči dialog
-                            var topDialog = el;
-                            while (topDialog.parentElement && topDialog.parentElement !== document.body && topDialog.parentElement !== document.documentElement) {
-                                var pStyle = window.getComputedStyle(topDialog.parentElement);
-                                if (pStyle.position === 'fixed' || pStyle.position === 'absolute' || parseInt(pStyle.zIndex, 10) > 10) {
-                                    topDialog = topDialog.parentElement;
-                                } else {
-                                    break;
-                                }
-                            }
-                            topDialog.remove();
-                            continue;
-                        }
-
-                        // 2. Odstrani lažne lebdeče gumbe za prenos
-                        if ((txt === 'download' || txt === 'prenesi') && (el.querySelectorAll('video, iframe, form').length === 0)) {
-                            var s = window.getComputedStyle(el);
-                            if (s.position === 'fixed' || parseInt(s.zIndex, 10) > 50) {
-                                el.remove();
-                            }
+                    // Odstrani lažna sistemska opozorila (baterija poškodovana, virus zaznan)
+                    var dialogs = document.querySelectorAll('[role="dialog"], [role="alertdialog"], .modal, .popup');
+                    for (var i = 0; i < dialogs.length; i++) {
+                        var d = dialogs[i];
+                        var txt = (d.innerText || d.textContent || '').trim().toLowerCase();
+                        if (txt.includes('battery damaged') || txt.includes('virus detected') || 
+                            txt.includes('vpn recommended') || txt.includes('whatsapp za seks') ||
+                            (txt.includes('disable your ad blocker') && txt.includes('disable'))) {
+                            try { d.remove(); } catch(e) {}
                         }
                     }
+                } catch(e) {}
+            }
 
                     // 3. Odstrani oglasne iframe okvirje (srcdoc ali lebdeče overlay iframe-e)
                     var iframes = document.querySelectorAll('iframe');

@@ -51,7 +51,8 @@ object AdBlockEngine {
             "vidsrc.net", "vidsrc.to", "vidsrc.xyz", "autoembed.co", "autoembed.cc", "multiembed.mov",
             "2embed.cc", "111movies.com", "hydrahd.ws", "megacloud.tv", "rabbitstream.net",
             "dokicloud.one", "vizcloud.online", "filemoon.sx", "streamtape.com", "vidgod.me",
-            "peach.stream", "cinemanos.com", "core.streamex.sh", "streamwish.to", "doodstream.com"
+            "peach.stream", "cinemanos.com", "core.streamex.sh", "streamwish.to", "doodstream.com",
+            "pornhub.com", "phncdn.com", "phncdn.net"
         )
         for (d in trusted) whitelistTrie.insert(d)
     }
