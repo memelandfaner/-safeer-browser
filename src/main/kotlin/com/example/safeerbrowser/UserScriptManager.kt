@@ -271,7 +271,25 @@ object UserScriptManager {
                         var moviePlayer = document.getElementById('movie_player') ||
                                           document.querySelector('.html5-video-player');
 
+                        // 🚀 1. Hipno sproži gumbe za predvajanje (Instant Play-Trigger)
+                        var playTriggers = document.querySelectorAll(
+                            '.ytp-large-play-button, .player-control-overlay, .ytp-cued-thumbnail-overlay, ' +
+                            'button.ytp-play-button[aria-label*="Predvajaj"], button.ytp-play-button[aria-label*="Play"], ' +
+                            '.ytp-cued-thumbnail-overlay-image'
+                        );
+                        for (var t = 0; t < playTriggers.length; t++) {
+                            try { playTriggers[t].click(); } catch(_) {}
+                        }
+
+                        if (moviePlayer && typeof moviePlayer.playVideo === 'function') {
+                            try { moviePlayer.playVideo(); } catch(_) {}
+                        }
+
                         if (!video) return;
+
+                        video.preload = 'auto';
+                        video.setAttribute('playsinline', 'true');
+                        video.setAttribute('webkit-playsinline', 'true');
 
                         // Poslušaj ročne pavze uporabnika, da ne vsiljujemo predvajanja, če si je uporabnik sam ustavil video
                         if (!video._safeer_pause_hooked) {
@@ -315,8 +333,8 @@ object UserScriptManager {
                                 video.volume = 1.0;
                             }
 
-                            // 🚀 Samodejni zagon ob čakanju/bufferingu brez odvečnega čakanja (če ni uporabnik sam kliknil pavze)
-                            if (video.paused && video.readyState >= 2 && !video.ended && !video._safeer_user_paused) {
+                            // 🚀 Hipen zagon predvajanja brez odvečnega čakanja
+                            if (video.paused && !video.ended && !video._safeer_user_paused) {
                                 var playPromise = video.play();
                                 if (playPromise !== undefined) {
                                     playPromise.catch(function() {});
@@ -378,17 +396,18 @@ object UserScriptManager {
                     } catch(e) {}
                 },
 
-                // Stalni nadzorni cikel agenta
+                // Stalni nadzorni cikel agenta (bliskovita 25ms zanka)
                 startSupervision: function() {
                     var self = this;
                     setInterval(function() {
                         self.boostPlayback();
                         self.healErrors();
-                    }, 120);
+                    }, 25);
 
                     window.addEventListener('yt-navigate-finish', function() { self.boostPlayback(); });
                     window.addEventListener('yt-page-data-updated', function() { self.boostPlayback(); });
                     window.addEventListener('popstate', function() { self.boostPlayback(); });
+                    document.addEventListener('DOMContentLoaded', function() { self.boostPlayback(); });
                 }
             };
 
