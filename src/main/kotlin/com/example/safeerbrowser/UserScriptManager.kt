@@ -404,6 +404,29 @@ object UserScriptManager {
                                 try { topBtns[tb].style.display = 'none'; topBtns[tb].remove(); } catch(_) {}
                             }
                         }
+
+                        // 🚫 3. Samodejno zapri vsiljena pojavna okna seznamov predvajanja / miksov (Auto-dismiss Mix/Playlist Drawer Popup)
+                        var playlistCloseBtns = document.querySelectorAll(
+                            'ytm-engagement-panel-section-list-renderer button.header-close-button, ' +
+                            'ytm-engagement-panel-section-list-renderer button[aria-label*="Zapri"], ' +
+                            'ytm-engagement-panel-section-list-renderer button[aria-label*="Close"], ' +
+                            'ytm-bottom-sheet-renderer button.bottom-sheet-layout-close-button, ' +
+                            'button[aria-label*="Zapri ploščo"], button[aria-label*="Close panel"], ' +
+                            '.bottom-sheet-layout-close-button, .header-close-button, .panel-header-close-button'
+                        );
+                        for (var pcb = 0; pcb < playlistCloseBtns.length; pcb++) {
+                            try { playlistCloseBtns[pcb].click(); } catch(_) {}
+                        }
+
+                        // 🚫 Odstrani zatemnitev in zameglitev videa (Backdrop Dimming)
+                        var backdrops = document.querySelectorAll('.engagement-panel-backdrop, ytm-bottom-sheet-renderer.backdrop');
+                        for (var bd = 0; bd < backdrops.length; bd++) {
+                            try {
+                                backdrops[bd].style.display = 'none';
+                                backdrops[bd].style.opacity = '0';
+                                backdrops[bd].style.pointerEvents = 'none';
+                            } catch(_) {}
+                        }
                     } catch(e) {}
                 },
 
@@ -467,7 +490,12 @@ object UserScriptManager {
 
             HTMLMediaElement.prototype.pause = function() {
                 var elapsed = Date.now() - lastUserInteractionTime;
-                if (elapsed > 600) {
+                // Če se je video končal, dovoli naraven prehod na naslednjo skladbo v seznamu/miksu
+                if (this.ended || (isFinite(this.duration) && this.duration > 0 && Math.abs(this.currentTime - this.duration) < 1.0)) {
+                    return origPause.apply(this, arguments);
+                }
+                // Če je pavza sprožena brez neposrednega klika (npr. preklop aplikacije ali ugasnjen zaslon), jo prezri!
+                if (elapsed > 800) {
                     return;
                 }
                 userExplicitlyPaused = true;
@@ -487,7 +515,11 @@ object UserScriptManager {
                     if (typeof origPauseVideo === 'function') {
                         player.pauseVideo = function() {
                             var elapsed = Date.now() - lastUserInteractionTime;
-                            if (elapsed > 600) {
+                            var v = document.querySelector('video');
+                            if (v && (v.ended || (isFinite(v.duration) && v.duration > 0 && Math.abs(v.currentTime - v.duration) < 1.0))) {
+                                return origPauseVideo.apply(this, arguments);
+                            }
+                            if (elapsed > 800) {
                                 return;
                             }
                             userExplicitlyPaused = true;
@@ -513,20 +545,14 @@ object UserScriptManager {
                 } catch(e) {}
             }
 
-            function ensureAudioPlaying() {
+            // Stalni nadzornik za neprekinjeno predvajanje v ozadju
+            setInterval(function() {
                 hookPlayerObject();
-                var vids = document.querySelectorAll('video');
-                for (var v = 0; v < vids.length; v++) {
-                    var vid = vids[v];
-                    if (!userExplicitlyPaused && vid.paused && !vid.ended && isFinite(vid.duration) && vid.currentTime > 0) {
-                        try {
-                            origPlay.call(vid).catch(function(){});
-                        } catch(e) {}
-                    }
+                var video = document.querySelector('video');
+                if (video && video.paused && !video.ended && !userExplicitlyPaused && video.readyState >= 2) {
+                    video.play().catch(function() {});
                 }
-            }
-
-            setInterval(ensureAudioPlaying, 300);
+            }, 500);
         })();
     """
 

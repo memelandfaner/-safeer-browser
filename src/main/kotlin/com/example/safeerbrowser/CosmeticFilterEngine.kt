@@ -42,6 +42,11 @@ object CosmeticFilterEngine {
         "ytm-mobile-topbar-renderer [aria-label*='Odpri']", "ytm-mobile-topbar-renderer [aria-label*='Open']",
         "a[href*='app_redirect']", "a[href*='open_in_app']", "button[title*='Odpri']", "button[title*='Open']",
 
+        // 🎵 YouTube Mix / Playlist Obstructing Popup Overlays & Dimming Backdrops (Bugfix)
+        ".engagement-panel-backdrop", "ytm-bottom-sheet-renderer.backdrop",
+        "ytm-engagement-panel-section-list-renderer[target-id='engagement-panel-playlist-panel']",
+        "ytm-engagement-panel-section-list-renderer .engagement-panel-header-container",
+
         // 🎬 In-Video Preroll & Streaming Ad Overlays (Pornhub, HTML5, Casino)
         ".mgp_adOverlay", ".mgp_adSkip", ".mgp_adMarker", ".mgp_commercial", ".mgp_adContainer",
         ".mgp_adPlaying", ".adBlockContainer", "div[class*='adOverlay']", "div[class*='adSkip']",
