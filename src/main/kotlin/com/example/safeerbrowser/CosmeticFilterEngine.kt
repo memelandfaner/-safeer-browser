@@ -52,14 +52,10 @@ object CosmeticFilterEngine {
         "ytm-fullscreen-engagement-overlay-renderer", "ytm-companion-ad-renderer",
         "ytm-promoted-sparkles-web-renderer", "ytm-paid-content-overlay-renderer",
 
-        // 🎬 In-Video Preroll & Streaming Ad Overlays (Pornhub, HTML5, Casino)
-        ".mgp_adOverlay", ".mgp_adSkip", ".mgp_adMarker", ".mgp_commercial", ".mgp_adContainer",
-        ".mgp_adPlaying", ".adBlockContainer", "div[class*='adOverlay']", "div[class*='adSkip']",
-        ".mgp_skipAdButton", "a[class*='adLink']", "div[class*='adInformation']", ".adInformation",
-        "div[class*='mgp_ad']", ".removeAds", "a[href*='casino']", ".topAd", ".bottomAd",
-        ".wideBanner", ".underPlayerAd", ".commercial-unit", ".ad-zone", ".player-ad",
-        "[class*='ad-banner']", "[class*='player-advertisement']", "[id*='player-advertisement']",
-        ".ad-banner-overlay", ".jw-ad-container", ".plyr__ad", ".vjs-ad", ".video-ad-overlay",
+        // 🎬 Oglasni bannerji in zunanji oglasni elementi (brez vpliva na sam video predvajalnik)
+        ".removeAds", "a[href*='casino']", ".topAd", ".bottomAd", ".wideBanner", ".underPlayerAd",
+        ".commercial-unit", ".ad-zone", "[class*='ad-banner']", ".ad-banner-overlay",
+        ".jw-ad-container", ".plyr__ad", ".vjs-ad", ".video-ad-overlay",
         
         // AdBlock opozorila in prekrivna okna
         ".fc-ab-root", ".adblock-overlay", "#adblock-modal", ".ad-block-warning"
@@ -82,6 +78,11 @@ object CosmeticFilterEngine {
                 pointer-events: none !important;
                 position: absolute !important;
                 left: -9999px !important;
+            }
+            video, audio, #player, #playerContainer, #player-container, .mgp_container, .mgp_player, .html5-video-player, .video-stream {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
             }
         """.trimIndent()
     }

@@ -26,132 +26,68 @@ object UserScriptManager {
                 };
             } catch(e) {}
 
-            // 🚫 2. Zaščita pred ugrabitvijo top.location iz vdelanih okvirjev (iframes)
-            try {
-                if (window.top !== window.self) {
-                    Object.defineProperty(window, 'top', {
-                        get: function() { return window.self; },
-                        set: function() {},
-                        configurable: true
-                    });
-                    Object.defineProperty(window, 'parent', {
-                        get: function() { return window.self; },
-                        set: function() {},
-                        configurable: true
-                    });
-                }
-            } catch(e) {}
+            function isPlayerElement(el) {
+                if (!el || el.nodeType !== 1) return true;
+                var tag = (el.tagName || '').toUpperCase();
+                if (tag === 'VIDEO' || tag === 'AUDIO' || tag === 'SOURCE' || tag === 'TRACK') return true;
+                if (el.querySelector && el.querySelector('video, audio')) return true;
+                if (el.closest && el.closest('#player, #playerContainer, #player-container, #movie_player, .mgp_container, .mgp_player, .html5-video-player, .video-player, .jwplayer, .plyr, .vjs-tech, .video-stream, .player')) return true;
+                return false;
+            }
 
-            // 🚫 3. Samodejno odstranjevanje lažnih opozoril, vsiljenih modalov in video oglasnih prekrivk
+            // 🚫 2. Samodejno odstranjevanje lažnih opozoril, vsiljenih modalov in bannerjev (brez vpliva na predvajalnik)
             function cleanAllAdOverlays() {
                 try {
                     var adSelectors = [
                         '.reward-zone', '#reward-zone', '.fc-ab-root', '.adblock-overlay', '#adblock-modal',
                         '[class*="dating-popup"]', '[id*="dating-popup"]', '[class*="fake-download"]',
                         '.download-button-ad', 'div[class*="download-arrow"]',
-                        '.mgp_adOverlay', '.mgp_adSkip', '.mgp_adMarker', '.mgp_commercial',
-                        '.adBlockContainer', 'div[class*="adSkip"]',
-                        '.mgp_skipAdButton', 'a[class*="adLink"]', 'div[class*="adInformation"]', '.adInformation',
-                        'div[class*="mgp_ad"]', '.removeAds', 'a[href*="casino"]', '.topAd', '.bottomAd',
+                        '.removeAds', 'a[href*="casino"]', '.topAd', '.bottomAd',
                         '.wideBanner', '.underPlayerAd', '.commercial-unit', '.ad-zone',
-                        '[class*="ad-banner"]', '[class*="player-advertisement"]', '[id*="player-advertisement"]',
-                        '.ad-banner-overlay', '.jw-ad-container', '.plyr__ad', '.vjs-ad', '.video-ad-overlay'
+                        '.ad-banner-overlay', '.jw-ad-container', '.plyr__ad', '.vjs-ad'
                     ].join(', ');
                     
                     var adElements = document.querySelectorAll(adSelectors);
-                    adElements.forEach(function(el) {
-                        try { el.remove(); } catch(e) {}
-                    });
+                    for (var i = 0; i < adElements.length; i++) {
+                        var el = adElements[i];
+                        if (!isPlayerElement(el)) {
+                            try { el.remove(); } catch(e) {}
+                        }
+                    }
 
                     // Odstrani lažna sistemska opozorila (baterija poškodovana, virus zaznan)
                     var dialogs = document.querySelectorAll('[role="dialog"], [role="alertdialog"], .modal, .popup');
-                    for (var i = 0; i < dialogs.length; i++) {
-                        var d = dialogs[i];
-                        var txt = (d.innerText || d.textContent || '').trim().toLowerCase();
+                    for (var d = 0; d < dialogs.length; d++) {
+                        var dlg = dialogs[d];
+                        if (isPlayerElement(dlg)) continue;
+                        var txt = (dlg.innerText || dlg.textContent || '').trim().toLowerCase();
                         if (txt.includes('battery damaged') || txt.includes('virus detected') || 
                             txt.includes('vpn recommended') || txt.includes('whatsapp za seks') ||
                             (txt.includes('disable your ad blocker') && txt.includes('disable'))) {
-                            try { d.remove(); } catch(e) {}
+                            try { dlg.remove(); } catch(e) {}
                         }
-                    }
-
-                    // Odstrani oglasne iframe okvirje (srcdoc ali lebdeče overlay iframe-e)
-                    var iframes = document.querySelectorAll('iframe');
-                    for (var k = 0; k < iframes.length; k++) {
-                        var ifr = iframes[k];
-                        var src = (ifr.getAttribute('src') || ifr.src || '').toLowerCase();
-                        var srcdoc = ifr.getAttribute('srcdoc');
-                        var isFixed = false;
-                        try {
-                            var ifStyle = window.getComputedStyle(ifr);
-                            if (ifStyle.position === 'fixed' || (ifStyle.position === 'absolute' && parseInt(ifStyle.zIndex, 10) > 20)) {
-                                isFixed = true;
-                            }
-                        } catch(e) {}
-
-                        if (srcdoc != null || src.includes('srcdoc') || (isFixed && !src.includes('embed') && !src.includes('player') && !src.includes('streamex') && !src.includes('vidgod'))) {
-                            ifr.remove();
-                        }
-                    }
-
-                    // Odstrani nevidne prekrivne plasti (Invisible Click-Jacking Overlays)
-                    var allFixed = document.querySelectorAll('div, a, span, button');
-                    var winW = window.innerWidth || 1000;
-                    var winH = window.innerHeight || 800;
-                    for (var j = 0; j < allFixed.length; j++) {
-                        var fx = allFixed[j];
-                        try {
-                            var style = window.getComputedStyle(fx);
-                            if (style.position === 'fixed' || style.position === 'absolute') {
-                                var z = parseInt(style.zIndex, 10) || 0;
-                                var op = parseFloat(style.opacity);
-                                var rect = fx.getBoundingClientRect();
-                                if (z >= 99 && (op === 0 || style.visibility === 'hidden') && rect.width >= winW * 0.5 && rect.height >= winH * 0.5) {
-                                    if (fx.querySelectorAll('video, iframe, form').length === 0) {
-                                        fx.remove();
-                                    }
-                                }
-                            }
-                        } catch(e) {}
                     }
                 } catch(e) {}
             }
 
-            // ⚡ 4. Samodejno preskakovanje video oglasov (Instant Video Ad Skipper)
+            // ⚡ 3. Samodejno preskakovanje video oglasov
             function autoSkipVideoAds() {
                 try {
-                    // Klikni gumb za preskok oglasa takoj ko se pojavi
                     var skipButtons = document.querySelectorAll(
                         '.videoAdUiSkipButton, .mgp_skipAdButton, .mgp_adSkip, [class*="skipAd"], ' +
                         '[class*="SkipAd"], [class*="adSkip"], [class*="ad-skip"], .video-ad-skip, ' +
                         'button[class*="skip-ad"], .skip-button, .ad-skip-button'
                     );
-                    skipButtons.forEach(function(btn) {
+                    for (var s = 0; s < skipButtons.length; s++) {
+                        var btn = skipButtons[s];
                         if (btn && (btn.offsetWidth > 0 || btn.offsetHeight > 0)) {
                             try { btn.click(); } catch(_) {}
-                        }
-                    });
-
-                    // Če teče oglasni video posnetek na spletnih straneh (NE na YouTube, kjer deluje namenski YouTube Freedom)
-                    if (location.hostname.indexOf('youtube.com') === -1) {
-                        var isAdActive = document.querySelector('.mgp_adPlaying, [class*="adPlaying"]');
-                        if (isAdActive) {
-                            var adVideos = document.querySelectorAll('.mgp_adContainer video, .ad-container video, video.ad-video');
-                            adVideos.forEach(function(v) {
-                                if (v && !v.paused) {
-                                    if (isFinite(v.duration) && v.duration > 0) {
-                                        try { v.currentTime = v.duration; } catch(_) {}
-                                    }
-                                    try { v.playbackRate = 16.0; } catch(_) {}
-                                    try { v.muted = true; } catch(_) {}
-                                }
-                            });
                         }
                     }
                 } catch(e) {}
             }
 
-            // 🚫 5. Blokada klikov na zunanje oglasne povezave
+            // 🚫 4. Blokada klikov na zunanje oglasne povezave
             document.addEventListener('click', function(e) {
                 var target = e.target;
                 var a = target.closest ? target.closest('a') : null;
@@ -176,7 +112,7 @@ object UserScriptManager {
             setInterval(function() {
                 cleanAllAdOverlays();
                 autoSkipVideoAds();
-            }, 200);
+            }, 500);
 
             var observer = new MutationObserver(function() {
                 cleanAllAdOverlays();
@@ -445,88 +381,11 @@ object UserScriptManager {
                 })(stopEvents[i]);
             }
 
-            var origPause = HTMLMediaElement.prototype.pause;
-            var origPlay = HTMLMediaElement.prototype.play;
-
-            var lastUserInteractionTime = Date.now();
-            var userExplicitlyPaused = false;
-            var lastBgHref = location.href;
-
-            var userActionEvents = ['click', 'touchstart', 'touchend', 'pointerdown', 'pointerup', 'keydown'];
-            for (var u = 0; u < userActionEvents.length; u++) {
-                window.addEventListener(userActionEvents[u], function() {
-                    lastUserInteractionTime = Date.now();
-                }, true);
-            }
-
-            HTMLMediaElement.prototype.pause = function() {
-                var elapsed = Date.now() - lastUserInteractionTime;
-                // Če se menja pesem ali je video končan, dovoli naravno pavzo za zagon nove skladbe
-                if (location.href !== lastBgHref || this.ended || this.readyState < 2 || (isFinite(this.duration) && this.duration > 0 && Math.abs(this.currentTime - this.duration) < 1.0)) {
-                    lastBgHref = location.href;
-                    return origPause.apply(this, arguments);
-                }
-                // Če je pavza sprožena brez neposrednega klika uporabnika, jo ignoriraj za predvajanje v ozadju
-                if (elapsed > 800) {
-                    return;
-                }
-                userExplicitlyPaused = true;
-                return origPause.apply(this, arguments);
-            };
-
-            HTMLMediaElement.prototype.play = function() {
-                userExplicitlyPaused = false;
-                lastBgHref = location.href;
-                return origPlay.apply(this, arguments);
-            };
-
-            function hookPlayerObject() {
-                var player = document.getElementById('movie_player') || document.querySelector('.html5-video-player');
-                if (player && !player._safeer_bg_hooked) {
-                    player._safeer_bg_hooked = true;
-                    var origPauseVideo = player.pauseVideo;
-                    if (typeof origPauseVideo === 'function') {
-                        player.pauseVideo = function() {
-                            var elapsed = Date.now() - lastUserInteractionTime;
-                            var v = document.querySelector('video');
-                            if (location.href !== lastBgHref || (v && (v.ended || v.readyState < 2 || (isFinite(v.duration) && v.duration > 0 && Math.abs(v.currentTime - v.duration) < 1.0)))) {
-                                lastBgHref = location.href;
-                                return origPauseVideo.apply(this, arguments);
-                            }
-                            if (elapsed > 800) {
-                                return;
-                            }
-                            userExplicitlyPaused = true;
-                            return origPauseVideo.apply(this, arguments);
-                        };
-                    }
-                }
-            }
-
             if ('mediaSession' in navigator) {
                 try {
                     navigator.mediaSession.playbackState = 'playing';
-                    navigator.mediaSession.setActionHandler('pause', function() {
-                        userExplicitlyPaused = true;
-                        var v = document.querySelector('video');
-                        if (v) origPause.call(v);
-                    });
-                    navigator.mediaSession.setActionHandler('play', function() {
-                        userExplicitlyPaused = false;
-                        var v = document.querySelector('video');
-                        if (v) origPlay.call(v);
-                    });
                 } catch(e) {}
             }
-
-            // Stalni nadzornik za neprekinjeno predvajanje v ozadju
-            setInterval(function() {
-                hookPlayerObject();
-                var video = document.querySelector('video');
-                if (video && video.paused && !video.ended && !userExplicitlyPaused && video.readyState >= 2) {
-                    video.play().catch(function() {});
-                }
-            }, 500);
         })();
     """
 

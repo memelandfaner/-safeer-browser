@@ -56,6 +56,9 @@ class ChromiumEngineView @JvmOverloads constructor(
 
     private fun setupSettings() {
         setLayerType(View.LAYER_TYPE_HARDWARE, null)
+        try {
+            WebView.setWebContentsDebuggingEnabled(true)
+        } catch (_: Exception) {}
 
         // 🔊 100% Native Strojni Vklop Zvoka (Unmute STREAM_MUSIC)
         try {
