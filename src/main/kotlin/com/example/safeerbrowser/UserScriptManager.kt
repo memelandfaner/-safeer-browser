@@ -451,6 +451,25 @@ object UserScriptManager {
                     v.setAttribute('playsinline', 'true');
                     v.setAttribute('webkit-playsinline', 'true');
 
+                    function clearBufferingOverlay() {
+                        try {
+                            var c = v.closest('.mgp_container') || document.querySelector('.mgp_container');
+                            if (c) {
+                                c.classList.remove('mgp_bufferingState', 'mgp_adRollReady', 'mgp_prerollState');
+                                c.classList.add('mgp_playingState');
+                            }
+                        } catch(_) {}
+                    }
+
+                    if (!v._safeer_events_bound) {
+                        v._safeer_events_bound = true;
+                        v.addEventListener('playing', clearBufferingOverlay);
+                        v.addEventListener('timeupdate', function() {
+                            if (v.currentTime > 0) clearBufferingOverlay();
+                        });
+                        v.addEventListener('loadeddata', clearBufferingOverlay);
+                    }
+
                     if ((!v.src && !v.currentSrc) || v.readyState === 0) {
                         var fvKey = Object.keys(window).find(function(key) { return key.startsWith('flashvars_'); });
                         if (fvKey && window[fvKey] && window[fvKey].mediaDefinitions) {
@@ -466,12 +485,14 @@ object UserScriptManager {
                                         hls.on(window.Hls.Events.MANIFEST_PARSED, function() {
                                             var p = v.play();
                                             if (p !== undefined) p.catch(function() {});
+                                            clearBufferingOverlay();
                                         });
                                     }
                                 } else {
                                     v.src = media.videoUrl;
                                     var p = v.play();
                                     if (p !== undefined) p.catch(function() {});
+                                    clearBufferingOverlay();
                                 }
                             }
                         }
@@ -480,6 +501,10 @@ object UserScriptManager {
                     if (v.paused && !v._safeer_user_paused && (v.readyState >= 1 || v.src || v.currentSrc)) {
                         var p = v.play();
                         if (p !== undefined) p.catch(function() {});
+                    }
+
+                    if (!v.paused && v.currentTime > 0) {
+                        clearBufferingOverlay();
                     }
 
                     if (window.MGP && window.MGP.players) {

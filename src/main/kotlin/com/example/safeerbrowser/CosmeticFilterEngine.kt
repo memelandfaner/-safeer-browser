@@ -84,6 +84,13 @@ object CosmeticFilterEngine {
                 visibility: visible !important;
                 opacity: 1 !important;
             }
+            .mgp_container.mgp_playingState .mgp_loadingSpinner,
+            .mgp_container.mgp_playingState .mgp_bufferingState,
+            .mgp_container.mgp_playingState::after {
+                display: none !important;
+                opacity: 0 !important;
+                visibility: hidden !important;
+            }
         """.trimIndent()
     }
 
