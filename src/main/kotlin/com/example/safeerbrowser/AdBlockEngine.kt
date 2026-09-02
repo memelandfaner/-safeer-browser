@@ -163,14 +163,19 @@ object AdBlockEngine {
             blockedAdsCount.incrementAndGet()
             onAdBlocked?.invoke()
 
-            val isJson = lower.endsWith(".json") || lower.contains("json") ||
+            val isXml = lower.endsWith(".xml") || lower.contains("xml") ||
+                        lower.contains("vast") || lower.contains("vmap") ||
+                        lower.contains("/delivery/") || lower.contains("/adtag")
+
+            val isJson = !isXml && (lower.endsWith(".json") || lower.contains("json") ||
                          lower.contains("/pagead/") || lower.contains("/api/stats/ads") ||
-                         lower.contains("get_midroll_info")
+                         lower.contains("get_midroll_info"))
 
             val mime = when {
+                isXml -> "application/xml"
                 isJson -> "application/json"
-                lower.endsWith(".js") -> "application/javascript"
-                lower.endsWith(".css") -> "text/css"
+                lower.endsWith(".js") || lower.contains(".js?") -> "application/javascript"
+                lower.endsWith(".css") || lower.contains(".css?") -> "text/css"
                 lower.endsWith(".png") -> "image/png"
                 lower.endsWith(".jpg") || lower.endsWith(".jpeg") -> "image/jpeg"
                 lower.endsWith(".gif") -> "image/gif"
@@ -179,10 +184,11 @@ object AdBlockEngine {
                 else -> "text/plain"
             }
 
-            val contentBytes = if (isJson) {
-                "{\"adPlacements\":[],\"status\":\"ok\"}".toByteArray(Charsets.UTF_8)
-            } else {
-                ByteArray(0)
+            val contentBytes = when {
+                isXml -> "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<VAST version=\"3.0\"/>".toByteArray(Charsets.UTF_8)
+                isJson -> "{\"adPlacements\":[],\"ads\":[],\"status\":\"ok\"}".toByteArray(Charsets.UTF_8)
+                lower.endsWith(".js") || lower.contains(".js?") -> "// Safeer AdBlock Neutralized\n".toByteArray(Charsets.UTF_8)
+                else -> ByteArray(0)
             }
 
             return WebResourceResponse(

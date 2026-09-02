@@ -392,7 +392,7 @@ object UserScriptManager {
     private const val MOBILE_MEDIA_AUDIO_JS = """
         (function() {
             try {
-                var vids = document.querySelectorAll('video, audio');
+                var vids = document.querySelectorAll('video');
                 for (var i = 0; i < vids.length; i++) {
                     var v = vids[i];
                     v.muted = false;
@@ -400,6 +400,17 @@ object UserScriptManager {
                     v.volume = 1.0;
                     v.setAttribute('playsinline', 'true');
                     v.setAttribute('webkit-playsinline', 'true');
+                    if (v.paused && !v._safeer_user_paused && v.readyState >= 1) {
+                        var p = v.play();
+                        if (p !== undefined) p.catch(function() {});
+                    }
+                }
+                var playBtns = document.querySelectorAll('.mgp_play, .mgp_centerPlay, .vjs-big-play-button, .plyr__control--overlaid, .jw-display-icon-container');
+                for (var b = 0; b < playBtns.length; b++) {
+                    var btn = playBtns[b];
+                    if (btn && (btn.offsetWidth > 0 || btn.offsetHeight > 0)) {
+                        try { btn.click(); } catch(_) {}
+                    }
                 }
             } catch(e) {}
         })();
