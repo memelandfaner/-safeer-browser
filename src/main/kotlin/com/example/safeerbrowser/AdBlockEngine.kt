@@ -28,6 +28,7 @@ object AdBlockEngine {
         "/pagead/", "/api/stats/ads", "/ptracking", "/get_midroll_info",
         "/ads.js", "/ad.js", "/adservice.", "/pixel.", "collect?v=",
         "/metrika", "/watch.js", "/tag.js", "/monetag/", "/popunder",
+        "/_xa/ads", "/_xa/", "justservingfiles.net", "delivery.trafficjunky",
         "disable-devtool", "devtools-detector"
     )
 

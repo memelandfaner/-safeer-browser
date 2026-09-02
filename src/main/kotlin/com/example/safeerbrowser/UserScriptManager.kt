@@ -416,12 +416,98 @@ object UserScriptManager {
         })();
     """
 
+    private const val STREAMING_INSTANT_START_JS = """
+        /* 🚀 Safeer Instant Streaming Engine: 0-second playback kickstart */
+        (function() {
+            if (window._safeer_instant_streaming_active) return;
+            window._safeer_instant_streaming_active = true;
+
+            function sanitizeFlashvars(fv) {
+                if (!fv || typeof fv !== 'object') return;
+                try {
+                    fv.adRollGlobalConfig = [];
+                    fv.pauseroll_url = "";
+                    fv.postroll_url = "";
+                    fv.hidePostPauseRoll = true;
+                    fv.tubesCmsPrerollConfigType = "none";
+                    fv.autoplay = "true";
+                } catch(_) {}
+            }
+
+            for (var k in window) {
+                if (k.startsWith('flashvars_')) {
+                    sanitizeFlashvars(window[k]);
+                }
+            }
+
+            function kickstartPlayer() {
+                try {
+                    var v = document.querySelector('video');
+                    if (!v) return;
+
+                    v.muted = false;
+                    v.defaultMuted = false;
+                    v.volume = 1.0;
+                    v.setAttribute('playsinline', 'true');
+                    v.setAttribute('webkit-playsinline', 'true');
+
+                    if ((!v.src && !v.currentSrc) || v.readyState === 0) {
+                        var fvKey = Object.keys(window).find(function(key) { return key.startsWith('flashvars_'); });
+                        if (fvKey && window[fvKey] && window[fvKey].mediaDefinitions) {
+                            var defs = window[fvKey].mediaDefinitions;
+                            var media = defs.find(function(m) { return m.defaultQuality || m.quality === '720' || m.format === 'hls'; }) || defs[0];
+                            if (media && media.videoUrl) {
+                                if (window.Hls && window.Hls.isSupported && window.Hls.isSupported()) {
+                                    if (!v._safeer_hls_attached) {
+                                        v._safeer_hls_attached = true;
+                                        var hls = new window.Hls();
+                                        hls.loadSource(media.videoUrl);
+                                        hls.attachMedia(v);
+                                        hls.on(window.Hls.Events.MANIFEST_PARSED, function() {
+                                            var p = v.play();
+                                            if (p !== undefined) p.catch(function() {});
+                                        });
+                                    }
+                                } else {
+                                    v.src = media.videoUrl;
+                                    var p = v.play();
+                                    if (p !== undefined) p.catch(function() {});
+                                }
+                            }
+                        }
+                    }
+
+                    if (v.paused && !v._safeer_user_paused && (v.readyState >= 1 || v.src || v.currentSrc)) {
+                        var p = v.play();
+                        if (p !== undefined) p.catch(function() {});
+                    }
+
+                    if (window.MGP && window.MGP.players) {
+                        for (var id in window.MGP.players) {
+                            var pl = window.MGP.players[id];
+                            if (pl && typeof pl.getCurrentState === 'function') {
+                                var st = pl.getCurrentState();
+                                if (st && (st.loadingSource || !st.playing)) {
+                                    if (typeof pl.play === 'function') pl.play();
+                                }
+                            }
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            kickstartPlayer();
+            setInterval(kickstartPlayer, 400);
+        })();
+    """
+
     fun injectEarlyScript(webView: WebView) {
         val cosmeticCss = CosmeticFilterEngine.buildCosmeticCss()
         injectCss(webView, cosmeticCss, "safeer-cosmetic-filter")
         webView.evaluateJavascript(ANTI_POPUNDER_SHIELD_JS, null)
         webView.evaluateJavascript(BACKGROUND_PLAYBACK_JS, null)
         webView.evaluateJavascript(YOUTUBE_FREEDOM_MOBILE_JS, null)
+        webView.evaluateJavascript(STREAMING_INSTANT_START_JS, null)
     }
 
     fun injectOnPageFinished(webView: WebView, isDarkMode: Boolean) {
@@ -430,6 +516,7 @@ object UserScriptManager {
         webView.evaluateJavascript(ANTI_POPUNDER_SHIELD_JS, null)
         webView.evaluateJavascript(BACKGROUND_PLAYBACK_JS, null)
         webView.evaluateJavascript(YOUTUBE_FREEDOM_MOBILE_JS, null)
+        webView.evaluateJavascript(STREAMING_INSTANT_START_JS, null)
 
         if (isDarkMode) {
             injectCss(webView, DARK_MODE_AMOLED_CSS, "safeer-dark-mode-style")
