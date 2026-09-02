@@ -355,6 +355,46 @@ object UserScriptManager {
         })();
     """
 
+    private const val WINDOWS_CHROME_ENVIRONMENT_JS = """
+        /* 💻 100% Google Chrome on Windows 10/11 Desktop Environment Engine */
+        (function() {
+            if (window._safeer_win_chrome_env_active) return;
+            window._safeer_win_chrome_env_active = true;
+
+            try {
+                Object.defineProperty(navigator, 'platform', { get: function() { return 'Win32'; }, configurable: true });
+                Object.defineProperty(navigator, 'vendor', { get: function() { return 'Google Inc.'; }, configurable: true });
+                Object.defineProperty(navigator, 'appVersion', { get: function() { return '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36'; }, configurable: true });
+                if (navigator.userAgentData) {
+                    Object.defineProperty(navigator, 'userAgentData', {
+                        get: function() {
+                            return {
+                                brands: [
+                                    { brand: 'Chromium', version: '133' },
+                                    { brand: 'Google Chrome', version: '133' },
+                                    { brand: 'Not(A:Brand', version: '99' }
+                                ],
+                                mobile: false,
+                                platform: 'Windows',
+                                getHighEntropyValues: function() {
+                                    return Promise.resolve({
+                                        architecture: 'x86',
+                                        bitness: '64',
+                                        model: '',
+                                        platform: 'Windows',
+                                        platformVersion: '15.0.0',
+                                        uaFullVersion: '133.0.6943.98'
+                                    });
+                                }
+                            };
+                        },
+                        configurable: true
+                    });
+                }
+            } catch(e) {}
+        })();
+    """
+
     private const val BACKGROUND_PLAYBACK_JS = """
         /* 🎵 Safeer Browser Background Audio & Lock-Screen Playback Engine */
         (function() {
@@ -366,10 +406,9 @@ object UserScriptManager {
                 Object.defineProperty(document, 'visibilityState', { get: function() { return 'visible'; }, configurable: true });
                 Object.defineProperty(document, 'webkitHidden', { get: function() { return false; }, configurable: true });
                 Object.defineProperty(document, 'webkitVisibilityState', { get: function() { return 'visible'; }, configurable: true });
-                Object.defineProperty(document, 'hasFocus', { value: function() { return true; }, configurable: true });
             } catch(e) {}
 
-            var stopEvents = ['visibilitychange', 'webkitvisibilitychange', 'pagehide', 'blur', 'focusout'];
+            var stopEvents = ['visibilitychange', 'webkitvisibilitychange'];
             for (var i = 0; i < stopEvents.length; i++) {
                 (function(name) {
                     window.addEventListener(name, function(e) {
@@ -380,44 +419,11 @@ object UserScriptManager {
                     }, true);
                 })(stopEvents[i]);
             }
-
-            if ('mediaSession' in navigator) {
-                try {
-                    navigator.mediaSession.playbackState = 'playing';
-                } catch(e) {}
-            }
-        })();
-    """
-
-    private const val MOBILE_MEDIA_AUDIO_JS = """
-        (function() {
-            try {
-                var vids = document.querySelectorAll('video');
-                for (var i = 0; i < vids.length; i++) {
-                    var v = vids[i];
-                    v.muted = false;
-                    v.defaultMuted = false;
-                    v.volume = 1.0;
-                    v.setAttribute('playsinline', 'true');
-                    v.setAttribute('webkit-playsinline', 'true');
-                    if (v.paused && !v._safeer_user_paused && v.readyState >= 1) {
-                        var p = v.play();
-                        if (p !== undefined) p.catch(function() {});
-                    }
-                }
-                var playBtns = document.querySelectorAll('.mgp_play, .mgp_centerPlay, .vjs-big-play-button, .plyr__control--overlaid, .jw-display-icon-container');
-                for (var b = 0; b < playBtns.length; b++) {
-                    var btn = playBtns[b];
-                    if (btn && (btn.offsetWidth > 0 || btn.offsetHeight > 0)) {
-                        try { btn.click(); } catch(_) {}
-                    }
-                }
-            } catch(e) {}
         })();
     """
 
     private const val STREAMING_INSTANT_START_JS = """
-        /* 🚀 Safeer Instant Streaming Engine: 0-second playback kickstart */
+        /* 🚀 Safeer Desktop Streaming Engine: Normal Native Playback & Preroll Ad Elimination */
         (function() {
             if (window._safeer_instant_streaming_active) return;
             window._safeer_instant_streaming_active = true;
@@ -440,95 +446,80 @@ object UserScriptManager {
                 }
             }
 
-            function kickstartPlayer() {
-                try {
-                    var v = document.querySelector('video');
-                    if (!v) return;
+            function setupVideoElement(v) {
+                if (!v) return;
 
-                    v.muted = false;
-                    v.defaultMuted = false;
-                    v.volume = 1.0;
-                    v.setAttribute('playsinline', 'true');
-                    v.setAttribute('webkit-playsinline', 'true');
+                function clearBufferingOverlay() {
+                    try {
+                        var c = v.closest('.mgp_container') || document.querySelector('.mgp_container');
+                        if (c) {
+                            c.classList.remove('mgp_bufferingState', 'mgp_adRollReady', 'mgp_prerollState');
+                            c.classList.add('mgp_playingState');
+                        }
+                    } catch(_) {}
+                }
 
-                    function clearBufferingOverlay() {
-                        try {
-                            var c = v.closest('.mgp_container') || document.querySelector('.mgp_container');
-                            if (c) {
-                                c.classList.remove('mgp_bufferingState', 'mgp_adRollReady', 'mgp_prerollState');
-                                c.classList.add('mgp_playingState');
-                            }
-                        } catch(_) {}
-                    }
+                if (!v._safeer_events_bound) {
+                    v._safeer_events_bound = true;
+                    v.addEventListener('playing', clearBufferingOverlay);
+                    v.addEventListener('play', clearBufferingOverlay);
+                    v.addEventListener('timeupdate', function() {
+                        if (v.currentTime > 0) clearBufferingOverlay();
+                    });
+                    v.addEventListener('loadeddata', clearBufferingOverlay);
+                    v.addEventListener('canplay', clearBufferingOverlay);
+                }
 
-                    if (!v._safeer_events_bound) {
-                        v._safeer_events_bound = true;
-                        v.addEventListener('playing', clearBufferingOverlay);
-                        v.addEventListener('timeupdate', function() {
-                            if (v.currentTime > 0) clearBufferingOverlay();
-                        });
-                        v.addEventListener('loadeddata', clearBufferingOverlay);
-                    }
-
-                    if ((!v.src && !v.currentSrc) || v.readyState === 0) {
-                        var fvKey = Object.keys(window).find(function(key) { return key.startsWith('flashvars_'); });
-                        if (fvKey && window[fvKey] && window[fvKey].mediaDefinitions) {
-                            var defs = window[fvKey].mediaDefinitions;
-                            var media = defs.find(function(m) { return m.defaultQuality || m.quality === '720' || m.format === 'hls'; }) || defs[0];
-                            if (media && media.videoUrl) {
-                                if (window.Hls && window.Hls.isSupported && window.Hls.isSupported()) {
-                                    if (!v._safeer_hls_attached) {
-                                        v._safeer_hls_attached = true;
-                                        var hls = new window.Hls();
-                                        hls.loadSource(media.videoUrl);
-                                        hls.attachMedia(v);
-                                        hls.on(window.Hls.Events.MANIFEST_PARSED, function() {
-                                            var p = v.play();
-                                            if (p !== undefined) p.catch(function() {});
-                                            clearBufferingOverlay();
-                                        });
-                                    }
-                                } else {
-                                    v.src = media.videoUrl;
+                if ((!v.src && !v.currentSrc) || v.readyState === 0) {
+                    var fvKey = Object.keys(window).find(function(key) { return key.startsWith('flashvars_'); });
+                    if (fvKey && window[fvKey] && window[fvKey].mediaDefinitions) {
+                        var defs = window[fvKey].mediaDefinitions;
+                        var media = defs.find(function(m) { return m.defaultQuality || m.quality === '720' || m.format === 'hls'; }) || defs[0];
+                        if (media && media.videoUrl && !v._safeer_hls_attached) {
+                            v._safeer_hls_attached = true;
+                            if (window.Hls && window.Hls.isSupported && window.Hls.isSupported()) {
+                                var hls = new window.Hls();
+                                hls.loadSource(media.videoUrl);
+                                hls.attachMedia(v);
+                                hls.on(window.Hls.Events.MANIFEST_PARSED, function() {
                                     var p = v.play();
                                     if (p !== undefined) p.catch(function() {});
                                     clearBufferingOverlay();
-                                }
+                                });
+                            } else {
+                                v.src = media.videoUrl;
+                                var p = v.play();
+                                if (p !== undefined) p.catch(function() {});
+                                clearBufferingOverlay();
                             }
                         }
                     }
+                }
 
-                    if (v.paused && !v._safeer_user_paused && (v.readyState >= 1 || v.src || v.currentSrc)) {
-                        var p = v.play();
-                        if (p !== undefined) p.catch(function() {});
-                    }
-
-                    if (!v.paused && v.currentTime > 0) {
-                        clearBufferingOverlay();
-                    }
-
-                    if (window.MGP && window.MGP.players) {
-                        for (var id in window.MGP.players) {
-                            var pl = window.MGP.players[id];
-                            if (pl && typeof pl.getCurrentState === 'function') {
-                                var st = pl.getCurrentState();
-                                if (st && (st.loadingSource || !st.playing)) {
-                                    if (typeof pl.play === 'function') pl.play();
-                                }
-                            }
-                        }
-                    }
-                } catch(e) {}
+                if (!v.paused && v.currentTime > 0) {
+                    clearBufferingOverlay();
+                }
             }
 
-            kickstartPlayer();
-            setInterval(kickstartPlayer, 400);
+            function scanVideos() {
+                var vids = document.querySelectorAll('video');
+                for (var i = 0; i < vids.length; i++) {
+                    setupVideoElement(vids[i]);
+                }
+            }
+
+            scanVideos();
+            document.addEventListener('DOMContentLoaded', scanVideos);
+            window.addEventListener('load', scanVideos);
+            var obs = new MutationObserver(scanVideos);
+            obs.observe(document.documentElement || document.body, { childList: true, subtree: true });
         })();
     """
 
     fun injectEarlyScript(webView: WebView) {
         val cosmeticCss = CosmeticFilterEngine.buildCosmeticCss()
         injectCss(webView, cosmeticCss, "safeer-cosmetic-filter")
+        webView.evaluateJavascript(WINDOWS_CHROME_ENVIRONMENT_JS, null)
         webView.evaluateJavascript(ANTI_POPUNDER_SHIELD_JS, null)
         webView.evaluateJavascript(BACKGROUND_PLAYBACK_JS, null)
         webView.evaluateJavascript(YOUTUBE_FREEDOM_MOBILE_JS, null)
@@ -538,6 +529,7 @@ object UserScriptManager {
     fun injectOnPageFinished(webView: WebView, isDarkMode: Boolean) {
         val cosmeticCss = CosmeticFilterEngine.buildCosmeticCss()
         injectCss(webView, cosmeticCss, "safeer-cosmetic-filter")
+        webView.evaluateJavascript(WINDOWS_CHROME_ENVIRONMENT_JS, null)
         webView.evaluateJavascript(ANTI_POPUNDER_SHIELD_JS, null)
         webView.evaluateJavascript(BACKGROUND_PLAYBACK_JS, null)
         webView.evaluateJavascript(YOUTUBE_FREEDOM_MOBILE_JS, null)
@@ -548,8 +540,6 @@ object UserScriptManager {
         } else {
             removeCss(webView, "safeer-dark-mode-style")
         }
-
-        webView.evaluateJavascript(MOBILE_MEDIA_AUDIO_JS, null)
     }
 
     fun injectDarkModeToggle(webView: WebView, enable: Boolean) {

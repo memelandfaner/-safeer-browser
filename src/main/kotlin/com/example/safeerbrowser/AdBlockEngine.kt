@@ -28,7 +28,8 @@ object AdBlockEngine {
         "/pagead/", "/api/stats/ads", "/ptracking", "/get_midroll_info",
         "/ads.js", "/ad.js", "/adservice.", "/pixel.", "collect?v=",
         "/metrika", "/watch.js", "/tag.js", "/monetag/", "/popunder",
-        "/_xa/ads", "/_xa/", "justservingfiles.net", "delivery.trafficjunky",
+        "/_xa/ads", "/_xa/", "justservingfiles.net", "etahub.com",
+        "delivery.trafficjunky", "trafficjunky", "tsyndicate",
         "disable-devtool", "devtools-detector"
     )
 
@@ -164,13 +165,16 @@ object AdBlockEngine {
             blockedAdsCount.incrementAndGet()
             onAdBlocked?.invoke()
 
-            val isXml = lower.endsWith(".xml") || lower.contains("xml") ||
+            val isXml = (lower.endsWith(".xml") || lower.contains("xml") ||
                         lower.contains("vast") || lower.contains("vmap") ||
-                        lower.contains("/delivery/") || lower.contains("/adtag")
+                        lower.contains("/delivery/") || lower.contains("/adtag")) &&
+                        !lower.contains("_xa") && !lower.contains("json")
 
             val isJson = !isXml && (lower.endsWith(".json") || lower.contains("json") ||
                          lower.contains("/pagead/") || lower.contains("/api/stats/ads") ||
-                         lower.contains("get_midroll_info"))
+                         lower.contains("get_midroll_info") || lower.contains("/_xa/") ||
+                         lower.contains("ads_batch") || lower.contains("/ads?") ||
+                         lower.contains("trafficjunky"))
 
             val mime = when {
                 isXml -> "application/xml"
@@ -187,7 +191,7 @@ object AdBlockEngine {
 
             val contentBytes = when {
                 isXml -> "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<VAST version=\"3.0\"/>".toByteArray(Charsets.UTF_8)
-                isJson -> "{\"adPlacements\":[],\"ads\":[],\"status\":\"ok\"}".toByteArray(Charsets.UTF_8)
+                isJson -> "{\"adPlacements\":[],\"ads\":[],\"adsBatch\":{},\"status\":\"ok\",\"success\":true}".toByteArray(Charsets.UTF_8)
                 lower.endsWith(".js") || lower.contains(".js?") -> "// Safeer AdBlock Neutralized\n".toByteArray(Charsets.UTF_8)
                 else -> ByteArray(0)
             }

@@ -24,7 +24,7 @@ class ChromiumEngineView @JvmOverloads constructor(
         const val DESKTOP_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
     }
 
-    var isDesktopMode: Boolean = false
+    var isDesktopMode: Boolean = true
         set(value) {
             field = value
             settings.userAgentString = if (value) DESKTOP_USER_AGENT else MOBILE_USER_AGENT
@@ -98,7 +98,7 @@ class ChromiumEngineView @JvmOverloads constructor(
             loadWithOverviewMode = isDesktopMode
             
             cacheMode = WebSettings.LOAD_DEFAULT
-            userAgentString = MOBILE_USER_AGENT
+            userAgentString = if (isDesktopMode) DESKTOP_USER_AGENT else MOBILE_USER_AGENT
         }
 
         addJavascriptInterface(SafeerWebAppInterface(context, this), "SafeerBridge")
