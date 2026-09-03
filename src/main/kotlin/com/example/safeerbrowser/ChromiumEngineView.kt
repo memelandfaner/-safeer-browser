@@ -24,7 +24,7 @@ class ChromiumEngineView @JvmOverloads constructor(
         const val DESKTOP_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
     }
 
-    var isDesktopMode: Boolean = true
+    var isDesktopMode: Boolean = false
         set(value) {
             field = value
             settings.userAgentString = if (value) DESKTOP_USER_AGENT else MOBILE_USER_AGENT
@@ -120,8 +120,97 @@ class ChromiumEngineView @JvmOverloads constructor(
         @android.webkit.JavascriptInterface
         fun navigate(url: String) {
             (context as? android.app.Activity)?.runOnUiThread {
-                webView.loadUrl(url)
+                (webView as? ChromiumEngineView)?.navigateDocument(url) ?: webView.loadUrl(url)
             }
+        }
+    }
+
+    /**
+     * Odpri URL kot nov dokument. Na YouTube nikoli ne uporabi location.replace —
+     * SPA sicer obdrži stari predvajalnik in predvaja napačen video.
+     */
+    fun navigateDocument(url: String) {
+        val target = normalizeExternalUrl(url)
+        stopLoading()
+        evaluateJavascript(
+            """
+            (function(){
+                try { window._safeer_yt_agent_installed = false; } catch (e1) {}
+                try {
+                    var media = document.querySelectorAll('video,audio');
+                    for (var i = 0; i < media.length; i++) {
+                        try { media[i].pause(); media[i].removeAttribute('src'); media[i].src = ''; media[i].load(); } catch (e2) {}
+                    }
+                } catch (e3) {}
+            })();
+            """.trimIndent(),
+            null
+        )
+        post {
+            val current = this.url ?: ""
+            val currentId = youtubeVideoId(current)
+            val targetId = youtubeVideoId(target)
+            val sameWatch = !currentId.isNullOrEmpty() && currentId == targetId &&
+                youtubeListId(current) == youtubeListId(target) &&
+                current.contains("youtube", ignoreCase = true)
+            if (sameWatch) {
+                reload()
+            } else {
+                loadUrl(target)
+            }
+        }
+    }
+
+    private fun normalizeExternalUrl(url: String): String {
+        return try {
+            val uri = Uri.parse(url)
+            val host = uri.host?.lowercase() ?: return url
+            val isYt = host.contains("youtube.com") || host.contains("youtu.be")
+            if (!isYt) return url
+            val path = uri.path ?: ""
+            val shortsMatch = Regex("/shorts/([A-Za-z0-9_-]{6,})").find(path)
+            val videoId = when {
+                host.contains("youtu.be") -> path.trim('/').substringBefore('/')
+                !uri.getQueryParameter("v").isNullOrEmpty() -> uri.getQueryParameter("v")
+                shortsMatch != null -> shortsMatch.groupValues[1]
+                else -> null
+            }
+            if (videoId.isNullOrEmpty()) return url
+            val base = if (isDesktopMode) "https://www.youtube.com" else "https://m.youtube.com"
+            if (path.contains("/shorts/") && shortsMatch != null) {
+                return "$base/shorts/$videoId"
+            }
+            val b = Uri.parse("$base/watch?v=$videoId").buildUpon()
+            for (key in listOf("list", "start_radio", "index", "t", "time_continue", "radio", "pp", "playnext")) {
+                val value = uri.getQueryParameter(key)
+                if (!value.isNullOrEmpty()) b.appendQueryParameter(key, value)
+            }
+            b.build().toString()
+        } catch (_: Exception) {
+            url
+        }
+    }
+
+    private fun youtubeListId(url: String): String? {
+        return try {
+            Uri.parse(url).getQueryParameter("list")
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun youtubeVideoId(url: String): String? {
+        return try {
+            val uri = Uri.parse(url)
+            val host = uri.host?.lowercase() ?: return null
+            if (host.contains("youtu.be")) {
+                uri.path?.trim('/')?.substringBefore('/')?.takeIf { it.length >= 6 }
+            } else {
+                uri.getQueryParameter("v")
+                    ?: Regex("/shorts/([A-Za-z0-9_-]{6,})").find(uri.path ?: "")?.groupValues?.get(1)
+            }
+        } catch (_: Exception) {
+            null
         }
     }
 
@@ -141,7 +230,7 @@ class ChromiumEngineView @JvmOverloads constructor(
                 super.onProgressChanged(view, newProgress)
                 onProgressUpdate?.invoke(newProgress)
                 if (newProgress in 20..60) {
-                    view?.let { UserScriptManager.injectEarlyScript(it) }
+                    view?.let { UserScriptManager.injectEarlyScript(it, isDesktopMode) }
                 }
             }
 
@@ -276,10 +365,11 @@ class ChromiumEngineView @JvmOverloads constructor(
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 url?.let {
+                    android.util.Log.d("SafeerNav", "start $it")
                     onUrlChanged?.invoke(it)
                     onSecurityChanged?.invoke(it.startsWith("https://", ignoreCase = true))
                     view?.let { wv ->
-                        UserScriptManager.injectEarlyScript(wv)
+                        UserScriptManager.injectEarlyScript(wv, isDesktopMode)
                     }
                 }
             }
@@ -287,13 +377,23 @@ class ChromiumEngineView @JvmOverloads constructor(
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 url?.let {
+                    android.util.Log.d("SafeerNav", "finish $it")
                     onUrlChanged?.invoke(it)
                     onSecurityChanged?.invoke(it.startsWith("https://", ignoreCase = true))
                     val pageTitle = title ?: ""
                     onPageLoaded?.invoke(it, pageTitle)
                     view?.let { wv ->
-                        UserScriptManager.injectOnPageFinished(wv, isDarkMode)
+                        UserScriptManager.injectOnPageFinished(wv, isDarkMode, isDesktopMode)
                     }
+                }
+            }
+
+            override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
+                super.doUpdateVisitedHistory(view, url, isReload)
+                url?.let {
+                    android.util.Log.d("SafeerNav", "hist $it")
+                    onUrlChanged?.invoke(it)
+                    onSecurityChanged?.invoke(it.startsWith("https://", ignoreCase = true))
                 }
             }
 

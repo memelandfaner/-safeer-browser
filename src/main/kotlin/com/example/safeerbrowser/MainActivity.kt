@@ -125,14 +125,19 @@ class MainActivity : android.app.Activity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+        setIntent(intent)
         val url = intent?.dataString
         if (!url.isNullOrEmpty()) {
-            val activeTab = tabManager.getActiveTab()
-            if (activeTab != null) {
-                activeTab.webView.loadUrl(url)
-            } else {
-                tabManager.createTab(this, url, true)
-            }
+            openUrlInBrowser(url)
+        }
+    }
+
+    private fun openUrlInBrowser(url: String) {
+        val activeTab = tabManager.getActiveTab()
+        if (activeTab != null) {
+            activeTab.webView.navigateDocument(url)
+        } else {
+            tabManager.createTab(this, url, true)
         }
     }
 
@@ -333,12 +338,7 @@ class MainActivity : android.app.Activity() {
             }
         }
 
-        val activeTab = tabManager.getActiveTab()
-        if (activeTab != null) {
-            activeTab.webView.loadUrl(finalUrl)
-        } else {
-            tabManager.createTab(this, finalUrl, true)
-        }
+        openUrlInBrowser(finalUrl)
     }
 
     private fun setupTopButtons() {
@@ -678,7 +678,7 @@ class MainActivity : android.app.Activity() {
                 view.findViewById<TextView>(R.id.tvBmUrl).text = bm.url
 
                 view.setOnClickListener {
-                    tabManager.getActiveTab()?.webView?.loadUrl(bm.url)
+                    tabManager.getActiveTab()?.webView?.navigateDocument(bm.url)
                     dialog.dismiss()
                 }
 
@@ -704,7 +704,7 @@ class MainActivity : android.app.Activity() {
             .setTitle("🕒 Zgodovina brskanja")
             .setItems(items) { _, which ->
                 val selected = history[which]
-                tabManager.getActiveTab()?.webView?.loadUrl(selected.url)
+                tabManager.getActiveTab()?.webView?.navigateDocument(selected.url)
             }
             .setPositiveButton("Počisti zgodovino") { _, _ ->
                 repository.clearHistory()
@@ -770,6 +770,12 @@ class MainActivity : android.app.Activity() {
         }
 
         val activeTab = tabManager.getActiveTab()
+        val currentUrl = activeTab?.webView?.url ?: ""
+        if (isYoutubeMixWatch(currentUrl) && activeTab != null) {
+            activeTab.webView.evaluateJavascript(UserScriptManager.YOUTUBE_MIX_BACK_HOME_JS, null)
+            return
+        }
+
         if (activeTab != null && activeTab.webView.canGoBack()) {
             activeTab.webView.goBack()
             return
@@ -781,5 +787,12 @@ class MainActivity : android.app.Activity() {
         }
 
         super.onBackPressed()
+    }
+
+    private fun isYoutubeMixWatch(url: String): Boolean {
+        val u = url.lowercase()
+        if (!u.contains("youtube.com") && !u.contains("youtu.be")) return false
+        if (!u.contains("/watch")) return false
+        return u.contains("list=rd") || u.contains("start_radio")
     }
 }

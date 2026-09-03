@@ -36,6 +36,7 @@ class TabManager(
             title = "Nov zavihek",
             url = url
         )
+        webView.isDesktopMode = tab.isDesktop
 
         tabs.add(tab)
 
