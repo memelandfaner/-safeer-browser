@@ -284,6 +284,30 @@
             transition: all 0.15s ease;
         }
 
+        .mob-lang-toggle {
+            display: flex;
+            gap: 2px;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 2px 4px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mob-lang-opt {
+            font-size: 9px;
+            font-weight: 700;
+            color: #8fa0b5;
+            padding: 2px 5px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .mob-lang-opt.active {
+            background: #ff5500;
+            color: #ffffff;
+        }
+
         .section-edit-btn.active {
             background: rgba(255, 85, 0, 0.25);
             border-color: #ff5500;
@@ -401,20 +425,30 @@
                 <span class="shield-icon">🦁</span>
                 <span>Safeer Shield</span>
             </div>
-            <span class="shield-badge">Zaščita aktivna</span>
+            <div style="display:flex; align-items:center; gap:6px;">
+                <span class="shield-badge" data-i18n="shield_active">Zaščita aktivna</span>
+                <div class="mob-lang-toggle">
+                    <span class="mob-lang-opt active" data-lang="sl" onclick="setMobileLanguage('sl')">SL</span>
+                    <span class="mob-lang-opt" data-lang="en" onclick="setMobileLanguage('en')">EN</span>
+                    <span class="mob-lang-opt" data-lang="de" onclick="setMobileLanguage('de')">DE</span>
+                    <span class="mob-lang-opt" data-lang="es" onclick="setMobileLanguage('es')">ES</span>
+                    <span class="mob-lang-opt" data-lang="fr" onclick="setMobileLanguage('fr')">FR</span>
+                    <span class="mob-lang-opt" data-lang="it" onclick="setMobileLanguage('it')">IT</span>
+                </div>
+            </div>
         </div>
         <div class="stats-grid">
             <div class="stat-box">
                 <div class="stat-val ads" id="valAds">1.430</div>
-                <div class="stat-lbl">Blokirano</div>
+                <div class="stat-lbl" data-i18n="lbl_blocked">Blokirano</div>
             </div>
             <div class="stat-box">
                 <div class="stat-val data" id="valData">21.4 MB</div>
-                <div class="stat-lbl">Prihranek</div>
+                <div class="stat-lbl" data-i18n="lbl_saved">Prihranek</div>
             </div>
             <div class="stat-box">
                 <div class="stat-val time" id="valTime">1.6 min</div>
-                <div class="stat-lbl">Prihranjen čas</div>
+                <div class="stat-lbl" data-i18n="lbl_time">Prihranjen čas</div>
             </div>
         </div>
     </div>
@@ -442,10 +476,10 @@
 
     <!-- ⭐ 4. Priljubljene strani in multimedija -->
     <div class="section-header">
-        <div class="section-title">Priljubljene strani & multimedija</div>
+        <div class="section-title" data-i18n="fav_title">Priljubljene strani & multimedija</div>
         <div style="display:flex; gap:6px;">
-            <button type="button" class="section-edit-btn" id="btnEditFavs" onclick="toggleEditFavorites()">⚙️ Uredi</button>
-            <button type="button" class="section-edit-btn" onclick="addNewFavorite()">➕ Dodaj</button>
+            <button type="button" class="section-edit-btn" id="btnEditFavs" onclick="toggleEditFavorites()" data-i18n="btn_edit">⚙️ Uredi</button>
+            <button type="button" class="section-edit-btn" onclick="addNewFavorite()" data-i18n="btn_add">➕ Dodaj</button>
         </div>
     </div>
 
@@ -639,15 +673,140 @@
         }
     }
 
-    // Posodobi uro in datum v slovenščini
+    // --- 5. Mobile Internationalization (i18n) ---
+    var mobileI18n = {
+        sl: {
+            locale: "sl-SI",
+            shield_active: "Zaščita aktivna",
+            lbl_blocked: "Blokirano",
+            lbl_saved: "Prihranek",
+            lbl_time: "Prihranjen čas",
+            search_placeholder: "Iščite ali vnesite naslov spleta...",
+            fav_title: "Priljubljene strani & multimedija",
+            btn_edit: "⚙️ Uredi",
+            btn_done: "✓ Končano",
+            btn_add: "➕ Dodaj",
+            tile_add: "Dodaj"
+        },
+        en: {
+            locale: "en-US",
+            shield_active: "Shield Active",
+            lbl_blocked: "Blocked",
+            lbl_saved: "Data Saved",
+            lbl_time: "Time Saved",
+            search_placeholder: "Search or enter web address...",
+            fav_title: "Favorites & Multimedia",
+            btn_edit: "⚙️ Edit",
+            btn_done: "✓ Done",
+            btn_add: "➕ Add",
+            tile_add: "Add"
+        },
+        de: {
+            locale: "de-DE",
+            shield_active: "Schutz Aktiv",
+            lbl_blocked: "Blockiert",
+            lbl_saved: "Gespart",
+            lbl_time: "Zeit Erspart",
+            search_placeholder: "Suchen oder Adresse eingeben...",
+            fav_title: "Favoriten & Multimedia",
+            btn_edit: "⚙️ Bearbeiten",
+            btn_done: "✓ Fertig",
+            btn_add: "➕ Hinzufügen",
+            tile_add: "Neu"
+        },
+        es: {
+            locale: "es-ES",
+            shield_active: "Escudo Activo",
+            lbl_blocked: "Bloqueado",
+            lbl_saved: "Ahorro",
+            lbl_time: "Tiempo Ahorrado",
+            search_placeholder: "Buscar o escribir dirección...",
+            fav_title: "Favoritos y Multimedia",
+            btn_edit: "⚙️ Editar",
+            btn_done: "✓ Listo",
+            btn_add: "➕ Añadir",
+            tile_add: "Añadir"
+        },
+        fr: {
+            locale: "fr-FR",
+            shield_active: "Bouclier Actif",
+            lbl_blocked: "Bloqué",
+            lbl_saved: "Économie",
+            lbl_time: "Temps Gagné",
+            search_placeholder: "Rechercher ou entrer une adresse...",
+            fav_title: "Favoris & Multimédia",
+            btn_edit: "⚙️ Modifier",
+            btn_done: "✓ Terminé",
+            btn_add: "➕ Ajouter",
+            tile_add: "Ajouter"
+        },
+        it: {
+            locale: "it-IT",
+            shield_active: "Protezione Attiva",
+            lbl_blocked: "Bloccato",
+            lbl_saved: "Risparmio",
+            lbl_time: "Tempo Risparmiato",
+            search_placeholder: "Cerca o inserisci un indirizzo...",
+            fav_title: "Preferiti e Multimedia",
+            btn_edit: "⚙️ Modifica",
+            btn_done: "✓ Fatto",
+            btn_add: "➕ Aggiungi",
+            tile_add: "Aggiungi"
+        }
+    };
+
+    var currentMobLang = 'sl';
+
+    function detectMobileLanguage() {
+        try {
+            var raw = localStorage.getItem('safeer_mob_lang');
+            if (raw && mobileI18n[raw]) return raw;
+            var nav = (navigator.language || navigator.userLanguage || '').substring(0, 2).toLowerCase();
+            if (mobileI18n[nav]) return nav;
+        } catch(e) {}
+        return 'sl';
+    }
+
+    function setMobileLanguage(lang) {
+        if (!mobileI18n[lang]) lang = 'en';
+        currentMobLang = lang;
+        try {
+            localStorage.setItem('safeer_mob_lang', lang);
+        } catch(e) {}
+
+        var dict = mobileI18n[lang];
+        document.querySelectorAll('[data-i18n]').forEach(function(el) {
+            var key = el.getAttribute('data-i18n');
+            if (dict[key]) el.textContent = dict[key];
+        });
+
+        var input = document.getElementById('searchInput');
+        if (input && dict.search_placeholder) {
+            input.placeholder = dict.search_placeholder;
+        }
+
+        document.querySelectorAll('.mob-lang-opt').forEach(function(opt) {
+            opt.classList.toggle('active', opt.getAttribute('data-lang') === lang);
+        });
+
+        var btnEdit = document.getElementById('btnEditFavs');
+        if (btnEdit) {
+            btnEdit.textContent = isEditFavoritesMode ? dict.btn_done : dict.btn_edit;
+        }
+
+        updateClock();
+    }
+
+    // Posodobi uro in datum v izbranem jeziku
     function updateClock() {
         var now = new Date();
         var hrs = String(now.getHours()).padStart(2, '0');
         var mins = String(now.getMinutes()).padStart(2, '0');
         document.getElementById('clockTime').textContent = hrs + ':' + mins;
 
+        var dict = mobileI18n[currentMobLang] || mobileI18n.sl;
         var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        var dateStr = now.toLocaleDateString('sl-SI', options);
+        var dateStr = now.toLocaleDateString(dict.locale || 'sl-SI', options);
         document.getElementById('clockDate').textContent = dateStr;
     }
 
@@ -667,7 +826,7 @@
     setInterval(updateClock, 1000);
     setInterval(updateStats, 2000);
     renderFavorites();
-    updateClock();
+    setMobileLanguage(detectMobileLanguage());
     updateStats();
 </script>
 
