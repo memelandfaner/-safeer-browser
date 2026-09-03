@@ -272,6 +272,24 @@
             letter-spacing: 0.6px;
         }
 
+        .section-edit-btn {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #d1dbe8;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .section-edit-btn.active {
+            background: rgba(255, 85, 0, 0.25);
+            border-color: #ff5500;
+            color: #ff8833;
+        }
+
         .favorites-grid {
             width: 100%;
             display: grid;
@@ -287,6 +305,7 @@
             cursor: pointer;
             text-decoration: none;
             transition: transform 0.15s ease;
+            position: relative;
         }
 
         .favorite-tile:active {
@@ -294,6 +313,7 @@
         }
 
         .tile-icon-wrapper {
+            position: relative;
             width: 56px;
             height: 56px;
             border-radius: 18px;
@@ -306,6 +326,25 @@
             font-size: 24px;
             box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
             transition: all 0.2s ease;
+        }
+
+        .tile-delete-btn {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #ef4444;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+            border: 2px solid #05070d;
+            z-index: 10;
         }
 
         .favorite-tile:hover .tile-icon-wrapper {
@@ -401,60 +440,17 @@
         </div>
     </div>
 
-    <!-- ⭐ 4. Priljubljene strani (Speed Dial) -->
+    <!-- ⭐ 4. Priljubljene strani in multimedija -->
     <div class="section-header">
-        <div class="section-title">Priljubljene strani</div>
+        <div class="section-title">Priljubljene strani & multimedija</div>
+        <div style="display:flex; gap:6px;">
+            <button type="button" class="section-edit-btn" id="btnEditFavs" onclick="toggleEditFavorites()">⚙️ Uredi</button>
+            <button type="button" class="section-edit-btn" onclick="addNewFavorite()">➕ Dodaj</button>
+        </div>
     </div>
 
     <div class="favorites-grid" id="favoritesGrid">
-        <div class="favorite-tile" onclick="openUrl('https://www.youtube.com')">
-            <div class="tile-icon-wrapper" style="background: rgba(255, 0, 0, 0.15); border-color: rgba(255, 0, 0, 0.3);">📺</div>
-            <div class="tile-name">YouTube</div>
-        </div>
-        <div class="favorite-tile" onclick="openUrl('https://hydrahd.ws/')">
-            <div class="tile-icon-wrapper" style="background: rgba(0, 210, 255, 0.15); border-color: rgba(0, 210, 255, 0.3);">🎬</div>
-            <div class="tile-name">Filmi</div>
-        </div>
-        <div class="favorite-tile" onclick="openUrl('https://www.google.com')">
-            <div class="tile-icon-wrapper" style="background: rgba(66, 133, 244, 0.15); border-color: rgba(66, 133, 244, 0.3);">🔍</div>
-            <div class="tile-name">Google</div>
-        </div>
-        <div class="favorite-tile" onclick="openUrl('https://chatgpt.com')">
-            <div class="tile-icon-wrapper" style="background: rgba(16, 163, 127, 0.15); border-color: rgba(16, 163, 127, 0.3);">💬</div>
-            <div class="tile-name">ChatGPT</div>
-        </div>
-        <div class="favorite-tile" onclick="openUrl('https://www.24ur.com')">
-            <div class="tile-icon-wrapper" style="background: rgba(0, 102, 204, 0.15); border-color: rgba(0, 102, 204, 0.3);">📰</div>
-            <div class="tile-name">24ur</div>
-        </div>
-        <div class="favorite-tile" onclick="openUrl('https://www.rtvslo.si')">
-            <div class="tile-icon-wrapper" style="background: rgba(0, 150, 255, 0.15); border-color: rgba(0, 150, 255, 0.3);">📡</div>
-            <div class="tile-name">RTV SLO</div>
-        </div>
-        <div class="favorite-tile" onclick="openUrl('https://cryptoquant.com')">
-            <div class="tile-icon-wrapper" style="background: rgba(255, 170, 0, 0.15); border-color: rgba(255, 170, 0, 0.3);">🪙</div>
-            <div class="tile-name">Kripto</div>
-        </div>
-        <div class="favorite-tile" onclick="openUrl('https://sl.wikipedia.org')">
-            <div class="tile-icon-wrapper" style="background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2);">📖</div>
-            <div class="tile-name">Wikipedija</div>
-        </div>
-        <div class="favorite-tile" onclick="openUrl('https://www.reddit.com')">
-            <div class="tile-icon-wrapper" style="background: rgba(255, 69, 0, 0.15); border-color: rgba(255, 69, 0, 0.3);">📱</div>
-            <div class="tile-name">Reddit</div>
-        </div>
-        <div class="favorite-tile" onclick="openUrl('https://github.com')">
-            <div class="tile-icon-wrapper" style="background: rgba(140, 140, 140, 0.15); border-color: rgba(140, 140, 140, 0.3);">🐙</div>
-            <div class="tile-name">GitHub</div>
-        </div>
-        <div class="favorite-tile" onclick="openUrl('https://www.speedtest.net')">
-            <div class="tile-icon-wrapper" style="background: rgba(0, 230, 118, 0.15); border-color: rgba(0, 230, 118, 0.3);">⚡</div>
-            <div class="tile-name">Hitrost</div>
-        </div>
-        <div class="favorite-tile" onclick="addNewFavorite()">
-            <div class="tile-icon-wrapper" style="background: rgba(255, 85, 0, 0.15); border-color: rgba(255, 85, 0, 0.4); color: #ff7700;">➕</div>
-            <div class="tile-name">Dodaj</div>
-        </div>
+        <!-- Generirano dinamično iz shrambe -->
     </div>
 
     <!-- 🛡️ Footer -->
@@ -518,18 +514,127 @@
         }
     }
 
+    // --- Dynamic Favorites & Multimedia Engine ---
+    var isEditFavoritesMode = false;
+    var defaultFavoritesList = [
+        { title: "Xplore TV", url: "https://www.xploretv.si/livetv", mark: "📺", color: "#e31837" },
+        { title: "YouTube", url: "https://www.youtube.com", mark: "▶️", color: "#cc0000" },
+        { title: "Filmi", url: "https://hydrahd.ws/", mark: "🎬", color: "#0284c7" },
+        { title: "24ur", url: "https://www.24ur.com", mark: "📰", color: "#1256a8" },
+        { title: "RTV SLO", url: "https://www.rtvslo.si", mark: "📡", color: "#0284c7" },
+        { title: "ChatGPT", url: "https://chatgpt.com", mark: "🤖", color: "#10a37f" },
+        { title: "Kripto", url: "https://cryptoquant.com", mark: "🪙", color: "#f59e0b" },
+        { title: "GitHub", url: "https://github.com", mark: "🐙", color: "#64748b" },
+        { title: "Reddit", url: "https://www.reddit.com", mark: "📱", color: "#ff4500" },
+        { title: "Wikipedija", url: "https://sl.wikipedia.org", mark: "📖", color: "#94a3b8" },
+        { title: "Hitrost", url: "https://www.speedtest.net", mark: "⚡", color: "#10b981" }
+    ];
+
+    function getMobileFavorites() {
+        try {
+            var raw = localStorage.getItem('safeer_mobile_favs_v2');
+            if (raw) {
+                var arr = JSON.parse(raw);
+                if (Array.isArray(arr) && arr.length > 0) return arr;
+            }
+        } catch(e) {}
+        return defaultFavoritesList;
+    }
+
+    function saveMobileFavorites(arr) {
+        try {
+            localStorage.setItem('safeer_mobile_favs_v2', JSON.stringify(arr));
+        } catch(e) {}
+        renderFavorites();
+    }
+
+    function toggleEditFavorites() {
+        isEditFavoritesMode = !isEditFavoritesMode;
+        var btn = document.getElementById('btnEditFavs');
+        if (btn) {
+            btn.textContent = isEditFavoritesMode ? '✓ Končano' : '⚙️ Uredi';
+            if (isEditFavoritesMode) btn.classList.add('active');
+            else btn.classList.remove('active');
+        }
+        renderFavorites();
+    }
+
+    function renderFavorites() {
+        var grid = document.getElementById('favoritesGrid');
+        if (!grid) return;
+        var list = getMobileFavorites();
+        grid.innerHTML = '';
+
+        list.forEach(function(item, index) {
+            var tile = document.createElement('div');
+            tile.className = 'favorite-tile';
+            var col = item.color || '#00d2ff';
+
+            var delHtml = isEditFavoritesMode ? '<div class="tile-delete-btn" onclick="event.stopPropagation(); deleteFavorite(' + index + ')">✕</div>' : '';
+
+            tile.innerHTML = delHtml +
+                '<div class="tile-icon-wrapper" style="background: rgba(255, 255, 255, 0.07); border-color: ' + col + ';">' + (item.mark || '🌐') + '</div>' +
+                '<div class="tile-name">' + item.title + '</div>';
+
+            tile.onclick = function() {
+                if (isEditFavoritesMode) {
+                    editFavorite(index);
+                } else {
+                    openUrl(item.url);
+                }
+            };
+            grid.appendChild(tile);
+        });
+
+        // Gumb za dodajanje
+        var addTile = document.createElement('div');
+        addTile.className = 'favorite-tile';
+        addTile.innerHTML = '<div class="tile-icon-wrapper" style="background: rgba(255, 85, 0, 0.15); border-color: rgba(255, 85, 0, 0.4); color: #ff7700;">➕</div><div class="tile-name">Dodaj</div>';
+        addTile.onclick = addNewFavorite;
+        grid.appendChild(addTile);
+    }
+
+    function deleteFavorite(index) {
+        var list = getMobileFavorites();
+        if (index >= 0 && index < list.length) {
+            if (confirm('Želite odstraniti ' + list[index].title + '?')) {
+                list.splice(index, 1);
+                saveMobileFavorites(list);
+            }
+        }
+    }
+
+    function editFavorite(index) {
+        var list = getMobileFavorites();
+        if (index >= 0 && index < list.length) {
+            var item = list[index];
+            var newTitle = prompt('Uredite naziv priljubljene strani:', item.title);
+            if (!newTitle) return;
+            var newUrl = prompt('Uredite spletni naslov (URL):', item.url);
+            if (!newUrl) return;
+            var newMark = prompt('Uredite simbol ali emoji:', item.mark || '🌐');
+
+            item.title = newTitle.trim();
+            item.url = newUrl.trim();
+            item.mark = (newMark || '🌐').trim();
+            saveMobileFavorites(list);
+        }
+    }
+
     function addNewFavorite() {
         var url = prompt('Vnesite URL spletnega mesta (npr. https://siol.net):', 'https://');
         if (url && url !== 'https://') {
-            var name = prompt('Vnesite ime zaznamka:', 'Priljubljeno');
+            var name = prompt('Vnesite ime zaznamka:', 'Nova stran');
             if (name) {
-                var grid = document.getElementById('favoritesGrid');
-                var addBtn = grid.lastElementChild;
-                var tile = document.createElement('div');
-                tile.className = 'favorite-tile';
-                tile.onclick = function() { openUrl(url); };
-                tile.innerHTML = '<div class="tile-icon-wrapper">⭐</div><div class="tile-name">' + name + '</div>';
-                grid.insertBefore(tile, addBtn);
+                var mark = prompt('Vnesite simbol ali emoji (npr. 📺, 🎬, 📰, ⭐):', '⭐');
+                var list = getMobileFavorites();
+                list.push({
+                    title: name.trim(),
+                    url: url.trim(),
+                    mark: (mark || '⭐').trim(),
+                    color: '#ff5500'
+                });
+                saveMobileFavorites(list);
             }
         }
     }
@@ -561,6 +666,7 @@
 
     setInterval(updateClock, 1000);
     setInterval(updateStats, 2000);
+    renderFavorites();
     updateClock();
     updateStats();
 </script>
