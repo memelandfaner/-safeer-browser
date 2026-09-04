@@ -25,6 +25,7 @@ echo "⚙️ 1/5: Prevajam Android XML vire (AAPT2)..."
 "$TOOLS_DIR/aapt2" compile --dir "$DIR/res" -o "$BUILD_DIR/compiled_res.zip"
 "$TOOLS_DIR/aapt2" link -I "$TOOLS_DIR/android.jar" \
     --manifest "$DIR/AndroidManifest.xml" \
+    --rename-manifest-package "com.safeer.mobile.browser" \
     -A "$DIR/assets" \
     --min-sdk-version 28 \
     --target-sdk-version 34 \
@@ -61,12 +62,23 @@ java -jar "$TOOLS_DIR/uber-apk-signer.jar" \
     --out "$BUILD_DIR/signed" \
     --allowResign
 
-FINAL_APK="$RELEASE_DIR/safeer-browser-release.apk"
-cp "$BUILD_DIR/signed/unaligned-aligned-debugSigned.apk" "$FINAL_APK"
+FINAL_APK="$RELEASE_DIR/safeer-mobile-release.apk"
+SIGNED_APK="$BUILD_DIR/signed/unaligned-aligned-debugSigned.apk"
+cp "$SIGNED_APK" "$FINAL_APK"
+cp "$FINAL_APK" "$DIR/Safeer-Mobile.apk"
 cp "$FINAL_APK" "$DIR/Safeer-Browser.apk"
+
+# Sinhronizacija v spletno mapo za prenos
+WEB_MOB_DIR="/home/janez/Namizje/safeer-web/assets/mobile"
+if [ -d "$WEB_MOB_DIR" ]; then
+    cp -f "$FINAL_APK" "$WEB_MOB_DIR/Safeer-Mobile.apk"
+    cp -f "$FINAL_APK" "$WEB_MOB_DIR/Safeer-Browser.apk"
+    echo "🌐 Sinhronizirano v safeer-web/assets/mobile/"
+fi
 
 echo ""
 echo "=========================================================="
-echo "🎉 ZGRAJEN SIGNED SAFEER APK: $DIR/Safeer-Browser.apk"
+echo "🎉 ZGRAJEN SIGNED SAFEER MOBILE APK: $DIR/Safeer-Mobile.apk"
+echo "Package ID: com.safeer.mobile.browser"
 echo "=========================================================="
-ls -lh "$DIR/Safeer-Browser.apk"
+ls -lh "$DIR/Safeer-Mobile.apk"

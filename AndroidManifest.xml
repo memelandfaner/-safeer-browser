@@ -67,7 +67,7 @@
 
         <provider
             android:name="com.example.safeerbrowser.MobileFileProvider"
-            android:authorities="com.example.safeerbrowser.fileprovider"
+            android:authorities="com.safeer.mobile.browser.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
