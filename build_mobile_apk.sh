@@ -5,7 +5,24 @@
 set -e
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TOOLS_DIR="/home/janez/Namizje/Neimenovana mapa/streamN-TV2/android_tv/.tools"
+# Android build toolchain location. Resolution order:
+#   1. $SAFEER_TOOLS_DIR (explicit override)
+#   2. $HOME/.safeer-tools (provisioned by .cursor/setup_toolchain.sh)
+#   3. the original author's local path (backwards compatibility)
+if [ -n "${SAFEER_TOOLS_DIR:-}" ]; then
+    TOOLS_DIR="$SAFEER_TOOLS_DIR"
+elif [ -x "$HOME/.safeer-tools/aapt2" ]; then
+    TOOLS_DIR="$HOME/.safeer-tools"
+else
+    TOOLS_DIR="/home/janez/Namizje/Neimenovana mapa/streamN-TV2/android_tv/.tools"
+fi
+
+if [ ! -x "$TOOLS_DIR/aapt2" ]; then
+    echo "❌ Android toolchain not found in TOOLS_DIR='$TOOLS_DIR'."
+    echo "   Set SAFEER_TOOLS_DIR to a directory containing aapt2, android.jar, r8.jar,"
+    echo "   kotlinc/ and uber-apk-signer.jar, or run .cursor/setup_toolchain.sh first."
+    exit 1
+fi
 KOTLINC="$TOOLS_DIR/kotlinc/bin/kotlinc"
 KOTLIN_LIB="$TOOLS_DIR/kotlinc/lib/kotlin-stdlib.jar"
 BUILD_DIR="$DIR/build"
