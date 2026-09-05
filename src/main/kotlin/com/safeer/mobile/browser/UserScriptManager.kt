@@ -815,7 +815,7 @@ object UserScriptManager {
                         if (!video._safeer_instant_hooks) {
                             video._safeer_instant_hooks = true;
                             var onMediaReady = function() {
-                                if (!video._safeer_user_paused && video.paused) {
+                                if (!video._safeer_user_paused && video.paused && video.readyState >= 3) {
                                     try { video.play().catch(function() {}); } catch(_) {}
                                 }
                             };
@@ -827,9 +827,14 @@ object UserScriptManager {
                                 if (ytAgent.initialPlayDone && !video.ended && location.href === ytAgent.lastHref) {
                                     video._safeer_user_paused = true;
                                 }
+                                try { if (window.SafeerBridge && typeof window.SafeerBridge.notifyAudioState === 'function') window.SafeerBridge.notifyAudioState(false); } catch(_) {}
                             });
                             video.addEventListener('play', function() {
                                 video._safeer_user_paused = false;
+                                try { if (window.SafeerBridge && typeof window.SafeerBridge.notifyAudioState === 'function') window.SafeerBridge.notifyAudioState(true); } catch(_) {}
+                            });
+                            video.addEventListener('ended', function() {
+                                try { if (window.SafeerBridge && typeof window.SafeerBridge.notifyAudioState === 'function') window.SafeerBridge.notifyAudioState(false); } catch(_) {}
                             });
                         }
 
@@ -842,7 +847,8 @@ object UserScriptManager {
                             if (video.playbackRate > 2.0) {
                                 video.playbackRate = 1.0;
                             }
-                            if (video.paused && !video.ended && !video._safeer_user_paused) {
+                            // Trigger play only if enough buffer is available (readyState >= 3: HAVE_FUTURE_DATA) to avoid audio stutter
+                            if (video.paused && !video.ended && !video._safeer_user_paused && video.readyState >= 3) {
                                 var playPromise = video.play();
                                 if (playPromise !== undefined) {
                                     playPromise.catch(function() {});
@@ -902,11 +908,13 @@ object UserScriptManager {
                     } catch(e) {}
                 },
 
-                // Stalni nadzorni cikel agenta
+                // Stalni prilagodljivi nadzorni cikel agenta (250ms ob oglasih, 1500ms med nemotenim predvajanjem)
                 startSupervision: function() {
                     var self = this;
                     var ticks = 0;
-                    setInterval(function() {
+                    var _supervisorTimer = null;
+
+                    function runSupervisorCycle() {
                         ticks++;
                         if (isWatchPath()) {
                             ensureWatchPlayerVisible();
@@ -917,7 +925,21 @@ object UserScriptManager {
                             hideWatchPlayerOnHome();
                             if (ticks % 3 === 0) tameHomeMiniplayer();
                         }
-                    }, 200);
+
+                        var video = document.querySelector('video');
+                        var isAd = playerHasAd();
+                        var isSmoothPlaying = video && !video.paused && video.readyState >= 3 && !isAd;
+                        var nextInterval = (isAd || !self.initialPlayDone) ? 250 : (isSmoothPlaying ? 1500 : 350);
+                        scheduleNextCycle(nextInterval);
+                    }
+
+                    function scheduleNextCycle(intervalMs) {
+                        if (_supervisorTimer) clearTimeout(_supervisorTimer);
+                        _supervisorTimer = setTimeout(runSupervisorCycle, intervalMs);
+                    }
+                    self._scheduleNextCycle = scheduleNextCycle;
+
+                    scheduleNextCycle(250);
 
                     window.addEventListener('yt-navigate-start', function() {
                         self.lastTriggerTime = 0;
@@ -927,39 +949,19 @@ object UserScriptManager {
                             v._safeer_user_paused = false;
                             v.preload = 'auto';
                         }
-                        self.boostPlayback();
+                        scheduleNextCycle(150);
                     });
 
                     window.addEventListener('yt-navigate-finish', function() {
                         window._safeer_yt_mix_panel_tamed = false;
-                        if (isWatchPath()) {
-                            ensureWatchPlayerVisible();
-                            self.boostPlayback();
-                            tameMixPlaylistOverlay();
-                        } else {
-                            hideWatchPlayerOnHome();
-                        }
-                        tameHomeMiniplayer();
+                        scheduleNextCycle(150);
                     });
-                    window.addEventListener('yt-page-data-updated', function() {
-                        if (isWatchPath()) {
-                            ensureWatchPlayerVisible();
-                            self.boostPlayback();
-                        } else {
-                            hideWatchPlayerOnHome();
-                        }
-                    });
+                    window.addEventListener('yt-page-data-updated', function() { scheduleNextCycle(200); });
                     window.addEventListener('popstate', function() {
                         window._safeer_yt_mix_panel_tamed = false;
-                        if (isWatchPath()) {
-                            ensureWatchPlayerVisible();
-                            self.boostPlayback();
-                        } else {
-                            hideWatchPlayerOnHome();
-                        }
-                        tameHomeMiniplayer();
+                        scheduleNextCycle(150);
                     });
-                    document.addEventListener('DOMContentLoaded', function() { self.boostPlayback(); });
+                    document.addEventListener('DOMContentLoaded', function() { scheduleNextCycle(200); });
                 }
             };
 
@@ -1059,6 +1061,41 @@ object UserScriptManager {
                     }, true);
                 })(stopEvents[i]);
             }
+
+            // Samodejno poročanje stanja predvajanja zvoka v domačo kodo (SafeerBridge)
+            function hookMediaAudioState(media) {
+                if (!media || media._safeer_audio_hooked) return;
+                media._safeer_audio_hooked = true;
+                function reportState() {
+                    try {
+                        var isPlaying = !media.paused && !media.ended && media.currentTime > 0;
+                        if (window.SafeerBridge && typeof window.SafeerBridge.notifyAudioState === 'function') {
+                            window.SafeerBridge.notifyAudioState(isPlaying);
+                        }
+                    } catch(e) {}
+                }
+                media.addEventListener('play', reportState);
+                media.addEventListener('playing', reportState);
+                media.addEventListener('pause', reportState);
+                media.addEventListener('ended', reportState);
+            }
+
+            try {
+                document.querySelectorAll('video, audio').forEach(hookMediaAudioState);
+                var obs = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(m) {
+                        m.addedNodes.forEach(function(n) {
+                            if (n && n.nodeType === 1) {
+                                if (n.tagName === 'VIDEO' || n.tagName === 'AUDIO') hookMediaAudioState(n);
+                                if (n.querySelectorAll) n.querySelectorAll('video, audio').forEach(hookMediaAudioState);
+                            }
+                        });
+                    });
+                });
+                if (document.documentElement) {
+                    obs.observe(document.documentElement, { childList: true, subtree: true });
+                }
+            } catch(e) {}
         })();
     """
 
@@ -1197,6 +1234,7 @@ object UserScriptManager {
             webView.evaluateJavascript(WINDOWS_CHROME_ENVIRONMENT_JS, null)
         }
         webView.evaluateJavascript(ANTI_POPUNDER_SHIELD_JS, null)
+        webView.evaluateJavascript(BACKGROUND_PLAYBACK_JS, null)
         webView.evaluateJavascript(YOUTUBE_FREEDOM_MOBILE_JS, null)
         webView.evaluateJavascript(STREAMING_INSTANT_START_JS, null)
     }
@@ -1213,6 +1251,7 @@ object UserScriptManager {
             webView.evaluateJavascript(WINDOWS_CHROME_ENVIRONMENT_JS, null)
         }
         webView.evaluateJavascript(ANTI_POPUNDER_SHIELD_JS, null)
+        webView.evaluateJavascript(BACKGROUND_PLAYBACK_JS, null)
         webView.evaluateJavascript(YOUTUBE_FREEDOM_MOBILE_JS, null)
         webView.evaluateJavascript(STREAMING_INSTANT_START_JS, null)
 

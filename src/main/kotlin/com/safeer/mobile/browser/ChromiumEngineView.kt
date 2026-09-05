@@ -62,6 +62,8 @@ class ChromiumEngineView @JvmOverloads constructor(
     var onGeolocationRequested: ((String, GeolocationPermissions.Callback) -> Unit)? = null
     var onCreateWindowRequested: ((isDialog: Boolean, isUserGesture: Boolean, resultMsg: android.os.Message) -> Boolean)? = null
     var onCloseWindowRequested: (() -> Unit)? = null
+    var isPlayingAudio: Boolean = false
+    var onAudioStateChanged: ((Boolean) -> Unit)? = null
 
     private var customView: View? = null
     private var customViewCallback: WebChromeClient.CustomViewCallback? = null
@@ -170,6 +172,21 @@ class ChromiumEngineView @JvmOverloads constructor(
             if (act != null) {
                 act.runOnUiThread(runner)
             } else if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
+                runner.run()
+            } else {
+                webView.post(runner)
+            }
+        }
+
+        @android.webkit.JavascriptInterface
+        fun notifyAudioState(playing: Boolean) {
+            val runner = Runnable {
+                (webView as? ChromiumEngineView)?.let { cev ->
+                    cev.isPlayingAudio = playing
+                    cev.onAudioStateChanged?.invoke(playing)
+                }
+            }
+            if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
                 runner.run()
             } else {
                 webView.post(runner)

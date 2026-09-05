@@ -11,7 +11,8 @@ data class TabModel(
     var title: String = "Začetna stran",
     var url: String = "file:///android_asset/brave_home.html",
     var isDesktop: Boolean = false,
-    var favicon: String = "🦁"
+    var favicon: String = "🦁",
+    var isPlayingAudio: Boolean = false
 )
 
 class TabManager(
@@ -37,6 +38,12 @@ class TabManager(
             url = url
         )
         webView.isDesktopMode = tab.isDesktop
+        webView.onAudioStateChanged = { playing ->
+            tab.isPlayingAudio = playing
+            if (!playing && activeTabId != tab.id) {
+                try { tab.webView.onPause() } catch (_: Exception) {}
+            }
+        }
 
         tabs.add(tab)
 
@@ -54,7 +61,10 @@ class TabManager(
     fun switchTab(tabId: String) {
         val target = tabs.find { it.id == tabId } ?: return
         if (activeTabId != null && activeTabId != tabId) {
-            tabs.find { it.id == activeTabId }?.webView?.onPause()
+            val oldTab = tabs.find { it.id == activeTabId }
+            if (oldTab != null && !oldTab.isPlayingAudio) {
+                try { oldTab.webView.onPause() } catch (_: Exception) {}
+            }
         }
         activeTabId = tabId
 
@@ -63,7 +73,7 @@ class TabManager(
             (target.webView.parent as? ViewGroup)?.removeView(target.webView)
         }
         container.addView(target.webView)
-        target.webView.onResume()
+        try { target.webView.onResume() } catch (_: Exception) {}
 
         notifyUpdated()
     }
