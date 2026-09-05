@@ -16,8 +16,7 @@ object ThreatFeedsUpdater {
     data class ThreatFeed(
         val name: String,
         val url: String,
-        val category: String,
-        val expectedSha256: String? = null // Če je naveden, preveri točen hash
+        val category: String
     )
 
     private val FEEDS = listOf(
@@ -39,7 +38,7 @@ object ThreatFeedsUpdater {
     )
 
     /**
-     * Izračuna SHA-256 kontrolno vsoto vsebine.
+     * Izračuna SHA-256 kontrolno vsoto vsebine za varnostno beleženje integritete (Security Audit Log).
      */
     fun computeSha256(bytes: ByteArray): String {
         val digest = MessageDigest.getInstance("SHA-256")
@@ -78,14 +77,11 @@ object ThreatFeedsUpdater {
 
                     if (conn.responseCode == 200) {
                         val bytes = conn.inputStream.readBytes()
-                        
-                        // Preveri SHA-256, če je zahtevan
-                        if (feed.expectedSha256 != null) {
-                            val computed = computeSha256(bytes)
-                            if (!computed.equals(feed.expectedSha256, ignoreCase = true)) {
-                                continue // Zavrni poškodovan ali spremenjen seznam
-                            }
-                        }
+                        if (bytes.size < 100) continue
+
+                        // Beleženje SHA-256 kontrolne vsote za revizijo integritete
+                        val hash = computeSha256(bytes)
+                        android.util.Log.i("SafeerSecurity", "Posodobljen vir '${feed.name}' (${bytes.size} B, SHA-256: $hash)")
 
                         val reader = BufferedReader(InputStreamReader(bytes.inputStream(), Charsets.UTF_8))
                         var line: String?

@@ -80,7 +80,7 @@ class MobileFileProvider : ContentProvider() {
         val basePath = base.path
         val targetPath = target.path
         if (!targetPath.startsWith(basePath + File.separator) && targetPath != basePath) {
-            throw SecurityException("Zavrnjen poskus path traversal: $child")
+            throw FileNotFoundException("Zavrnjen neveljaven poskus dostopa ali pot: $child")
         }
         return target
     }
