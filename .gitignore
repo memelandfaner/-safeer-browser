@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+download_stats.json
+*.pid
+.DS_Store

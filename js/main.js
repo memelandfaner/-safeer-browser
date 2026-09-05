@@ -437,44 +437,62 @@ function setupThreatSimulator() {
   });
 }
 
-// --- 4. Live Showcase Switcher ---
+// --- 4. Live Showcase Switcher & D-Pad Engine ---
+let currentTvTileIndex = 0;
+window.navigateTvShowcase = function(direction) {
+  const tiles = [
+    document.getElementById('tvTile0'),
+    document.getElementById('tvTile1'),
+    document.getElementById('tvTile2'),
+    document.getElementById('tvTile3')
+  ].filter(Boolean);
+
+  if (!tiles.length) return;
+  tiles[currentTvTileIndex]?.classList.remove('active-focus');
+  currentTvTileIndex = (currentTvTileIndex + direction + tiles.length) % tiles.length;
+  tiles[currentTvTileIndex]?.classList.add('active-focus');
+};
+
 function setupShowcaseSwitcher() {
   const tabMob = document.getElementById('tabMobileShowcase');
   const tabTv = document.getElementById('tabTvShowcase');
   const tabDesk = document.getElementById('tabDesktopShowcase');
-  const img = document.getElementById('showcaseImg');
+  
+  const viewMob = document.getElementById('liveMobileView');
+  const viewTv = document.getElementById('liveTvView');
+  const viewDesk = document.getElementById('liveDesktopView');
+  
   const urlEl = document.getElementById('showcaseUrl');
+  const statusText = document.getElementById('showcaseStatusText');
 
-  if (!tabMob || !tabTv || !img) return;
+  if (!tabMob || !tabTv || !viewMob) return;
 
   function deactivateAll() {
     tabMob.classList.remove('active');
     tabTv.classList.remove('active');
     if (tabDesk) tabDesk.classList.remove('active');
+    
+    if (viewMob) viewMob.style.display = 'none';
+    if (viewTv) viewTv.style.display = 'none';
+    if (viewDesk) viewDesk.style.display = 'none';
   }
 
   tabMob.addEventListener('click', () => {
     window._showcaseManualSwitched = true;
     deactivateAll();
     tabMob.classList.add('active');
-    img.style.opacity = '0';
-    setTimeout(() => {
-      img.src = 'assets/mobile/mobile_home_showcase.png';
-      urlEl.textContent = 'safeer://home';
-      img.style.opacity = '1';
-    }, 120);
+    if (viewMob) viewMob.style.display = 'block';
+    if (urlEl) urlEl.textContent = 'safeer://home';
+    if (statusText) statusText.textContent = 'C2 Ščit 100%';
   });
 
   tabTv.addEventListener('click', () => {
     window._showcaseManualSwitched = true;
     deactivateAll();
     tabTv.classList.add('active');
-    img.style.opacity = '0';
-    setTimeout(() => {
-      img.src = 'assets/tv/tv_home_clean.png';
-      urlEl.textContent = 'tv://home';
-      img.style.opacity = '1';
-    }, 120);
+    if (viewTv) viewTv.style.display = 'block';
+    if (urlEl) urlEl.textContent = 'tv://home';
+    if (statusText) statusText.textContent = 'Media3 60 FPS';
   });
 
   if (tabDesk) {
@@ -482,12 +500,9 @@ function setupShowcaseSwitcher() {
       window._showcaseManualSwitched = true;
       deactivateAll();
       tabDesk.classList.add('active');
-      img.style.opacity = '0';
-      setTimeout(() => {
-        img.src = 'assets/desktop/desktop_mint_showcase.png';
-        urlEl.textContent = 'safeer://home';
-        img.style.opacity = '1';
-      }, 120);
+      if (viewDesk) viewDesk.style.display = 'block';
+      if (urlEl) urlEl.textContent = 'mint://awesomebar';
+      if (statusText) statusText.textContent = 'Socket Active';
     });
   }
 }

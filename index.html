@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Safeer Browser | Brez oglasov. Varen na telefonu in 4K TV.</title>
   <meta name="description" content="Safeer Browser v1.0.2: Odprtokodni spletni brskalnik z lokalnim varnostnim slojem pred znanimi botneti (abuse.ch), 0 oglasi in predvajanjem v ozadju. Safeer is a security layer, not a guarantee against all online threats.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300d2ff'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/></svg>">
 </head>
@@ -110,17 +113,157 @@
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                 <span id="showcaseUrl">safeer://home</span>
               </div>
+              <div class="header-status-badge">
+                <span class="pulse-dot"></span>
+                <span id="showcaseStatusText">C2 Ščit 100%</span>
+              </div>
             </div>
 
-            <img src="assets/mobile/mobile_home_showcase.png" alt="Safeer Začetna stran" id="showcaseImg" class="showcase-screen">
+            <!-- Dynamic Live Screen Area -->
+            <div class="showcase-screen-container" id="showcaseContainer">
+              
+              <!-- 1. Live Mobile View (Default) -->
+              <div class="live-screen-view active" id="liveMobileView">
+                <div class="mobile-mockup-inner">
+                  <div class="mock-top-bar">
+                    <span class="mock-time">10:24</span>
+                    <div class="mock-icons">
+                      <span>5G</span>
+                      <span>100% 🔋</span>
+                    </div>
+                  </div>
 
-            <div class="badge-floating top-left">
-              <span style="color:#00d2ff;">🛡️</span>
-              <span data-i18n="badge_c2">Zaščita aktivna</span>
-            </div>
-            <div class="badge-floating bottom-right">
-              <span style="color:#10b981;">⚡</span>
-              <span data-i18n="badge_yt">1.430 Oglasov Blokirano</span>
+                  <!-- Safeer Shield Hero Card -->
+                  <div class="mock-shield-card">
+                    <div class="mock-shield-header">
+                      <div class="mock-shield-icon">🛡️</div>
+                      <div class="mock-shield-title">
+                        <strong>Safeer Shield v1.0.2</strong>
+                        <span class="mock-shield-sub">Lokalna C2 &amp; AdBlock Zaščita</span>
+                      </div>
+                      <span class="mock-shield-active">AKTIVNA</span>
+                    </div>
+                    <div class="mock-stats-row">
+                      <div class="mock-stat-col">
+                        <span class="mock-stat-num" style="color:var(--accent-cyan);">1.430</span>
+                        <span class="mock-stat-label">Blokirano</span>
+                      </div>
+                      <div class="mock-stat-col">
+                        <span class="mock-stat-num" style="color:var(--accent-emerald);">21.4 MB</span>
+                        <span class="mock-stat-label">Prihranjeno</span>
+                      </div>
+                      <div class="mock-stat-col">
+                        <span class="mock-stat-num" style="color:#c084fc;">0.2 ms</span>
+                        <span class="mock-stat-label">O(k) Trie</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Omnibox Search -->
+                  <div class="mock-omnibox">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <span class="mock-omnibox-text">Iščite z Google, DuckDuckGo ali Brave...</span>
+                    <div class="mock-engine-chips">
+                      <span class="chip-active">Google</span>
+                      <span>DuckDuckGo</span>
+                      <span>Brave</span>
+                    </div>
+                  </div>
+
+                  <!-- Quick Tiles Grid -->
+                  <div class="mock-tiles-grid">
+                    <div class="mock-tile">
+                      <span class="tile-icon">📰</span>
+                      <span class="tile-name">24ur.com</span>
+                      <span class="tile-badge">0 Sledilcev</span>
+                    </div>
+                    <div class="mock-tile">
+                      <span class="tile-icon">📺</span>
+                      <span class="tile-name">RTV SLO</span>
+                      <span class="tile-badge">Hitri predvajalnik</span>
+                    </div>
+                    <div class="mock-tile highlight-yt">
+                      <span class="tile-icon">🎵</span>
+                      <span class="tile-name">YouTube</span>
+                      <span class="tile-badge" style="color:var(--accent-cyan);">0 Oglasov • Ozadje</span>
+                    </div>
+                    <div class="mock-tile">
+                      <span class="tile-icon">🐙</span>
+                      <span class="tile-name">GitHub</span>
+                      <span class="tile-badge">Open Source</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. Live TV View -->
+              <div class="live-screen-view" id="liveTvView" style="display:none;">
+                <div class="tv-mockup-inner">
+                  <div class="tv-banner-strip">
+                    <span>📺 TV-Browser-2 • Media3 4K ExoPlayer</span>
+                    <span class="tv-focus-badge">D-Pad 60 FPS Fokus</span>
+                  </div>
+                  <div class="tv-tiles-row">
+                    <div class="tv-tile active-focus" id="tvTile0">
+                      <div class="tv-tile-thumb" style="background:linear-gradient(135deg, #1e1b4b, #312e81);">🎬</div>
+                      <span class="tv-tile-title">YouTube 4K (0 Ads)</span>
+                    </div>
+                    <div class="tv-tile" id="tvTile1">
+                      <div class="tv-tile-thumb" style="background:linear-gradient(135deg, #064e3b, #047857);">📡</div>
+                      <span class="tv-tile-title">Xplore TV Live</span>
+                    </div>
+                    <div class="tv-tile" id="tvTile2">
+                      <div class="tv-tile-thumb" style="background:linear-gradient(135deg, #701a75, #a21caf);">📻</div>
+                      <span class="tv-tile-title">RTV Slovenija 4K</span>
+                    </div>
+                    <div class="tv-tile" id="tvTile3">
+                      <div class="tv-tile-thumb" style="background:linear-gradient(135deg, #0c4a6e, #0284c7);">⛅</div>
+                      <span class="tv-tile-title">ARSO Vreme HD</span>
+                    </div>
+                  </div>
+                  <div class="tv-remote-controls-bar">
+                    <div class="tv-color-buttons">
+                      <span style="color:#ef4444;">🔴 Novice</span>
+                      <span style="color:#10b981;">🟢 Video</span>
+                      <span style="color:#f59e0b;">🟡 Portali</span>
+                      <span style="color:#38bdf8;">🔵 Media3</span>
+                    </div>
+                    <div class="tv-dpad-mini">
+                      <button onclick="navigateTvShowcase(-1)" title="Prejšnji kanal">◄</button>
+                      <span>D-Pad</span>
+                      <button onclick="navigateTvShowcase(1)" title="Naslednji kanal">►</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. Live Linux Desktop View -->
+              <div class="live-screen-view" id="liveDesktopView" style="display:none;">
+                <div class="desktop-mockup-inner">
+                  <div class="desktop-term-bar">
+                    <span class="term-prompt">janez@linux-mint:~$</span>
+                    <span class="term-cmd">safeer --new-window http://localhost:8080</span>
+                  </div>
+                  <div class="desktop-awesomebar-mock">
+                    <div class="awesomebar-row">
+                      <span style="color:#87cf3e;">🍃 Awesomebar:</span>
+                      <span style="color:#f8fafc;">localhost:8080 • Razvoj &amp; Splet</span>
+                      <span class="socket-badge">● Unix socket aktiven</span>
+                    </div>
+                  </div>
+                  <div class="desktop-features-grid">
+                    <div class="desk-feat-item">
+                      <strong>Customizer Studio</strong>
+                      <span>Prilagoditev tem (AMOLED, Cyberpunk, Midnight) in lasten CSS.</span>
+                    </div>
+                    <div class="desk-feat-item">
+                      <strong>Vgrajen Tampermonkey</strong>
+                      <span>Samodejni zagon uporabniških JavaScript skript brez razširitev.</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -166,6 +309,12 @@
             <p class="bento-desc" data-i18n="card1_desc">
               Poslušajte glasbo, podcaste in oddaje brez prekinitev. Ugasnite zaslon ali preklopite v drugo aplikacijo – zvok se nemoteno predvaja naprej z znatnim prihrankom baterije.
             </p>
+            <div class="audio-equalizer-wrap">
+              <div class="equalizer-bars">
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
+              <span class="audio-equalizer-text">Predvajanje v ozadju • Zaslon zaklenjen</span>
+            </div>
           </div>
           <div class="bento-visual">
             <img src="assets/mobile/live_youtube_playback.png" alt="YouTube Background Playback" loading="lazy">
@@ -183,6 +332,10 @@
           </div>
 
           <div class="threat-interactive-box">
+            <div class="threat-radar-indicator">
+              <span class="pulse-dot" style="background:#10b981; box-shadow:0 0 8px #10b981;"></span>
+              <span>abuse.ch Radar: <strong style="color:var(--accent-emerald);">0.18 ms</strong> • Status: <strong style="color:var(--accent-cyan);">Neutralizirano</strong></span>
+            </div>
             <div class="threat-chips-row">
               <button class="threat-btn active" data-sim="feodo">C2 Botnet</button>
               <button class="threat-btn" data-sim="urlhaus">Malware Dropper</button>
