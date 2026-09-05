@@ -1,6 +1,22 @@
 # 🛡️ Safeer Browser (Mobile Security Edition)
 
-**Safeer Browser** je sodoben odprtokodni mobilni spletni brskalnik za Android z napredno večslojno zaščito, zasnovan za zmanjšanje izpostavljenosti znanim Botnet C2 strežnikom, zlonamerni programski opremi (Malware), spletnemu ribarjenju (Phishing) ter agresivnim sledilnim in oglasnim mrežam.
+### **Safeer Browser v1.0.1 — Stable Release**
+*Open-source Android browser with local malware, phishing, C2 and tracker protection.*
+
+> ⚠️ **Safeer is a security layer, not a guarantee against all online threats.**  
+> Safeer zmanjšuje tveganje in blokira znane grožnje; ne zagotavlja zaščite pred vsemi novimi ali neznanimi grožnjami (Zero-Day).
+
+**Safeer Browser** je sodoben odprtokodni mobilni spletni brskalnik za Android z napredno večslojno zaščito, zasnovan za bistveno zmanjšanje izpostavljenosti znanim Botnet C2 strežnikom, zlonamerni programski opremi (Malware), spletnemu ribarjenju (Phishing) ter agresivnim sledilnim in oglasnim mrežam.
+
+---
+
+## 🌟 Odprta Koda, Navdih in Spodbuda k Lastnemu Razvoju (Fork & Customize)
+
+> **Kdor obvladuje brskalnik, določa pravila spleta.**  
+> Milijon uporabnikov ima milijon različnih potreb, okusov in prioritet. Safeer je 100 % odprtokoden projekt pod licenco [Apache 2.0](LICENSE) prav zato, da služi kot odprta platforma in navdih za skupnost.  
+>  
+> 👉 **Vabljeni k ustvarjanju lastnih vejic (Fork)!**  
+> Vzemite izvorno kodo v svoje roke, prilagodite varnostne sezname, spremenite grafično podobo, dodajte lastne bližnjice ali preizkusite nove eksperimentalne funkcionalnosti. Internet je boljši, ko ima vsakdo možnost ustvariti brskalnik po svojih lastnih željah in potrebah.
 
 ---
 
@@ -105,7 +121,7 @@ Skripta samostojno prevede vire z AAPT2, prevede Kotlin kodo s `kotlinc`, generi
 
 ## ⚖️ Pravno Obvestilo in Omejitev Odgovornosti (Disclaimer)
 
-- **Varnostna omejitev**: Noben spletni brskalnik ali varnostni filter ne more zagotoviti 100 % zaščite pred vsemi novimi ali neznanimi grožnjami (Zero-Day). Safeer Browser uporablja več nivojev zaščite za občutno zmanjšanje napadalne površine in tveganja.
+- **Varnostna omejitev**: **Safeer is a security layer, not a guarantee against all online threats.** Noben spletni brskalnik ali varnostni filter ne more zagotoviti 100 % ali absolutne zaščite pred vsemi novimi, ciljanimi ali še neznanimi grožnjami (Zero-Day). Safeer deluje kot lokalni varnostni sloj, ki bistveno zmanjšuje tveganje in blokira znana škodljiva vozlišča, zlonamerne domene in sledilce.
 - **Vsebine in licence**: Kozmetično filtriranje oglasov uporablja odprta pravila skupnosti EasyList. Varnostne sezname zagotavljajo abuse.ch, Phishing Army in StevenBlack pod ustreznimi odprtimi pogoji uporabe.
-- **Licenca**: Projekt je izdan pod licenco [Apache License 2.0](LICENSE).
+- **Licenca in Prilagajanje (Forking)**: Projekt je izdan pod licenco [Apache License 2.0](LICENSE). Prosto ga klonirajte, delite, predelujte in prilagajajte po lastnih željah in potrebah.
 - **Zasebnost**: Podrobnosti o ravnanju s podatki najdete v dokumentu [PRIVACY_POLICY.md](PRIVACY_POLICY.md).
