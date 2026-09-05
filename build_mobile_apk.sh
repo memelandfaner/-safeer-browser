@@ -79,7 +79,18 @@ KEYSTORE_DIR="$DIR/keystore"
 DEFAULT_KEYSTORE="$KEYSTORE_DIR/safeer-release.jks"
 RELEASE_KEYSTORE="${RELEASE_KEYSTORE:-$DEFAULT_KEYSTORE}"
 RELEASE_KEY_ALIAS="${RELEASE_KEY_ALIAS:-safeer-browser}"
-RELEASE_KEY_PASS="${RELEASE_KEY_PASS:-SafeerMobile2026SecureReleaseKey}"
+
+# Preberi geslo iz okolja ali lokalne zaščitene datoteke (brez privzetega gesla v skripti)
+if [ -z "$RELEASE_KEY_PASS" ] && [ -f "$KEYSTORE_DIR/.release_pass" ]; then
+    RELEASE_KEY_PASS="$(cat "$KEYSTORE_DIR/.release_pass")"
+fi
+
+if [ -z "$RELEASE_KEY_PASS" ]; then
+    echo "❌ Napaka: Geslo produkcijskega ključa (RELEASE_KEY_PASS) ni nastavljeno."
+    echo "👉 Nastavite okoljsko spremenljivko: export RELEASE_KEY_PASS=\"...\""
+    echo "👉 Ali shranite geslo v lokalno datoteko $KEYSTORE_DIR/.release_pass (ki je v .gitignore)"
+    exit 1
+fi
 
 if [ ! -f "$RELEASE_KEYSTORE" ]; then
     echo "🔑 Generiram namenski produkcijski release keystore ($RELEASE_KEYSTORE)..."

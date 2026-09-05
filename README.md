@@ -53,14 +53,17 @@
 - **1x1 Prozorni GIF Nadomestek**:
   - Blokirane oglasne slike se nadomestijo z nevidnim 1x1 GIF-om, kar prepreči prikazovanje grdih zlomljenih okvirjev slik.
 
-### 6. 🎨 EasyList Kozmetično Filtriranje & Optimizacija Medijev
-- Odstranitev praznih oglasnih okvirjev preko injiciranja CSS pravil (`##.adsbygoogle, ##ins.adsbygoogle, ##iframe[src*="doubleclick"]`).
-- Vgrajena skripta za nemoteno predvajanje medijev v ozadju z ugasnjenim zaslonom.
+### 6. 🎨 Vgrajeno Kozmetično Filtriranje & Optimizacija Medijev
+- Vgrajena CSS pravila za skrivanje oglasnih elementov (Element Hiding Rules po vzoru EasyList selektorjev), ki brez zunanjih odvisnosti odstranijo prazne oglasne okvirje (`.adsbygoogle`, `iframe[src*="doubleclick"]` ipd.).
+- Baterijsko optimiziran cikel: aplikacija ne uporablja agresivnih WakeLock zaklepov in spoštuje sistemski življenjski cikel Android WebView.
 - Uravnotežen `MIXED_CONTENT_COMPATIBILITY_MODE`, ki omogoča nemoteno predvajanje zakonitih medijskih tokov brez izpostavljanja aktivnim skriptnim napadom.
 
 ---
 
 ## ⚡ Namestitev in Povezave (Installation & Verification)
+
+> [!IMPORTANT]
+> **Pomembno ob posodobitvi**: Različica v1.0.1 je podpisana z uradnim Safeer produkcijskim certifikatom (`CN=Safeer Mobile Browser`). Če imate na napravi še nameščeno staro razvojno (debug) različico, jo morate pred namestitvijo najprej odstraniti, saj Android zaradi varnosti ne dovoljuje neposredne nadgradnje aplikacije z drugačnim podpisnim certifikatom.
 
 ### 📥 1. Uradne APK Datoteke in Preverjanje Celovitosti:
 * **Uradni Release APK**: [Safeer-Browser.apk](https://raw.githubusercontent.com/memelandfaner/-safeer-browser/main/Safeer-Browser.apk)

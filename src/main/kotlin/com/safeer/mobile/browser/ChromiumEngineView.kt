@@ -616,8 +616,8 @@ class ChromiumEngineView @JvmOverloads constructor(
             val conn = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
                 requestMethod = "GET"
                 instanceFollowRedirects = true
-                connectTimeout = 6000
-                readTimeout = 8000
+                connectTimeout = 4000
+                readTimeout = 5000
                 setRequestProperty("User-Agent", userAgent)
                 val cookies = CookieManager.getInstance().getCookie(url)
                 if (!cookies.isNullOrEmpty()) {
@@ -636,13 +636,18 @@ class ChromiumEngineView @JvmOverloads constructor(
                 return null
             }
 
-            // Shrani morebitne Set-Cookie glave v CookieManager, da se ohranijo prijava in piškotki
+            // Shrani morebitne Set-Cookie glave v CookieManager prek zanesljive iteracije indeksov
             val cm = CookieManager.getInstance()
-            conn.headerFields["Set-Cookie"]?.forEach { cookieHeader ->
-                cm.setCookie(url, cookieHeader)
-            }
-            conn.headerFields["set-cookie"]?.forEach { cookieHeader ->
-                cm.setCookie(url, cookieHeader)
+            var headerIdx = 1
+            while (true) {
+                val key = conn.getHeaderFieldKey(headerIdx) ?: break
+                if (key.equals("Set-Cookie", ignoreCase = true)) {
+                    val cookieVal = conn.getHeaderField(headerIdx)
+                    if (!cookieVal.isNullOrEmpty()) {
+                        cm.setCookie(url, cookieVal)
+                    }
+                }
+                headerIdx++
             }
             cm.flush()
 

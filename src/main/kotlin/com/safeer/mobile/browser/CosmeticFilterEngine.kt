@@ -62,7 +62,7 @@ object CosmeticFilterEngine {
         "ytm-promoted-sparkles-web-renderer", "ytm-paid-content-overlay-renderer",
 
         // 🎬 Oglasni bannerji in zunanji oglasni elementi (brez vpliva na sam video predvajalnik)
-        ".removeAds", "a[href*='casino']", ".topAd", ".bottomAd", ".wideBanner", ".underPlayerAd",
+        ".removeAds", ".topAd", ".bottomAd", ".wideBanner", ".underPlayerAd",
         ".commercial-unit", ".ad-zone", "[class*='ad-banner']", ".ad-banner-overlay",
         ".jw-ad-container", ".plyr__ad", ".vjs-ad", ".video-ad-overlay",
         

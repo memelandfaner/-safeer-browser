@@ -134,8 +134,7 @@ object AdBlockEngine {
                 if (lower.contains("&ctier=") || lower.contains("?ctier=") ||
                     lower.contains("&oad=") || lower.contains("?oad=") ||
                     lower.contains("&adformat=") || lower.contains("?adformat=") ||
-                    lower.contains("&ad_type=") || lower.contains("?ad_type=") ||
-                    lower.contains("&alr=yes") || lower.contains("?alr=yes")) {
+                    lower.contains("&ad_type=") || lower.contains("?ad_type=")) {
                     return true // Blokiraj oglasni video tok!
                 }
             }
