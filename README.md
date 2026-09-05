@@ -1,6 +1,6 @@
 # 🛡️ Safeer Browser (Mobile Security Edition)
 
-### **Safeer Browser v1.0.1 — Stable Release**
+### **Safeer Browser v1.0.2 — Stable Release**
 *Open-source Android browser with local malware, phishing, C2 and tracker protection.*
 
 > ⚠️ **Safeer is a security layer, not a guarantee against all online threats.**  
@@ -99,7 +99,7 @@
 ## ⚡ Namestitev in Povezave (Installation & Verification)
 
 > [!IMPORTANT]
-> **Pomembno ob posodobitvi**: Različica v1.0.1 je podpisana z uradnim Safeer produkcijskim certifikatom (`CN=Safeer Mobile Browser`). Če imate na napravi še nameščeno staro razvojno (debug) različico, jo morate pred namestitvijo najprej odstraniti, saj Android zaradi varnosti ne dovoljuje neposredne nadgradnje aplikacije z drugačnim podpisnim certifikatom.
+> **Pomembno ob posodobitvi**: Različica v1.0.2 je podpisana z uradnim Safeer produkcijskim certifikatom (`CN=Safeer Mobile Browser`). Če imate na napravi še nameščeno staro razvojno (debug) različico, jo morate pred namestitvijo najprej odstraniti, saj Android zaradi varnosti ne dovoljuje neposredne nadgradnje aplikacije z drugačnim podpisnim certifikatom.
 
 ### 📥 1. Uradne APK Datoteke in Preverjanje Celovitosti:
 * **Uradni Release APK**: [Safeer-Browser.apk](https://raw.githubusercontent.com/memelandfaner/-safeer-browser/main/Safeer-Browser.apk)

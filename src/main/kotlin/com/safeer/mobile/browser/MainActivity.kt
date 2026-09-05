@@ -896,7 +896,7 @@ class MainActivity : android.app.Activity() {
 
         // 4. Info
         val tvInfo = TextView(this).apply {
-            text = "\nSafeer Mobile Browser v1.0.1 (Build 2) • Target SDK 36\nSafeer is a security layer, not a guarantee against all online threats."
+            text = "\nSafeer Mobile Browser v1.0.2 (Build 3) • Target SDK 36\nSafeer is a security layer, not a guarantee against all online threats."
             textSize = 11f
             setTextColor(Color.parseColor("#64748b"))
             setPadding(0, 16, 0, 0)
