@@ -102,12 +102,16 @@
 > **Pomembno ob posodobitvi**: Različica v1.0.2 je podpisana z uradnim Safeer produkcijskim certifikatom (`CN=Safeer Mobile Browser`). Če imate na napravi še nameščeno staro razvojno (debug) različico, jo morate pred namestitvijo najprej odstraniti, saj Android zaradi varnosti ne dovoljuje neposredne nadgradnje aplikacije z drugačnim podpisnim certifikatom.
 
 ### 📥 1. Uradne APK Datoteke in Preverjanje Celovitosti:
-* **Uradni Release APK**: [Safeer-Browser.apk](https://raw.githubusercontent.com/memelandfaner/-safeer-browser/main/Safeer-Browser.apk)
+* **Uradni Release APK**: [Safeer-Browser.apk](https://raw.githubusercontent.com/memelandfaner/-safeer-browser/main/Safeer-Browser.apk) ali [Safeer-Mobile.apk](https://raw.githubusercontent.com/memelandfaner/-safeer-browser/main/Safeer-Mobile.apk)
 * **Release Artefakt**: [safeer-browser-release.apk](https://raw.githubusercontent.com/memelandfaner/-safeer-browser/main/Release/Artifacts/safeer-browser-release.apk)
 * **Kontrolne vsote**: [SHA256SUMS](https://raw.githubusercontent.com/memelandfaner/-safeer-browser/main/SHA256SUMS)
 
 Preverjanje celovitosti prenesenega paketa v terminalu:
 ```bash
+# Preverjanje posameznega prenesenega paketa:
+sha256sum -c --ignore-missing SHA256SUMS
+
+# Ali preverjanje obeh paketov, če sta oba v mapi:
 sha256sum -c SHA256SUMS
 ```
 
