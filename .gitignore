@@ -3,3 +3,7 @@ __pycache__/
 download_stats.json
 *.pid
 .DS_Store
+download_tracker.py
+safeer_server.py
+start_server.sh
+host_worldwide.sh
