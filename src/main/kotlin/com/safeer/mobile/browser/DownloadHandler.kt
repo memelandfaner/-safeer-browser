@@ -4,6 +4,7 @@ import android.app.DownloadManager
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import android.webkit.CookieManager
 import android.webkit.URLUtil
 import android.widget.Toast
 
@@ -17,6 +18,13 @@ class DownloadHandler(private val context: Context) {
                 if (userAgent != null) {
                     addRequestHeader("User-Agent", userAgent)
                 }
+                // 🍪 Posreduj sejne piškotke za preprečitev 403 Forbidden napak pri prijavljenih računih
+                val cookies = CookieManager.getInstance().getCookie(url)
+                if (!cookies.isNullOrEmpty()) {
+                    addRequestHeader("Cookie", cookies)
+                }
+                addRequestHeader("Referer", url)
+
                 setDescription("Prenašam datoteko...")
                 setTitle(filename)
                 setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)

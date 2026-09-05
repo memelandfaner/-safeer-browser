@@ -80,6 +80,16 @@ class MainActivity : android.app.Activity() {
         repository = BrowserRepository(this)
         downloadHandler = DownloadHandler(this)
 
+        // ⚙️ Naloži shranjene nastavitve iz PreferencesManager
+        AdBlockEngine.isEnabled = PreferencesManager.isAdBlockEnabled(this)
+        isDarkModeActive = PreferencesManager.isDarkModeEnabled(this)
+        AdBlockEngine.onAdBlocked = {
+            PreferencesManager.incrementAdsBlocked(this)
+        }
+        ThreatBlockEngine.onThreatBlocked = { _, _, _, _ ->
+            PreferencesManager.incrementThreatsBlocked(this)
+        }
+
         initViews()
         setupTabManager()
         setupOmnibox()
@@ -87,7 +97,7 @@ class MainActivity : android.app.Activity() {
         setupTouchGestures()
         setupFindInPage()
 
-        // Zaženi posodobitev varnostnih seznamov (Feodo, URLhaus, Phishing Army) v ozadju
+        // Zaženi posodobitev varnostnih seznamov (ThreatFox, URLhaus, Phishing Army) v ozadju
         ThreatFeedsUpdater.updateFeedsAsync(this)
 
         if (android.os.Build.VERSION.SDK_INT >= 33) {
@@ -97,9 +107,58 @@ class MainActivity : android.app.Activity() {
             }
         }
 
-        // Odpri začetni zavihek
-        val targetUrl = intent?.dataString ?: "file:///android_asset/brave_home.html"
-        tabManager.createTab(this, targetUrl, true)
+        handleIncomingIntent(intent, isInitial = true)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIncomingIntent(intent, isInitial = false)
+    }
+
+    private fun handleIncomingIntent(intent: Intent?, isInitial: Boolean) {
+        var targetUrl: String? = null
+
+        if (intent != null) {
+            when (intent.action) {
+                Intent.ACTION_VIEW -> {
+                    targetUrl = intent.dataString
+                }
+                Intent.ACTION_WEB_SEARCH -> {
+                    val query = intent.getStringExtra(android.app.SearchManager.QUERY)
+                        ?: intent.getStringExtra("query") ?: ""
+                    if (query.isNotBlank()) {
+                        targetUrl = PreferencesManager.buildSearchUrl(this, query)
+                    }
+                }
+                Intent.ACTION_SEND -> {
+                    if (intent.type?.startsWith("text/") == true) {
+                        val shared = intent.getStringExtra(Intent.EXTRA_TEXT)?.trim() ?: ""
+                        if (shared.isNotBlank()) {
+                            targetUrl = if (shared.startsWith("http://") || shared.startsWith("https://")) {
+                                shared
+                            } else {
+                                PreferencesManager.buildSearchUrl(this, shared)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        val finalUrl = targetUrl ?: if (isInitial) "file:///android_asset/brave_home.html" else null
+        if (finalUrl != null) {
+            if (isInitial) {
+                tabManager.createTab(this, finalUrl, true)
+            } else {
+                val activeTab = tabManager.getActiveTab()
+                if (activeTab != null && (activeTab.url.isEmpty() || activeTab.url.startsWith("file:///android_asset/"))) {
+                    activeTab.webView.loadUrl(finalUrl)
+                } else {
+                    tabManager.createTab(this, finalUrl, true)
+                }
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -150,15 +209,6 @@ class MainActivity : android.app.Activity() {
 
     override fun onDestroy() {
         super.onDestroy()
-    }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        setIntent(intent)
-        val url = intent?.dataString
-        if (!url.isNullOrEmpty()) {
-            openUrlInBrowser(url)
-        }
     }
 
     private fun openUrlInBrowser(url: String) {
@@ -459,7 +509,7 @@ class MainActivity : android.app.Activity() {
                 "https://$input"
             }
             else -> {
-                "https://www.google.com/search?q=" + URLEncoder.encode(input, "UTF-8")
+                PreferencesManager.buildSearchUrl(this, input)
             }
         }
 
@@ -696,6 +746,7 @@ class MainActivity : android.app.Activity() {
         dialog.findViewById<LinearLayout>(R.id.rowMenuAdBlock).setOnClickListener {
             AdBlockEngine.isEnabled = !AdBlockEngine.isEnabled
             cbAdBlock.isChecked = AdBlockEngine.isEnabled
+            PreferencesManager.setAdBlockEnabled(this, AdBlockEngine.isEnabled)
             Toast.makeText(
                 this,
                 if (AdBlockEngine.isEnabled) "🛡️ AdBlock vklopljen" else "⚠️ AdBlock izklopljen",
@@ -710,6 +761,7 @@ class MainActivity : android.app.Activity() {
         dialog.findViewById<LinearLayout>(R.id.rowMenuDarkMode).setOnClickListener {
             isDarkModeActive = !isDarkModeActive
             cbDark.isChecked = isDarkModeActive
+            PreferencesManager.setDarkModeEnabled(this, isDarkModeActive)
             tabManager.getAllTabs().forEach { t ->
                 t.webView.applyDarkMode(isDarkModeActive)
             }
@@ -721,7 +773,177 @@ class MainActivity : android.app.Activity() {
             dialog.dismiss()
         }
 
+        dialog.findViewById<LinearLayout>(R.id.rowMenuSettings)?.setOnClickListener {
+            dialog.dismiss()
+            showSettingsDialog()
+        }
+
         dialog.show()
+    }
+
+    private fun showSettingsDialog() {
+        val engines = arrayOf("Google", "DuckDuckGo", "Brave Search")
+        val engineKeys = arrayOf(
+            PreferencesManager.SEARCH_GOOGLE,
+            PreferencesManager.SEARCH_DUCKDUCKGO,
+            PreferencesManager.SEARCH_BRAVE
+        )
+        val currentEngine = PreferencesManager.getSearchEngine(this)
+        val selectedEngineIndex = engineKeys.indexOf(currentEngine).let { if (it >= 0) it else 0 }
+
+        val view = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(48, 36, 48, 24)
+        }
+
+        // 1. Iskalnik
+        val tvSearchTitle = TextView(this).apply {
+            text = "🔍 Privzeti iskalnik:"
+            textSize = 15f
+            setTextColor(Color.parseColor("#00d2ff"))
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(0, 0, 0, 12)
+        }
+        view.addView(tvSearchTitle)
+
+        val rgEngine = RadioGroup(this)
+        engineKeys.forEachIndexed { idx, _ ->
+            val rb = RadioButton(this).apply {
+                id = View.generateViewId()
+                text = engines[idx]
+                isChecked = (idx == selectedEngineIndex)
+                setTextColor(Color.WHITE)
+            }
+            rgEngine.addView(rb)
+        }
+        view.addView(rgEngine)
+
+        // Ločilna črta
+        view.addView(View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2).apply {
+                setMargins(0, 24, 0, 24)
+            }
+            setBackgroundColor(Color.parseColor("#334155"))
+        })
+
+        // 2. Preklopniki
+        val tvShieldTitle = TextView(this).apply {
+            text = "🛡️ Zasebnost in varnost:"
+            textSize = 15f
+            setTextColor(Color.parseColor("#00d2ff"))
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(0, 0, 0, 12)
+        }
+        view.addView(tvShieldTitle)
+
+        val cbAdBlock = CheckBox(this).apply {
+            text = "Vgrajeni AdBlock & Botnet ščit"
+            isChecked = PreferencesManager.isAdBlockEnabled(this@MainActivity)
+            setTextColor(Color.WHITE)
+        }
+        view.addView(cbAdBlock)
+
+        val cbDarkMode = CheckBox(this).apply {
+            text = "AMOLED Temni način"
+            isChecked = PreferencesManager.isDarkModeEnabled(this@MainActivity)
+            setTextColor(Color.WHITE)
+        }
+        view.addView(cbDarkMode)
+
+        val cbThirdPartyCookies = CheckBox(this).apply {
+            text = "Dovoli piškotke tretjih oseb (priporočeno: izklopljeno)"
+            isChecked = PreferencesManager.isThirdPartyCookiesEnabled(this@MainActivity)
+            setTextColor(Color.WHITE)
+        }
+        view.addView(cbThirdPartyCookies)
+
+        val cbJs = CheckBox(this).apply {
+            text = "Omogoči JavaScript"
+            isChecked = PreferencesManager.isJavaScriptEnabled(this@MainActivity)
+            setTextColor(Color.WHITE)
+        }
+        view.addView(cbJs)
+
+        // Ločilna črta
+        view.addView(View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2).apply {
+                setMargins(0, 24, 0, 24)
+            }
+            setBackgroundColor(Color.parseColor("#334155"))
+        })
+
+        // 3. Počisti podatke
+        val btnClearData = Button(this).apply {
+            text = "🗑️ Počisti piškotke in predpomnilnik"
+            setBackgroundResource(R.drawable.bg_mobile_icon_button)
+            setTextColor(Color.parseColor("#ff5555"))
+            setOnClickListener {
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Počisti podatke brskanja?")
+                    .setMessage("To bo izbrisalo vse piškotke, predpomnilnik strani, spletno shrambo in zgodovino.")
+                    .setPositiveButton("Počisti") { _, _ ->
+                        android.webkit.CookieManager.getInstance().removeAllCookies(null)
+                        android.webkit.WebStorage.getInstance().deleteAllData()
+                        tabManager.getAllTabs().forEach { it.webView.clearCache(true) }
+                        repository.clearHistory()
+                        Toast.makeText(this@MainActivity, "🧹 Podatki brskanja uspešno počiščeni!", Toast.LENGTH_SHORT).show()
+                    }
+                    .setNegativeButton("Prekliči", null)
+                    .show()
+            }
+        }
+        view.addView(btnClearData)
+
+        // 4. Info
+        val tvInfo = TextView(this).apply {
+            text = "\nSafeer Mobile Browser v1.0.1 (Build 2) • Target SDK 36\nSafeer is a security layer, not a guarantee against all online threats."
+            textSize = 11f
+            setTextColor(Color.parseColor("#64748b"))
+            setPadding(0, 16, 0, 0)
+        }
+        view.addView(tvInfo)
+
+        val scroll = ScrollView(this).apply {
+            addView(view)
+            setBackgroundColor(Color.parseColor("#0a0f1d"))
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("⚙️ Nastavitve")
+            .setView(scroll)
+            .setPositiveButton("Shrani") { _, _ ->
+                val checkedId = rgEngine.checkedRadioButtonId
+                val checkedRb = rgEngine.findViewById<RadioButton>(checkedId)
+                val radioIdx = rgEngine.indexOfChild(checkedRb)
+                if (radioIdx in engineKeys.indices) {
+                    PreferencesManager.setSearchEngine(this, engineKeys[radioIdx])
+                }
+
+                val newAdBlock = cbAdBlock.isChecked
+                PreferencesManager.setAdBlockEnabled(this, newAdBlock)
+                AdBlockEngine.isEnabled = newAdBlock
+
+                val newDark = cbDarkMode.isChecked
+                PreferencesManager.setDarkModeEnabled(this, newDark)
+                isDarkModeActive = newDark
+                tabManager.getAllTabs().forEach { it.webView.applyDarkMode(newDark) }
+
+                val newThirdParty = cbThirdPartyCookies.isChecked
+                PreferencesManager.setThirdPartyCookiesEnabled(this, newThirdParty)
+                tabManager.getAllTabs().forEach {
+                    android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(it.webView, newThirdParty)
+                }
+
+                val newJs = cbJs.isChecked
+                PreferencesManager.setJavaScriptEnabled(this, newJs)
+                tabManager.getAllTabs().forEach {
+                    it.webView.settings.javaScriptEnabled = newJs
+                }
+
+                Toast.makeText(this, "✅ Nastavitve shranjene!", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Prekliči", null)
+            .show()
     }
 
     private fun showThreatStatsDialog() {
@@ -743,7 +965,7 @@ class MainActivity : android.app.Activity() {
                 • Skupaj preprečenih groženj: $totalThreats
                 • Blokiranih oglasov in sledilcev: $totalAds
                 
-                Viri: abuse.ch Feodo Tracker, URLhaus, ThreatFox, Phishing Army, StevenBlack Hosts.
+                Viri: abuse.ch ThreatFox IOC, URLhaus, Phishing Army, StevenBlack Hosts.
                 """.trimIndent()
             )
             .setPositiveButton("Posodobi sezname") { _, _ ->

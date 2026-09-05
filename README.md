@@ -24,7 +24,7 @@
 
 ### 1. 🛡️ Večslojni Threat Shield z Atomsko Zamenjavo (Atomic Trie Swap)
 - **Viri groženj v živo (Live HTTPS Feeds)**:
-  - **abuse.ch Feodo Tracker**: Zaznava in blokada C2 (Command & Control) botnet strežnikov (Dridex, Emotet, TrickBot, QakBot).
+  - **abuse.ch ThreatFox IOC**: Zaznava in blokada C2 (Command & Control) botnet strežnikov in indikatorjev napada.
   - **abuse.ch URLhaus**: Blokada domen in gostiteljev za razširjanje zlonamerne kode (Malware distribution).
   - **Phishing Army Extended**: Zaščita pred lažnim predstavljanjem in poskusi kraje osebnih podatkov.
 - **Semenska baza (Seed Database)**:
@@ -79,6 +79,20 @@
 - Vgrajena CSS pravila za skrivanje oglasnih elementov (Element Hiding Rules po vzoru EasyList selektorjev), ki brez zunanjih odvisnosti odstranijo prazne oglasne okvirje (`.adsbygoogle`, `iframe[src*="doubleclick"]` ipd.).
 - Baterijsko optimiziran cikel: aplikacija ne uporablja agresivnih WakeLock zaklepov in spoštuje sistemski življenjski cikel Android WebView.
 - Brezkompromisen varnostni način `MIXED_CONTENT_NEVER_ALLOW`, ki onemogoča kakršnokoli nalaganje nešifriranih elementov na zaščitenih spletnih straneh.
+
+### 7. ⚙️ Uporabniške Nastavitve, Persistenca & Podpora za Intente (v1.1)
+- **Trajna hramba nastavitev (`PreferencesManager` / `SharedPreferences`)**:
+  - Samodejno shranjevanje stikal: AdBlock ščit, AMOLED Temni način, Piškotki 3. oseb, JavaScript.
+  - Možnost izbire privzetega iskalnika: **Google**, **DuckDuckGo** ali **Brave Search** z neposrednim iskanjem prek Omniboxa.
+  - Kumulativni števec preprečenih oglasov in groženj (se ne ponastavi ob ponovnem zagonu aplikacije).
+- **Prijavljeni prenosi s piškotki (`DownloadHandler`)**:
+  - Samodejno posredovanje `Cookie` in `Referer` glav v `DownloadManager`, kar preprečuje napake `403 Forbidden` pri prenosu datotek iz prijavljenih uporabniških računov (oblak, forumi, repozitoriji).
+- **Sistemska integracija Android (`ACTION_SEND` & `ACTION_WEB_SEARCH`)**:
+  - Brskalnik podpira sprejemanje deljenih povezav in besedil iz drugih aplikacij (WhatsApp, Telegram, e-pošta) ter obdelavo sistemskih iskalnih zahtevkov.
+- **Popolno čiščenje podatkov brskanja**:
+  - Vgrajeno orodje za takojšen izbris piškotkov (`removeAllCookies`), predpomnilnika (`clearCache`), spletne shrambe (`deleteAllData`) in zgodovine brskanja.
+- **Pristen User-Agent**:
+  - Uporaba naravnega sistemskega WebView User-Agenta namesto statičnih fiksnih nizov, kar preprečuje napačne bot-checke in zmanjšuje tveganje za zlom strani.
 
 ---
 

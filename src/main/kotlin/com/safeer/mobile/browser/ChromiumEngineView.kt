@@ -21,7 +21,6 @@ class ChromiumEngineView @JvmOverloads constructor(
 ) : WebView(context, attrs, defStyleAttr) {
 
     companion object {
-        const val MOBILE_USER_AGENT = "Mozilla/5.0 (Linux; Android 15; SM-S931B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Mobile Safari/537.36"
         const val DESKTOP_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
         val PRIVACY_HEADERS = mapOf(
             "Sec-GPC" to "1",
@@ -29,10 +28,18 @@ class ChromiumEngineView @JvmOverloads constructor(
         )
     }
 
+    private val defaultMobileUserAgent: String by lazy {
+        try {
+            WebSettings.getDefaultUserAgent(context)
+        } catch (_: Exception) {
+            "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Mobile Safari/537.36"
+        }
+    }
+
     var isDesktopMode: Boolean = false
         set(value) {
             field = value
-            settings.userAgentString = if (value) DESKTOP_USER_AGENT else MOBILE_USER_AGENT
+            settings.userAgentString = if (value) DESKTOP_USER_AGENT else defaultMobileUserAgent
             settings.useWideViewPort = value
             settings.loadWithOverviewMode = value
         }
@@ -80,12 +87,12 @@ class ChromiumEngineView @JvmOverloads constructor(
         val cm = CookieManager.getInstance()
         cm.setAcceptCookie(true)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // Omogoči za nemoteno prijavo (OAuth 2.0, Google Sign-In, bančništvo)
-            cm.setAcceptThirdPartyCookies(this, true)
+            val allowThirdParty = PreferencesManager.isThirdPartyCookiesEnabled(context)
+            cm.setAcceptThirdPartyCookies(this, allowThirdParty)
         }
 
         settings.apply {
-            javaScriptEnabled = true
+            javaScriptEnabled = PreferencesManager.isJavaScriptEnabled(context)
             domStorageEnabled = true
             databaseEnabled = true
             allowFileAccess = false
@@ -102,7 +109,7 @@ class ChromiumEngineView @JvmOverloads constructor(
             loadWithOverviewMode = isDesktopMode
             
             cacheMode = WebSettings.LOAD_DEFAULT
-            userAgentString = if (isDesktopMode) DESKTOP_USER_AGENT else MOBILE_USER_AGENT
+            userAgentString = if (isDesktopMode) DESKTOP_USER_AGENT else defaultMobileUserAgent
         }
 
         addJavascriptInterface(SafeerWebAppInterface(context, this), "SafeerBridge")
@@ -114,21 +121,27 @@ class ChromiumEngineView @JvmOverloads constructor(
     class SafeerWebAppInterface(private val context: Context, private val webView: WebView) {
         @android.webkit.JavascriptInterface
         fun getStats(): String {
-            val ads = AdBlockEngine.blockedAdsCount.get()
-            val threats = ThreatBlockEngine.totalBlockedThreats.get()
-            val totalSavedKb = (ads * 45L) + (threats * 120L)
+            val sessionAds = AdBlockEngine.blockedAdsCount.get().toLong()
+            val savedAds = PreferencesManager.getTotalAdsBlocked(context)
+            val totalAds = savedAds + sessionAds
+
+            val sessionThreats = ThreatBlockEngine.totalBlockedThreats.get().toLong()
+            val savedThreats = PreferencesManager.getTotalThreatsBlocked(context)
+            val totalThreats = savedThreats + sessionThreats
+
+            val totalSavedKb = (totalAds * 45L) + (totalThreats * 120L)
             val dataMb = if (totalSavedKb >= 1024) {
                 String.format(java.util.Locale.US, "%.1f MB", totalSavedKb / 1024.0)
             } else {
                 "$totalSavedKb KB"
             }
-            val totalSec = (ads * 1.0) + (threats * 1.5)
+            val totalSec = (totalAds * 1.0) + (totalThreats * 1.5)
             val timeMin = if (totalSec >= 60) {
                 String.format(java.util.Locale.US, "%.1f min", totalSec / 60.0)
             } else {
                 String.format(java.util.Locale.US, "%.0f s", totalSec)
             }
-            return "{\"ads\": $ads, \"threats\": $threats, \"dataMb\": \"$dataMb\", \"timeMin\": \"$timeMin\"}"
+            return "{\"ads\": $totalAds, \"threats\": $totalThreats, \"dataMb\": \"$dataMb\", \"timeMin\": \"$timeMin\"}"
         }
 
         @android.webkit.JavascriptInterface
