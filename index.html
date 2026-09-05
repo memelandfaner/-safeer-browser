@@ -616,11 +616,14 @@ setInterval(() => {
             <div class="dl-qr-box" id="qrContainerTv" title="Skenirajte s TV ali telefonom"></div>
           </div>
 
-          <div class="dl-actions">
+          <div class="dl-actions" style="flex-direction: column; gap: 8px;">
             <a href="assets/tv/TV-Browser-2.apk" download class="btn-pill-purple" style="flex:1; justify-content:center;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              <span data-i18n="dl_btn_tv">Prenesi TV brskalnik APK (8.8 MB)</span>
+              <span data-i18n="dl_btn_tv">Prenesi TV brskalnik APK v2.1.80 (9.2 MB)</span>
             </a>
+            <div style="font-size: 0.70rem; color: #64748b; font-family: monospace; text-align: center;">
+              SHA-256: 73678fce3792ef9d149ad35b00e5de8fc68baeec711cc76481d665a5d28ae09f
+            </div>
           </div>
         </div>
 
@@ -642,11 +645,14 @@ setInterval(() => {
             <button onclick="navigator.clipboard.writeText('curl -sSL https://raw.githubusercontent.com/memelandfaner/linux-mint-safeer-browser/main/install.sh | bash'); this.textContent='✓'; setTimeout(()=>this.textContent='📋', 1500);" style="background:transparent; border:none; color:#87cf3e; cursor:pointer; font-size:0.9rem; flex-shrink:0;" title="Kopiraj ukaz">📋</button>
           </div>
 
-          <div class="dl-actions">
+          <div class="dl-actions" style="flex-direction: column; gap: 8px;">
             <a href="assets/desktop/safeer-browser-linux.tar.gz" download class="btn-pill-green" style="flex:1; justify-content:center;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              <span data-i18n="dl_btn_desktop">Prenesi Linux Paket (485 KB)</span>
+              <span data-i18n="dl_btn_desktop">Prenesi Linux Paket v1.0.4 (500 KB)</span>
             </a>
+            <div style="font-size: 0.70rem; color: #64748b; font-family: monospace; text-align: center;">
+              SHA-256: b1c728273bdad6ca082f5ffe4fd9d7a972ac03e60cb32cc3c064c058601d598b
+            </div>
           </div>
         </div>
       </div>
@@ -658,8 +664,10 @@ setInterval(() => {
     <div class="container">
       <ul class="footer-nav">
         <li><a href="https://github.com/memelandfaner/-safeer-browser" target="_blank">GitHub Safeer Mobile</a></li>
-        <li><a href="https://github.com/memelandfaner/-safeer-browser/releases/tag/v1.0.4" target="_blank" style="color:var(--accent-cyan); font-weight:600;">Uradni Release v1.0.4</a></li>
+        <li><a href="https://github.com/memelandfaner/-safeer-browser/releases/tag/v1.0.4" target="_blank" style="color:var(--accent-cyan); font-weight:600;">Mobile Release v1.0.4</a></li>
         <li><a href="https://github.com/memelandfaner/tv-browser-2" target="_blank">GitHub TV Browser 2</a></li>
+        <li><a href="https://github.com/memelandfaner/tv-browser-2/releases/tag/v2.1.80" target="_blank" style="color:#c084fc; font-weight:600;">TV Release v2.1.80</a></li>
+        <li><a href="https://github.com/memelandfaner/linux-mint-safeer-browser" target="_blank" style="color:#87cf3e; font-weight:600;">GitHub Linux Mint v1.0.4</a></li>
         <li><a href="https://tinyurl.com/298zn386" target="_blank">Mobile APK Mirror</a></li>
         <li><a href="https://tinyurl.com/29y9bg9k" target="_blank">TV APK Mirror</a></li>
       </ul>
