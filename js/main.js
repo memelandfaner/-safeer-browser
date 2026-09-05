@@ -457,28 +457,28 @@ const screenshotData = {
   mobile: {
     shield: {
       img: 'assets/mobile/safeer_front.png',
-      url: 'safeer://shield-blocked',
+      url: 'safeer://shield',
       status: 'Aktivna Zaščita',
       icon: '🛡️',
       caption: '<strong>Lokalni Varnostni Ščit:</strong> Prestreže zlonamerna spletna mesta, botnete (Dridex, Emotet) in trojance pred nalaganjem v pomnilnik (abuse.ch O(k) Trie).'
     },
     stats: {
       img: 'assets/mobile/threat_dialog_screen.png',
-      url: 'safeer://shield-stats',
+      url: 'safeer://stats',
       status: '48 Blokiranih',
       icon: '📊',
       caption: '<strong>Nadzorna plošča in statistika:</strong> Pregled v realnem času nad blokiranimi C2 strežniki, sledilci in preprečenimi nevarnimi prenosi.'
     },
     search: {
       img: 'assets/mobile/search_6_rtv_slovenij.png',
-      url: 'https://www.google.com/search?q=rtv+slovenija',
+      url: 'google.com/search?q=rtv',
       status: 'Čisto Brskanje',
       icon: '🔍',
       caption: '<strong>Čisto in hitro brskanje:</strong> Nemoteno iskanje in branje novic brez oglasnih pasic, pojavnih oken in invazivnih sledilnih skript.'
     },
     youtube: {
       img: 'assets/mobile/live_youtube_playback.png',
-      url: 'https://m.youtube.com',
+      url: 'youtube.com (v ozadju)',
       status: '0 Oglasov • Ozadje',
       icon: '🎵',
       caption: '<strong>YouTube z ugasnjenim zaslonom:</strong> Nemoteno poslušanje glasbe in podcastov v ozadju z zaklenjenim telefonom brez oglasnih prekinitev.'
@@ -494,14 +494,14 @@ const screenshotData = {
     },
     dpad: {
       img: 'assets/tv/whole_card_focus_final.png',
-      url: 'tv://dpad-spatial-focus',
+      url: 'tv://dpad',
       status: '60 FPS D-Pad',
       icon: '🎮',
       caption: '<strong>60 FPS D-Pad Fokus:</strong> Cianov fokusni obroč natančno skače med elementi brez zakasnitve – brez nerodnih navideznih mišk.'
     },
     portals: {
       img: 'assets/tv/portal_manager_dialog_verified.png',
-      url: 'tv://portal-manager',
+      url: 'tv://portals',
       status: 'Upravitelj Postaj',
       icon: '📑',
       caption: '<strong>Upravitelj TV Portalov:</strong> Preprosto urejanje, razvrščanje in dodajanje lastnih televizijskih postaj in spletnih mest z daljincem.'
@@ -619,6 +619,22 @@ function renderInlineQRs() {
 const demoScripts = [
   {
     title: "youtube_auto_skip.js",
+    icon: "⚡",
+    headline: "YouTube Samodejni Preskok",
+    meta: "Cilj: *.youtube.com/* • Čas proženja: document-end",
+    badge: "Aktivno",
+    stat1: "14",
+    stat1Lbl: "Oglasov preskočeno",
+    stat2: "42 s",
+    stat2Lbl: "Prihranjen čas",
+    stat3: "0 ms",
+    stat3Lbl: "Zakasnitev klika",
+    logs: [
+      { time: "[10:14:02]", text: "🛡️ Safeer Userscript Engine inicializiran", type: "info" },
+      { time: "[10:14:03]", text: "🔍 Zaznan video element & oglasni predvajalnik", type: "info" },
+      { time: "[10:14:03]", text: "⚡ Najden '.ytp-skip-ad-button' -> Samodejni klik!", type: "success" },
+      { time: "[10:14:04]", text: "✅ Oglas uspešno preskočen brez zamika", type: "success" }
+    ],
     code: `// ==SafeerUserScript==
 // @name         YouTube Samodejni Preskok
 // @match        *://*.youtube.com/*
@@ -635,6 +651,22 @@ setInterval(() => {
   },
   {
     title: "smart_dark_mode.js",
+    icon: "🌙",
+    headline: "Pametni Nočni Način",
+    meta: "Cilj: Vse spletne strani (*) • Brez popačenja slik",
+    badge: "Aktivno",
+    stat1: "85%",
+    stat1Lbl: "Manj modre svetlobe",
+    stat2: "100%",
+    stat2Lbl: "Ohranjene barve slik",
+    stat3: "3.2x",
+    stat3Lbl: "Prihranek baterije",
+    logs: [
+      { time: "[21:40:11]", text: "🌙 Pametni nočni način vklopljen", type: "info" },
+      { time: "[21:40:11]", text: "🎨 Uporabljen CSS invert(90%) hue-rotate(180deg)", type: "info" },
+      { time: "[21:40:12]", text: "🖼️ Zaznanih 18 slik in 2 videa -> Obnovljene naravne barve", type: "success" },
+      { time: "[21:40:12]", text: "✨ Stran pretvorjena v čist AMOLED kontrast", type: "success" }
+    ],
     code: `// ==SafeerUserScript==
 // @name         Pametni Nočni Način
 // @match        *
@@ -649,6 +681,22 @@ document.querySelectorAll("img, video, canvas, picture").forEach(el => {
   },
   {
     title: "clean_web_nobanners.js",
+    icon: "🧹",
+    headline: "Čisti Splet Brez Ovir",
+    meta: "Cilj: Vse spletne strani (*) • Odstranitev vsiljivih pasic",
+    badge: "Aktivno",
+    stat1: "7",
+    stat1Lbl: "Odstranjenih pasic",
+    stat2: "0",
+    stat2Lbl: "Klikov na 'Sprejmi vse'",
+    stat3: "+38%",
+    stat3Lbl: "Več vidne vsebine",
+    logs: [
+      { time: "[14:22:05]", text: "🧹 Skeniranje DOM elementov za nadležne pasice", type: "info" },
+      { time: "[14:22:05]", text: "🚫 Odstranjeno: '.cookie-banner' in '[id*=\"gdpr\"]'", type: "success" },
+      { time: "[14:22:06]", text: "🚫 Odstranjeno: '.newsletter-modal' in '.fixed-bottom-bar'", type: "success" },
+      { time: "[14:22:06]", text: "🎉 Čisto branje omogočeno brez motenj!", type: "success" }
+    ],
     code: `// ==SafeerUserScript==
 // @name         Čisti Splet Brez Ovir
 // @match        *
@@ -678,6 +726,39 @@ function switchScriptDemo(index, btn) {
   if (titleEl) titleEl.textContent = data.title;
   if (codeEl) {
     codeEl.innerHTML = `<code class="language-javascript">${data.code.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code>`;
+  }
+
+  // Update simulator fields
+  const iconEl = document.getElementById('simScriptIcon');
+  const headlineEl = document.getElementById('simScriptHeadline');
+  const metaEl = document.getElementById('simScriptMeta');
+  const badgeEl = document.getElementById('simScriptBadge');
+  const stat1El = document.getElementById('simStat1');
+  const stat1LblEl = document.getElementById('simStat1Lbl');
+  const stat2El = document.getElementById('simStat2');
+  const stat2LblEl = document.getElementById('simStat2Lbl');
+  const stat3El = document.getElementById('simStat3');
+  const stat3LblEl = document.getElementById('simStat3Lbl');
+  const consoleEl = document.getElementById('simConsoleOutput');
+
+  if (iconEl) iconEl.textContent = data.icon;
+  if (headlineEl) headlineEl.textContent = data.headline;
+  if (metaEl) metaEl.textContent = data.meta;
+  if (badgeEl) badgeEl.textContent = data.badge;
+  if (stat1El) stat1El.textContent = data.stat1;
+  if (stat1LblEl) stat1LblEl.textContent = data.stat1Lbl;
+  if (stat2El) stat2El.textContent = data.stat2;
+  if (stat2LblEl) stat2LblEl.textContent = data.stat2Lbl;
+  if (stat3El) stat3El.textContent = data.stat3;
+  if (stat3LblEl) stat3LblEl.textContent = data.stat3Lbl;
+
+  if (consoleEl && data.logs) {
+    consoleEl.innerHTML = data.logs.map(l => `
+      <div class="log-line">
+        <span class="log-time">${l.time}</span>
+        <span class="${l.type === 'success' ? 'log-success' : 'log-info'}">${l.text}</span>
+      </div>
+    `).join('');
   }
 
   document.querySelectorAll('.script-preset-pills .preset-pill').forEach(p => p.classList.remove('active'));

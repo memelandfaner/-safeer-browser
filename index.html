@@ -109,36 +109,36 @@
           <!-- Sub-tabs for Mobile Screenshots -->
           <div class="showcase-subtabs-bar" id="subtabsMobile">
             <button class="subtab-btn active" onclick="switchScreenshot('mobile', 'shield', this)">
-              🛡️ C2 Ščit &amp; Blokada
+              🛡️ C2 Ščit
             </button>
             <button class="subtab-btn" onclick="switchScreenshot('mobile', 'stats', this)">
-              📊 Števec Groženj
+              📊 Števec
             </button>
             <button class="subtab-btn" onclick="switchScreenshot('mobile', 'search', this)">
-              🔍 Iskanje &amp; Portali
+              🔍 Portali
             </button>
             <button class="subtab-btn" onclick="switchScreenshot('mobile', 'youtube', this)">
-              🎵 YouTube v ozadju
+              🎵 YouTube
             </button>
           </div>
 
           <!-- Sub-tabs for TV Screenshots -->
           <div class="showcase-subtabs-bar" id="subtabsTv" style="display:none;">
             <button class="subtab-btn active" onclick="switchScreenshot('tv', 'home', this)">
-              📺 4K Domači portal
+              📺 Portali
             </button>
             <button class="subtab-btn" onclick="switchScreenshot('tv', 'dpad', this)">
-              🎮 60 FPS D-Pad Fokus
+              🎮 60 FPS
             </button>
             <button class="subtab-btn" onclick="switchScreenshot('tv', 'portals', this)">
-              📑 Upravitelj portalov
+              📑 Postaje
             </button>
           </div>
 
           <!-- Sub-tabs for Desktop Screenshots -->
           <div class="showcase-subtabs-bar" id="subtabsDesktop" style="display:none;">
             <button class="subtab-btn active" onclick="switchScreenshot('desktop', 'main', this)">
-              🍃 Suvereno Namizje &amp; Awesomebar
+              🍃 Namizje
             </button>
           </div>
 
@@ -336,68 +336,30 @@
         </p>
       </div>
 
-      <div class="userscripts-content-grid">
-        <!-- Left: Feature Cards & Actions -->
-        <div class="userscripts-cards-col">
-          <div class="feature-card-glass">
-            <div class="feature-card-icon">⚡</div>
-            <div class="feature-card-body">
-              <h4>Enostavno dodajanje in urejanje</h4>
-              <p>Kliknite ikono 🧩, poimenujte skripto, vnesite spletno stran in prilepite kodo. Brskalnik poskrbi za vse ostalo.</p>
+      <!-- Studio Row: Code Editor Window (Left) + Live Execution Simulator (Right) -->
+      <div class="userscripts-studio-grid">
+        <!-- Left: Code Editor Window -->
+        <div class="code-window">
+          <div class="code-window-header">
+            <div class="window-dots">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
             </div>
+            <div class="window-title-tab" id="activeScriptTabTitle">youtube_auto_skip.js</div>
+            <div class="window-badge-status">● AKTIVNA</div>
           </div>
 
-          <div class="feature-card-glass">
-            <div class="feature-card-icon">🎨</div>
-            <div class="feature-card-body">
-              <h4>Oblikovanje po meri &amp; Lasten CSS</h4>
-              <p>Izbirajte med 4 vgrajenimi temami (Midnight, Mint Emerald, Cyberpunk, AMOLED) ali z lastnim CSS-jem preuredite videz katerega koli elementa.</p>
-            </div>
+          <!-- Preset Switcher Pills -->
+          <div class="script-preset-pills">
+            <button class="preset-pill active" onclick="switchScriptDemo(0, this)">1. Preskok oglasov</button>
+            <button class="preset-pill" onclick="switchScriptDemo(1, this)">2. Nočni način</button>
+            <button class="preset-pill" onclick="switchScriptDemo(2, this)">3. Čisti splet</button>
           </div>
 
-          <div class="feature-card-glass">
-            <div class="feature-card-icon">🔒</div>
-            <div class="feature-card-body">
-              <h4>100% zasebno &amp; lokalno izvajanje</h4>
-              <p>Vse vaše skripte se izvajajo lokalno v vaši napravi, brez sledenja, brez oblačnih strežnikov in brez ogrožanja zasebnosti.</p>
-            </div>
-          </div>
-
-          <div class="userscripts-cta-row">
-            <a href="assets/desktop/safeer-browser-linux.tar.gz" download class="btn-pill-green">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-              <span>Prenesi Safeer Linux (Customizer &amp; Skripte)</span>
-            </a>
-            <a href="#download" class="btn-pill-primary">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              <span>Vsi prenosi (Telefon, TV, Linux)</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- Right: Interactive Code Window Mockup (starts at top level) -->
-        <div class="userscripts-code-col">
-          <div class="code-window">
-            <div class="code-window-header">
-              <div class="window-dots">
-                <span class="dot red"></span>
-                <span class="dot yellow"></span>
-                <span class="dot green"></span>
-              </div>
-              <div class="window-title-tab" id="activeScriptTabTitle">youtube_auto_skip.js</div>
-              <div class="window-badge-status">● AKTIVNA</div>
-            </div>
-
-            <!-- Tab Switcher for Quick Script Presets -->
-            <div class="script-preset-pills">
-              <button class="preset-pill active" onclick="switchScriptDemo(0, this)">1. Preskok oglasov &amp; uvodov</button>
-              <button class="preset-pill" onclick="switchScriptDemo(1, this)">2. Pametni nočni način</button>
-              <button class="preset-pill" onclick="switchScriptDemo(2, this)">3. Čisti splet (Brez pasic)</button>
-            </div>
-
-            <!-- Code Body -->
-            <div class="code-editor-body">
-              <pre id="demoCodeDisplay"><code class="language-javascript">// ==SafeerUserScript==
+          <!-- Code Body -->
+          <div class="code-editor-body">
+            <pre id="demoCodeDisplay"><code class="language-javascript">// ==SafeerUserScript==
 // @name         YouTube Samodejni Preskok
 // @match        *://*.youtube.com/*
 // @run-at       document-end
@@ -410,13 +372,112 @@ setInterval(() => {
     console.log('🛡️ Safeer: Oglas samodejno preskočen!');
   }
 }, 500);</code></pre>
-            </div>
+          </div>
 
-            <div class="code-window-footer">
-              <span class="footer-hint">💡 Kliknite zgornje gumbe za ogled primerov, ki jih lahko takoj uporabite v Safeerju.</span>
-            </div>
+          <div class="code-window-footer">
+            <span class="footer-hint">💡 Kliknite zgornje profile za takojšnjo menjavo kode in simulacije.</span>
           </div>
         </div>
+
+        <!-- Right: Live Execution Simulator Window -->
+        <div class="simulator-window">
+          <div class="code-window-header">
+            <div class="window-dots">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+            </div>
+            <div class="window-title-tab" id="simulatorTabTitle">⚡ Rezultat izvajanja v živo</div>
+            <div class="window-badge-status" style="color:var(--accent-emerald);">▶ V TEKU</div>
+          </div>
+
+          <!-- Live Simulator Body -->
+          <div class="simulator-body" id="simulatorBody">
+            <div class="sim-card-active">
+              <div class="sim-card-header">
+                <div class="sim-script-icon" id="simScriptIcon">⚡</div>
+                <div>
+                  <h4 id="simScriptHeadline">YouTube Samodejni Preskok</h4>
+                  <span class="sim-script-meta" id="simScriptMeta">Cilj: *.youtube.com/* • Čas proženja: document-end</span>
+                </div>
+                <span class="sim-badge" id="simScriptBadge">Aktivno</span>
+              </div>
+
+              <!-- Stat Boxes Grid -->
+              <div class="sim-stats-grid">
+                <div class="sim-stat-box">
+                  <span class="sim-stat-val" id="simStat1">14</span>
+                  <span class="sim-stat-lbl" id="simStat1Lbl">Oglasov preskočeno</span>
+                </div>
+                <div class="sim-stat-box">
+                  <span class="sim-stat-val" id="simStat2">42 s</span>
+                  <span class="sim-stat-lbl" id="simStat2Lbl">Prihranjen čas</span>
+                </div>
+                <div class="sim-stat-box">
+                  <span class="sim-stat-val" id="simStat3">0 ms</span>
+                  <span class="sim-stat-lbl" id="simStat3Lbl">Zakasnitev klika</span>
+                </div>
+              </div>
+
+              <!-- Live DOM Console Box -->
+              <div class="sim-console-wrap">
+                <div class="sim-console-head">
+                  <span>TERMINALNI DNEVNIK SKRIPTE (CONSOLE)</span>
+                  <span class="sim-console-live">● V ŽIVO</span>
+                </div>
+                <div class="sim-console-output" id="simConsoleOutput">
+                  <div class="log-line"><span class="log-time">[10:14:02]</span> <span class="log-info">🛡️ Safeer Userscript Engine inicializiran</span></div>
+                  <div class="log-line"><span class="log-time">[10:14:03]</span> <span class="log-info">🔍 Zaznan video element &amp; oglasni predvajalnik</span></div>
+                  <div class="log-line"><span class="log-time">[10:14:03]</span> <span class="log-success">⚡ Najden '.ytp-skip-ad-button' -&gt; Samodejni klik!</span></div>
+                  <div class="log-line"><span class="log-time">[10:14:04]</span> <span class="log-success">✅ Oglas uspešno preskočen brez zamika</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-window-footer">
+            <span class="footer-hint">🚀 Izvajanje je 100% lokalno znotraj procesa brskalnika Safeer.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Full-Width 3-Column Features Row (Below Studio Grid) -->
+      <div class="userscripts-features-row">
+        <div class="feature-card-glass">
+          <div class="feature-card-icon">⚡</div>
+          <div class="feature-card-body">
+            <h4>Enostavno dodajanje in urejanje</h4>
+            <p>Kliknite ikono 🧩, poimenujte skripto, vnesite spletno stran in prilepite kodo. Brskalnik poskrbi za vse ostalo.</p>
+          </div>
+        </div>
+
+        <div class="feature-card-glass">
+          <div class="feature-card-icon">🎨</div>
+          <div class="feature-card-body">
+            <h4>Oblikovanje po meri &amp; Lasten CSS</h4>
+            <p>Izbirajte med 4 vgrajenimi temami (Midnight, Mint Emerald, Cyberpunk, AMOLED) ali z lastnim CSS-jem preuredite videz katerega koli elementa.</p>
+          </div>
+        </div>
+
+        <div class="feature-card-glass">
+          <div class="feature-card-icon">🔒</div>
+          <div class="feature-card-body">
+            <h4>100% zasebno &amp; lokalno izvajanje</h4>
+            <p>Vse vaše skripte se izvajajo lokalno v vaši napravi, brez sledenja, brez oblačnih strežnikov in brez ogrožanja zasebnosti.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Centered Sleek Download Action Row -->
+      <div class="userscripts-cta-center">
+        <a href="assets/desktop/safeer-browser-linux.tar.gz" download class="btn-pill-green">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          <span>Prenesi Safeer Linux (Customizer &amp; Skripte)</span>
+        </a>
+        <a href="#download" class="btn-pill-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span>Vsi prenosi (Telefon, TV, Linux)</span>
+        </a>
       </div>
     </div>
   </section>
