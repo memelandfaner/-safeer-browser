@@ -26,10 +26,9 @@ if command -v adb >/dev/null 2>&1; then
     DEVICE=$(adb devices | grep -v "List" | grep "device$" | head -n 1 | awk '{print $1}')
     if [ -n "$DEVICE" ]; then
         echo "📱 Zaznana ADB naprava: $DEVICE"
-        echo "📲 Nameščam Safeer Browser..."
         adb -s "$DEVICE" install -r "$TEMP_APK"
         echo "🚀 Zaganjam Safeer Browser..."
-        adb -s "$DEVICE" shell am start -n "com.example.safeerbrowser/.MainActivity"
+        adb -s "$DEVICE" shell am start -n "com.safeer.mobile.browser/com.example.safeerbrowser.MainActivity" || adb -s "$DEVICE" shell monkey -p com.safeer.mobile.browser 1
         echo "=========================================================="
         echo "🎉 SAFEER BROWSER JE USPEŠNO NAMEŠČEN IN ZAGNAN!"
         echo "=========================================================="

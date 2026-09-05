@@ -76,11 +76,17 @@ cp "$FINAL_APK" "$RELEASE_DIR/safeer-browser-release.apk"
 cp "$FINAL_APK" "$DIR/Safeer-Mobile.apk"
 cp "$FINAL_APK" "$DIR/Safeer-Browser.apk"
 
+# Generiranje uradnih SHA256SUMS kontrolnih vsot
+cd "$DIR"
+sha256sum Safeer-Browser.apk Safeer-Mobile.apk > "$DIR/SHA256SUMS"
+sha256sum "Release/Artifacts/safeer-mobile-release.apk" "Release/Artifacts/safeer-browser-release.apk" > "$RELEASE_DIR/SHA256SUMS"
+
 # Sinhronizacija v spletno mapo za prenos
 WEB_MOB_DIR="${WEB_MOB_DIR:-/home/janez/Namizje/safeer-web/assets/mobile}"
 if [ -d "$WEB_MOB_DIR" ]; then
     cp -f "$FINAL_APK" "$WEB_MOB_DIR/Safeer-Mobile.apk"
     cp -f "$FINAL_APK" "$WEB_MOB_DIR/Safeer-Browser.apk"
+    cp -f "$DIR/SHA256SUMS" "$WEB_MOB_DIR/SHA256SUMS"
     echo "🌐 Sinhronizirano v safeer-web/assets/mobile/"
 fi
 

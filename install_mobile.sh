@@ -29,6 +29,6 @@ echo "📲 Nameščam APK..."
 adb -s "$DEVICE" install -r "$APK"
 
 echo "🚀 Zaganjam Safeer Browser..."
-adb -s "$DEVICE" shell am start -n "com.example.safeerbrowser/.MainActivity"
+adb -s "$DEVICE" shell am start -n "com.safeer.mobile.browser/com.example.safeerbrowser.MainActivity" || adb -s "$DEVICE" shell monkey -p com.safeer.mobile.browser 1
 
 echo "✅ Uspešno nameščeno in zagnano!"

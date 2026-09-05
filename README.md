@@ -1,16 +1,16 @@
 # 🛡️ Safeer Browser (Mobile Security Edition)
 
-**Safeer Browser** je napreden, visoko-varen mobilni spletni brskalnik za Android, posebej optimiziran za sodobne mobilne naprave (npr. **Samsung Galaxy S25**, 120Hz Dynamic AMOLED 2X) s strojno podprto **kibernetsko zaščito pred Botnet C2 strežniki, zlonamerno programsko opremo (Malware), spletnim ribarjenjem (Phishing) ter agresivnimi oglasnimi mrežami**.
+**Safeer Browser** je sodoben odprtokodni mobilni spletni brskalnik za Android z napredno večslojno zaščito, zasnovan za zmanjšanje izpostavljenosti znanim Botnet C2 strežnikom, zlonamerni programski opremi (Malware), spletnemu ribarjenju (Phishing) ter agresivnim sledilnim in oglasnim mrežam.
 
 ---
 
 ## 🛑 Ključne Varnostne in Zasebnostne Značilnosti
 
-### 1. 🛡️ Avtomatiziran Threat Shield z Atomsko Zamenjavo (Atomic Trie Swap)
+### 1. 🛡️ Večslojni Threat Shield z Atomsko Zamenjavo (Atomic Trie Swap)
 - **Viri groženj v živo (Live HTTPS Feeds)**:
-  - **abuse.ch Feodo Tracker**: Blokada C2 (Command & Control) botnet strežnikov (Dridex, Emotet, TrickBot, QakBot).
+  - **abuse.ch Feodo Tracker**: Zaznava in blokada C2 (Command & Control) botnet strežnikov (Dridex, Emotet, TrickBot, QakBot).
   - **abuse.ch URLhaus**: Blokada domen in gostiteljev za razširjanje zlonamerne kode (Malware distribution).
-  - **Phishing Army Extended**: Zaščita pred lažnim predstavljanjem in krajo bančnih ter osebnih podatkov.
+  - **Phishing Army Extended**: Zaščita pred lažnim predstavljanjem in poskusi kraje osebnih podatkov.
 - **Semenska baza (Seed Database)**:
   - Vgrajeni indikatorji napadov (**abuse.ch ThreatFox IOC**) in zlonamerna omrežja (**StevenBlack Unified**).
 - **🔄 Brezprekinitvena Atomska Zamenjava (Atomic Swap)**:
@@ -18,15 +18,17 @@
 - **🔒 Zero-Bypass Pravilo**:
   - Za nevarne C2/malware domene **ne veljajo nobene video ali embed izjeme**.
 - **🔑 Enokratni Kriptografski Žetoni za Obvoz (One-Time Token Interstitial)**:
-  - Ob poskusu obiska nevarne domene se prikaže rdeč opozorilni zaslon. Morebiten obvoz na lastno odgovornost (`safeer://bypass-threat`) je zaščiten z naključnim enokratnim žetonom (UUID), vezanim na točno določeno domeno in časovno veljavnost (5 min). Zunanje spletne strani ne morejo sprožiti neavtoriziranega odklepa.
+  - Ob poskusu obiska nevarne domene se prikaže opozorilni zaslon. Morebiten obvoz na lastno odgovornost (`safeer://bypass-threat`) je zaščiten z naključnim enokratnim žetonom (UUID), vezanim na točno določeno domeno in časovno veljavnost (5 min). Zunanje spletne strani ne morejo sprožiti neavtoriziranega odklepa.
+- **📝 SHA-256 Revizijsko Beleženje**:
+  - Ob vsakem prenosu seznama brskalnik izračuna SHA-256 kontrolno vsoto za varnostni revizijski dnevnik (Audit Log) za sledljivost posodobitev.
 
 ### 2. 🛡️ Stroga Zaščita Zasebnosti in Dovoljenj (Zero Auto-Grant)
 - **Interaktivna privolitev za strojne vire**:
-  - Brskalnik **nikoli avtomatsko ne odobri** dostopa do mikrofona, kamere ali DRM zaščitenih medijev (`onPermissionRequest`). Uporabnik je vedno eksplicitno vprašan s potrditvenim oknom z jasnim izpisom gostitelja (`origin`).
+  - Brskalnik **nikoli avtomatsko ne odobri** dostopa do mikrofona, kamere ali DRM zaščitenih medijev (`onPermissionRequest`). Uporabnik je vedno vprašan s potrditvenim oknom z jasnim izpisom gostitelja (`origin`). Ob preklicu se klic varno zavrne (`deny()`).
 - **Nadzor nad geolokacijo**:
-  - Dostop do geografske lokacije zahteva izrecno potrditev uporabnika. Ob preklicu ali zavrnitvi je dostop blokiran.
+  - Dostop do geografske lokacije zahteva izrecno potrditev uporabnika. Ob zavrnitvi ali zaprtju dialoga je dostop blokiran.
 - **Blokada piškotkov tretjih oseb**:
-  - `setAcceptThirdPartyCookies(false)` preprečuje medstransko sledenje (cross-site tracking).
+  - `setAcceptThirdPartyCookies(false)` onemogoča medstransko sledenje (cross-site tracking).
 - **Kanonična zaščita pred Path Traversal**:
   - `MobileFileProvider` preverja kanonične poti (`canonicalFile`), kar preprečuje pobeg iz predvidenih map prek `../` ali simbolnih povezav.
 
@@ -36,32 +38,31 @@
 
 ### 4. 🎨 EasyList Kozmetično Filtriranje & Optimizacija Medijev
 - Odstranitev praznih oglasnih okvirjev preko injiciranja CSS pravil (`##.ad-slot, ##[id^="google_ads"]`).
-- Vgrajena skripta za neprekinjeno predvajanje medijev v ozadju z ugasnjenim zaslonom.
+- Vgrajena skripta za nemoteno predvajanje medijev v ozadju z ugasnjenim zaslonom.
 - Uravnotežen `MIXED_CONTENT_COMPATIBILITY_MODE`, ki omogoča nemoteno predvajanje zakonitih medijskih tokov brez izpostavljanja aktivnim skriptnim napadom.
 
 ---
 
-## ⚡ Hitra 1-Klik Namestitev & Kratke Povezave (Quick Install)
+## ⚡ Namestitev in Povezave (Installation & Verification)
 
-### 🚀 1. Kratka povezava za vpis v brskalnik na telefonu:
-Vnesite v poljuben brskalnik na telefonu za takojšen prenos APK:
-* 👉 **`tinyurl.com/safeer-apk`** (ali `https://tinyurl.com/safeer-apk`)
-* 👉 Alternativa: **`tinyurl.com/safeer-mobi`**
-* 👉 Rezervna povezava: **`da.gd/xfcGi`**
+### 📥 1. Uradne APK Datoteke in Preverjanje Celovitosti:
+* **Uradni Release APK**: [Safeer-Browser.apk](https://raw.githubusercontent.com/memelandfaner/-safeer-browser/main/Safeer-Browser.apk)
+* **Release Artefakt**: [safeer-browser-release.apk](https://raw.githubusercontent.com/memelandfaner/-safeer-browser/main/Release/Artifacts/safeer-browser-release.apk)
+* **Kontrolne vsote**: [SHA256SUMS](https://raw.githubusercontent.com/memelandfaner/-safeer-browser/main/SHA256SUMS)
 
-### 📲 2. 1-Vrstični samodejni namestitveni ukaz prek terminala:
+Preverjanje celovitosti prenesenega paketa v terminalu:
 ```bash
-curl -sL https://tinyurl.com/install-safeer | bash
+sha256sum -c SHA256SUMS
 ```
-*(Ali z uradne GitHub povezave: `curl -sL https://raw.githubusercontent.com/memelandfaner/-safeer-browser/main/install_safeer.sh | bash`)*
 
-### 📥 3. Neposredna povezava do uradne APK datoteke:
-* **Najnovejši Release APK**: [Safeer-Browser.apk](https://raw.githubusercontent.com/memelandfaner/-safeer-browser/main/Safeer-Browser.apk)
-* **Release Artifact**: [safeer-browser-release.apk](https://raw.githubusercontent.com/memelandfaner/-safeer-browser/main/Release/Artifacts/safeer-browser-release.apk)
-
-### 📱 4. Lokalna namestitev prek ADB:
+### 📲 2. Samodejna namestitev prek uradnega terminalskega ukaza:
 ```bash
-adb -s 192.168.0.216:34527 install -r Safeer-Browser.apk
+curl -sL https://raw.githubusercontent.com/memelandfaner/-safeer-browser/main/install_safeer.sh | bash
+```
+
+### 📱 3. Namestitev prek orodja ADB:
+```bash
+adb install -r Safeer-Browser.apk
 ```
 
 ---
@@ -71,4 +72,12 @@ adb -s 192.168.0.216:34527 install -r Safeer-Browser.apk
 ```bash
 ./build_mobile_apk.sh
 ```
-Skripta uporablja AAPT2, Kotlinc, D8 in Uber-Apk-Signer ter ustvari podpisan, optimiziran APK paket.
+
+Skripta samostojno prevede vire z AAPT2, prevede Kotlin kodo s `kotlinc`, generira DEX z `D8`, podpiše paket z `uber-apk-signer` ter samodejno osveži kontrolne vsote `SHA256SUMS`. Lokacijo orodij je mogoče prilagoditi prek okoljske spremenljivke `ANDROID_BUILD_TOOLS`.
+
+---
+
+## ⚖️ Pravno Obvestilo in Omejitev Odgovornosti (Disclaimer)
+
+- **Varnostna omejitev**: Noben spletni brskalnik ali varnostni filter ne more zagotoviti 100 % zaščite pred vsemi novimi ali neznanimi grožnjami (Zero-Day). Safeer Browser uporablja več nivojev zaščite za občutno zmanjšanje napadalne površine in tveganja.
+- **Vsebine in licence**: Kozmetično filtriranje oglasov uporablja odprta pravila skupnosti EasyList. Varnostne sezname zagotavljajo abuse.ch, Phishing Army in StevenBlack pod ustreznimi odprtimi pogoji uporabe.
