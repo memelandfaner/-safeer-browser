@@ -48,7 +48,7 @@ echo "⚙️ 1/5: Prevajam Android XML vire (AAPT2)..."
     --rename-manifest-package "com.safeer.mobile.browser" \
     -A "$DIR/assets" \
     --min-sdk-version 28 \
-    --target-sdk-version 35 \
+    --target-sdk-version 36 \
     -o "$BUILD_DIR/resources.apk" \
     --java "$BUILD_DIR/gen" \
     "$BUILD_DIR/compiled_res.zip"

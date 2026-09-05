@@ -38,11 +38,17 @@ object ThreatBlockEngine {
     // Dogodek ob blokadi
     var onThreatBlocked: ((domain: String, category: String, source: String, isMainFrame: Boolean) -> Unit)? = null
 
-    // 🛡️ Stroga bela lista domen, ki jih Threat Shield NIKOLI ne sme blokirati
-    private val NEVER_BLOCK_WHITELIST = hashSetOf(
-        "google.com", "youtube.com", "googlevideo.com", "googleapis.com", "gstatic.com", "ytimg.com",
-        "duckduckgo.com", "wikipedia.org", "wikimedia.org", "github.com", "githubusercontent.com",
-        "microsoft.com", "apple.com", "mozilla.org", "android.com",
+    // 🛡️ Stroga minimalna bela lista domen, ki jih Threat Shield NIKOLI ne sme blokirati
+    // Odstranjen je githubusercontent.com in preširoki wildcardi za preprečevanje zlorab (Malware Staging)
+    private val NEVER_BLOCK_EXACT = hashSetOf(
+        "github.com", "api.github.com", "microsoft.com", "apple.com",
+        "fonts.googleapis.com", "fonts.gstatic.com", "ajax.googleapis.com",
+        "apis.google.com", "play.google.com"
+    )
+
+    private val NEVER_BLOCK_ROOT_DOMAINS = hashSetOf(
+        "google.com", "youtube.com", "googlevideo.com", "ytimg.com",
+        "duckduckgo.com", "wikipedia.org", "wikimedia.org", "mozilla.org", "android.com",
         // Slovenske bančne, javne in novičarske storitve
         "gov.si", "nlb.si", "nkbm.si", "skb.si", "intesasanpaolobank.si", "dh.si",
         "delavska-hranilnica.si", "sparkasse.si", "bks-bank.si", "unicreditbank.si",
@@ -53,8 +59,9 @@ object ThreatBlockEngine {
 
     fun isNeverBlockDomain(host: String): Boolean {
         val h = host.lowercase().trim()
-        if (NEVER_BLOCK_WHITELIST.contains(h)) return true
-        for (w in NEVER_BLOCK_WHITELIST) {
+        if (NEVER_BLOCK_EXACT.contains(h)) return true
+        if (NEVER_BLOCK_ROOT_DOMAINS.contains(h)) return true
+        for (w in NEVER_BLOCK_ROOT_DOMAINS) {
             if (h.endsWith(".$w")) return true
         }
         return false

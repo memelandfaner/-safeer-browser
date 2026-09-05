@@ -16,24 +16,32 @@ object ThreatFeedsUpdater {
     data class ThreatFeed(
         val name: String,
         val url: String,
-        val category: String
+        val category: String,
+        val requiredHeaderMarker: String,
+        val minValidEntries: Int
     )
 
     private val FEEDS = listOf(
         ThreatFeed(
             name = "abuse.ch ThreatFox IOC",
             url = "https://threatfox.abuse.ch/downloads/hostfile/",
-            category = "Botnet C2 & Malware IOC"
+            category = "Botnet C2 & Malware IOC",
+            requiredHeaderMarker = "threatfox",
+            minValidEntries = 20
         ),
         ThreatFeed(
             name = "abuse.ch URLhaus",
             url = "https://urlhaus.abuse.ch/downloads/hostfile/",
-            category = "Zlonamerna koda (Malware)"
+            category = "Zlonamerna koda (Malware)",
+            requiredHeaderMarker = "urlhaus",
+            minValidEntries = 20
         ),
         ThreatFeed(
             name = "Phishing Army Extended",
             url = "https://phishing.army/download/phishing_army_blocklist_extended.txt",
-            category = "Spletno ribarjenje (Phishing)"
+            category = "Spletno ribarjenje (Phishing)",
+            requiredHeaderMarker = "phishing",
+            minValidEntries = 20
         )
     )
 
@@ -91,14 +99,25 @@ object ThreatFeedsUpdater {
 
                     if (conn.responseCode == 200) {
                         val bytes = conn.inputStream.readBytes()
-                        if (bytes.size < 100) continue
+                        // 1. Preveri veljavno velikost (1 KB do 20 MB)
+                        if (bytes.size !in 1024..20_000_000) {
+                            android.util.Log.w("SafeerSecurity", "Zavrnjena neveljavna velikost vira '${feed.name}': ${bytes.size} B")
+                            continue
+                        }
 
-                        // Beleženje SHA-256 kontrolne vsote za revizijo integritete
+                        // 2. Kriptografski izračun SHA-256 kontrolne vsote za revizijski dnevnik
                         val hash = computeSha256(bytes)
-                        android.util.Log.i("SafeerSecurity", "Posodobljen vir '${feed.name}' (${bytes.size} B, SHA-256: $hash)")
+
+                        // 3. Strukturna verifikacija avtentičnosti ponudnika (zavrne captive portale, 404 ali HTML napake)
+                        val preview = String(bytes.sliceArray(0 until minOf(bytes.size, 1024)), Charsets.UTF_8).lowercase()
+                        if (!preview.contains(feed.requiredHeaderMarker)) {
+                            android.util.Log.w("SafeerSecurity", "Zavrnjen neavtentičen vir '${feed.name}' (manjka varnostni marker '${feed.requiredHeaderMarker}')")
+                            continue
+                        }
 
                         val reader = BufferedReader(InputStreamReader(bytes.inputStream(), Charsets.UTF_8))
                         var line: String?
+                        val feedDomains = mutableListOf<String>()
                         while (reader.readLine().also { line = it } != null) {
                             val l = line?.trim() ?: continue
                             if (l.isEmpty() || l.startsWith("#") || l.startsWith(";")) continue
@@ -112,10 +131,23 @@ object ThreatFeedsUpdater {
                             }
 
                             if (isValidDomainName(domain) && !ThreatBlockEngine.isNeverBlockDomain(domain)) {
-                                newTrie.insert(domain, feed.category, feed.name)
-                                totalAdded++
+                                feedDomains.add(domain)
                             }
                         }
+
+                        // 4. Preveri prag minimalnega števila pravil pred odobritvijo
+                        if (feedDomains.size < feed.minValidEntries) {
+                            android.util.Log.w("SafeerSecurity", "Zavrnjen vir '${feed.name}': premalo pravil (${feedDomains.size} < ${feed.minValidEntries})")
+                            continue
+                        }
+
+                        for (d in feedDomains) {
+                            newTrie.insert(d, feed.category, feed.name)
+                            totalAdded++
+                        }
+
+                        prefs.edit().putString("sha256_${feed.name}", hash).apply()
+                        android.util.Log.i("SafeerSecurity", "Uspešno potrjen vir '${feed.name}' (${feedDomains.size} pravil, SHA-256: $hash)")
                     }
                     conn.disconnect()
                 } catch (_: Exception) {}

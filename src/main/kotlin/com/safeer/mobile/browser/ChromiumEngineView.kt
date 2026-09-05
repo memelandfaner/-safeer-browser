@@ -89,9 +89,9 @@ class ChromiumEngineView @JvmOverloads constructor(
             domStorageEnabled = true
             databaseEnabled = true
             allowFileAccess = false
-            allowContentAccess = true
+            allowContentAccess = false
             mediaPlaybackRequiresUserGesture = false
-            mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+            mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
             setSupportMultipleWindows(true)
             javaScriptCanOpenWindowsAutomatically = false
             

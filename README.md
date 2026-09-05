@@ -19,10 +19,16 @@
   - Za nevarne C2/malware domene **ne veljajo nobene video ali embed izjeme**.
 - **🔑 Enokratni Kriptografski Žetoni za Obvoz (One-Time Token Interstitial)**:
   - Ob poskusu obiska nevarne domene se prikaže opozorilni zaslon. Morebiten obvoz na lastno odgovornost (`safeer://bypass-threat`) je zaščiten z naključnim enokratnim žetonom (UUID), vezanim na točno določeno domeno in časovno veljavnost (5 min). Zunanje spletne strani ne morejo sprožiti neavtoriziranega odklepa.
-- **📝 SHA-256 Revizijsko Beleženje**:
-  - Ob vsakem prenosu seznama brskalnik izračuna SHA-256 kontrolno vsoto za varnostni revizijski dnevnik (Audit Log) za sledljivost posodobitev.
+- **📝 Kriptografska Verifikacija & SHA-256 Revizija Feedov**:
+  - Ob vsakem prenosu varnostnih seznamov brskalnik preveri strukturne markerje avtentičnosti izdajatelja (`abuse.ch`, `Phishing Army`), meje veljavne velikosti ter prag minimalnega števila pravil. Preprečena je uveljavitev neveljavnih podatkov ali prestreženih HTML portalov. Izračunana kontrolna vsota SHA-256 se zabeleži v varnostni revizijski dnevnik in shrani v varovano lokalno shrambo.
 
 ### 2. 🛡️ Stroga Zaščita Zasebnosti in Dovoljenj (Zero Auto-Grant)
+- **Brezkompromisna zapora mešanih vsebin (`MIXED_CONTENT_NEVER_ALLOW`)**:
+  - Dosledno upoštevanje priporočil Android Security: brskalnik popolnoma prepoveduje nalaganje nezaščitenih HTTP elementov na HTTPS povezavah.
+- **Izolacija Content Providerjev (`allowContentAccess = false`)**:
+  - Popolnoma onemogočen dostop do `content://` shem prek spletnih vsebin, kar odpravlja vektorje napadov na sistemske ponudnike podatkov.
+- **Pripravljenost na Android 16 (Target SDK 36)**:
+  - Polna usklajenost z najnovejšimi standardi Android varnostnega modela.
 - **Interaktivna privolitev za strojne vire**:
   - Brskalnik **nikoli avtomatsko ne odobri** dostopa do mikrofona, kamere ali DRM zaščitenih medijev (`onPermissionRequest`). Uporabnik je vedno vprašan s potrditvenim oknom z jasnim izpisom gostitelja (`origin`). Ob preklicu se klic varno zavrne (`deny()`).
 - **Nadzor nad geolokacijo**:
@@ -56,7 +62,7 @@
 ### 6. 🎨 Vgrajeno Kozmetično Filtriranje & Optimizacija Medijev
 - Vgrajena CSS pravila za skrivanje oglasnih elementov (Element Hiding Rules po vzoru EasyList selektorjev), ki brez zunanjih odvisnosti odstranijo prazne oglasne okvirje (`.adsbygoogle`, `iframe[src*="doubleclick"]` ipd.).
 - Baterijsko optimiziran cikel: aplikacija ne uporablja agresivnih WakeLock zaklepov in spoštuje sistemski življenjski cikel Android WebView.
-- Uravnotežen `MIXED_CONTENT_COMPATIBILITY_MODE`, ki omogoča nemoteno predvajanje zakonitih medijskih tokov brez izpostavljanja aktivnim skriptnim napadom.
+- Brezkompromisen varnostni način `MIXED_CONTENT_NEVER_ALLOW`, ki onemogoča kakršnokoli nalaganje nešifriranih elementov na zaščitenih spletnih straneh.
 
 ---
 
