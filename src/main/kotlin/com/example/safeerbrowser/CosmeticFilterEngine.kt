@@ -12,22 +12,29 @@ object CosmeticFilterEngine {
     // Splošna EasyList pravila za skrivanje oglasnih elementov
     private val GENERIC_ELEMENT_HIDING_RULES = listOf(
         // Google Ads & DFP
-        ".adsbygoogle", "[id^='google_ads']", "[id^='div-gpt-ad']", "[class*='google-ad']",
+        ".adsbygoogle", "ins.adsbygoogle", "[id^='google_ads']", "[id^='div-gpt-ad']", "[class*='google-ad']",
+        "[data-ad-client]", "[data-ad-slot]", "[data-ad-format]",
+        "iframe[id*='google_ads_iframe']", "iframe[src*='doubleclick']", "iframe[src*='googlesyndication']",
+        "iframe[src*='adservice']", "iframe[src*='adnxs']", "iframe[src*='monetag']",
+        "iframe[src*='propellerads']", "iframe[src*='exoclick']", "iframe[src*='trafficjunky']",
         ".a4bIc-ad", ".commercial-unit", ".ad-slot",
         ".ad-container:not(#player):not(#player-container):not(#player-container-id):not(.html5-video-player)",
         ".ad-wrapper:not(#player):not(#player-container):not(.html5-video-player)",
+        "[class*='ad_container']:not(#player):not(#player-container):not(#player-container-id):not(.html5-video-player)",
         
         // Sponzorirane vsebine & Native Ads (Taboola, Outbrain)
         ".taboola", ".outbrain", ".trc_rbox_container",
         "[data-ad]:not(#movie_player):not(.html5-video-player):not(#player-container)",
         "[data-ad-unit]",
         ".sponsored-post", ".sponsored-content", ".promoted-tweet", ".promoted-post",
+        "[class*='sponsored-wrapper']", "[class*='sponsored_post']", "[class*='native-ad']",
         
         // Popunder, Banner, In-Page Push & Floating Ad elementi
         ".pop-under", ".ad-banner", ".banner-ad", ".sticky-ad", ".floating-banner",
-        ".monetag-banner", ".richpush-banner", ".interstitial-ad",
+        ".monetag-banner", ".richpush-banner", ".interstitial-ad", ".ad-modal",
         "[class*='reward-zone']", "[id*='reward-zone']", "[class*='floating-ad']",
         "[class*='gamify-ad']", "[class*='coin-chest']", "[class*='ad-floating']",
+        "[class*='ad-leaderboard']", "[class*='ad-rectangle']", "[class*='ad-sidebar']",
         
         // Lažni gumbi za prenos (Fake Download Ads)
         "[class*='fake-download']", "[id*='fake-download']", ".download-button-ad",
@@ -60,7 +67,8 @@ object CosmeticFilterEngine {
         ".jw-ad-container", ".plyr__ad", ".vjs-ad", ".video-ad-overlay",
         
         // AdBlock opozorila in prekrivna okna
-        ".fc-ab-root", ".adblock-overlay", "#adblock-modal", ".ad-block-warning"
+        ".fc-ab-root", ".adblock-overlay", "#adblock-modal", ".ad-block-warning",
+        ".adblock-notice", ".adblock-banner", "[id*='adblock-banner']"
     )
 
     /**

@@ -12,6 +12,36 @@ object UserScriptManager {
         }
     """
 
+    private const val GPC_AND_DNT_JS = """
+        /* 🔒 Safeer Global Privacy Control (GPC) & Do Not Track (DNT) W3C Engine */
+        (function() {
+            if (window._safeer_gpc_active) return;
+            window._safeer_gpc_active = true;
+
+            var gpcProp = {
+                value: true,
+                writable: false,
+                configurable: false,
+                enumerable: true
+            };
+            var dntProp = {
+                value: '1',
+                writable: false,
+                configurable: false,
+                enumerable: true
+            };
+
+            try {
+                Object.defineProperty(navigator, 'globalPrivacyControl', gpcProp);
+                Object.defineProperty(navigator, 'doNotTrack', dntProp);
+                if (window.Navigator && window.Navigator.prototype) {
+                    Object.defineProperty(window.Navigator.prototype, 'globalPrivacyControl', gpcProp);
+                    Object.defineProperty(window.Navigator.prototype, 'doNotTrack', dntProp);
+                }
+            } catch(e) {}
+        })();
+    """
+
     private const val ANTI_POPUNDER_SHIELD_JS = """
         /* 🛡️ Safeer Anti-Popunder, Anti-Clickjacking & Streaming Shield Engine */
         (function() {
@@ -40,6 +70,10 @@ object UserScriptManager {
                 try {
                     var adSelectors = [
                         '.reward-zone', '#reward-zone', '.fc-ab-root', '.adblock-overlay', '#adblock-modal',
+                        '.adsbygoogle', 'ins.adsbygoogle', '[id^="google_ads"]', '[id^="div-gpt-ad"]',
+                        '[class*="google-ad"]', '[class*="ad-banner"]', '.interstitial-ad', '.ad-modal',
+                        '.adblock-notice', '.ad-wrapper:not(#player):not(#player-container):not(.html5-video-player)',
+                        '.ad-container:not(#player):not(#player-container):not(#player-container-id):not(.html5-video-player)',
                         '[class*="dating-popup"]', '[id*="dating-popup"]', '[class*="fake-download"]',
                         '.download-button-ad', 'div[class*="download-arrow"]',
                         '.removeAds', 'a[href*="casino"]', '.topAd', '.bottomAd',
@@ -106,20 +140,56 @@ object UserScriptManager {
                 }
             }, true);
 
+            // 🚫 5. Zaznava in nevtralizacija nevidnih celozaslonskih clickjacking prevlek
+            function neutralizeClickjackingOverlays() {
+                try {
+                    var allDivs = document.querySelectorAll('div, a, span');
+                    for (var k = 0; k < allDivs.length; k++) {
+                        var node = allDivs[k];
+                        if (isPlayerElement(node)) continue;
+                        var style = window.getComputedStyle(node);
+                        if (style.position === 'fixed' || style.position === 'absolute') {
+                            var z = parseInt(style.zIndex, 10);
+                            if (z > 999) {
+                                var rect = node.getBoundingClientRect();
+                                var w = window.innerWidth || document.documentElement.clientWidth;
+                                var h = window.innerHeight || document.documentElement.clientHeight;
+                                if (rect.width >= w * 0.85 && rect.height >= h * 0.85) {
+                                    var text = (node.innerText || '').trim();
+                                    var isAdLike = node.tagName === 'A' || style.opacity < 0.15 || 
+                                                   style.backgroundColor.indexOf('rgba(0, 0, 0, 0)') !== -1 ||
+                                                   style.backgroundColor === 'transparent';
+                                    if (text.length === 0 && isAdLike) {
+                                        node.remove();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch(e) {}
+            }
+
             var hostNow = (location.hostname || '').toLowerCase();
             var isYouTubePage = hostNow.indexOf('youtube') !== -1 || hostNow.indexOf('youtu.be') !== -1;
 
             cleanAllAdOverlays();
-            if (!isYouTubePage) autoSkipVideoAds();
+            if (!isYouTubePage) {
+                autoSkipVideoAds();
+                neutralizeClickjackingOverlays();
+            }
             setInterval(function() {
                 cleanAllAdOverlays();
-                if (!isYouTubePage) autoSkipVideoAds();
+                if (!isYouTubePage) {
+                    autoSkipVideoAds();
+                    neutralizeClickjackingOverlays();
+                }
             }, isYouTubePage ? 2500 : 500);
 
             if (!isYouTubePage) {
                 var observer = new MutationObserver(function() {
                     cleanAllAdOverlays();
                     autoSkipVideoAds();
+                    neutralizeClickjackingOverlays();
                 });
                 if (document.body) {
                     observer.observe(document.body, { childList: true, subtree: true });
@@ -1065,6 +1135,7 @@ object UserScriptManager {
     """
 
     fun injectEarlyScript(webView: WebView, isDesktop: Boolean = false) {
+        webView.evaluateJavascript(GPC_AND_DNT_JS, null)
         val cosmeticCss = CosmeticFilterEngine.buildCosmeticCss()
         injectCss(webView, cosmeticCss, "safeer-cosmetic-filter")
         if (isDesktop) {
@@ -1077,6 +1148,7 @@ object UserScriptManager {
     }
 
     fun injectOnPageFinished(webView: WebView, isDarkMode: Boolean, isDesktop: Boolean = false) {
+        webView.evaluateJavascript(GPC_AND_DNT_JS, null)
         val cosmeticCss = CosmeticFilterEngine.buildCosmeticCss()
         injectCss(webView, cosmeticCss, "safeer-cosmetic-filter")
         if (isDesktop) {

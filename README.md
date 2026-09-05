@@ -32,12 +32,29 @@
 - **Kanonična zaščita pred Path Traversal**:
   - `MobileFileProvider` preverja kanonične poti (`canonicalFile`), kar preprečuje pobeg iz predvidenih map prek `../` ali simbolnih povezav.
 
-### 3. ⚡ Visoko-zmogljiv Radix / Domain Suffix Trie ($O(k)$)
-- Preverjanje domen v mikrosekundah brez obremenjevanja procesorja ali počasnih nizovnih zank.
-- Avtomatsko prestrezanje vseh poddomen (`sub.evil-server.cc` -> `evil-server.cc`).
+### 3. 🧹 Kirurško Čiščenje Sledilnih Parametrov v URL-jih (Query Tracker Stripping)
+- **Avtomatska nevtralizacija sledilcev**:
+  - Ob kliku na povezave ali vnosu v naslovno vrstico se iz URL-jev kirurško odstranijo sledilni parametri za medstransko profiliranje:
+    `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`, `fbclid`, `gclid`, `msclkid`, `twclid`, `ttclid`, `yclid`, `mc_eid`, `gad_source`, `gbraid`, `wbraid`, `dclid`, `zanpid`, `igshid`.
+- **Ničelna kolateralna škoda (Zero UX Regression)**:
+  - Stroga zaščita avtentikacijskih parametrov (OAuth 2.0 / SSO: `code`, `state`, `token`, `session_state`, `access_token`, `client_id`, `redirect_uri`), plačilnih portalov (Stripe, bančni portali: `session_id`, `payment_id`, `amount`, `return_url`), iskalnih poizvedb (`q`, `query`, `search`) in multimedijskih parametrov (`v`, `t`, `list`).
 
-### 4. 🎨 EasyList Kozmetično Filtriranje & Optimizacija Medijev
-- Odstranitev praznih oglasnih okvirjev preko injiciranja CSS pravil (`##.ad-slot, ##[id^="google_ads"]`).
+### 4. 🌐 Global Privacy Control (W3C GPC) & Do Not Track (DNT)
+- **DOM / JavaScript API**:
+  - `navigator.globalPrivacyControl = true` in `navigator.doNotTrack = "1"` sta privzeto uveljavljena pred izvajanjem katerekoli spletne skripte, kar samodejno sporoči platformam za upravljanje soglasij (CMP: OneTrust, Cookiebot, Klaro itd.) zahtevo za prepoved prodaje ali deljenja osebnih podatkov.
+- **HTTP Zahtevki**:
+  - Samodejno pošiljanje privzetih HTTP glav `Sec-GPC: 1` in `DNT: 1` pri vseh navigacijskih zahtevkih.
+
+### 5. ⚡ Vrhunsko Blokiranje Oglasov & Proti-Clickjacking Zaščita
+- **Razširjen Suffix Trie ($O(k)$)**:
+  - Vgrajen obsežen register več kot 120 oglasnih borz, agresivnih popunder omrežij, lažnih potisnih obvestil ter vedenjske telemetrije.
+- **Nevtralizacija prosojnih celozaslonskih prevlek**:
+  - Zaznava in takojšnje brisanje nevidnih clickjacking slojev, ki jih spletna mesta uporabljajo za sprožitev oglasov ob prvem dotiku zaslona ali predvajalnika.
+- **1x1 Prozorni GIF Nadomestek**:
+  - Blokirane oglasne slike se nadomestijo z nevidnim 1x1 GIF-om, kar prepreči prikazovanje grdih zlomljenih okvirjev slik.
+
+### 6. 🎨 EasyList Kozmetično Filtriranje & Optimizacija Medijev
+- Odstranitev praznih oglasnih okvirjev preko injiciranja CSS pravil (`##.adsbygoogle, ##ins.adsbygoogle, ##iframe[src*="doubleclick"]`).
 - Vgrajena skripta za nemoteno predvajanje medijev v ozadju z ugasnjenim zaslonom.
 - Uravnotežen `MIXED_CONTENT_COMPATIBILITY_MODE`, ki omogoča nemoteno predvajanje zakonitih medijskih tokov brez izpostavljanja aktivnim skriptnim napadom.
 

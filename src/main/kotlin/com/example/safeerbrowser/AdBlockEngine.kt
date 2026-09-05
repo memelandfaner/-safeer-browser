@@ -23,14 +23,26 @@ object AdBlockEngine {
     // Suffix Trie za strogo preverjene varne domene (Bela lista)
     private val whitelistTrie = DomainSuffixTrie()
 
+    // 1x1 prozorni GIF za nevtralizacijo oglasnih slik brez zlomljenih okvirjev
+    private val TRANSPARENT_1X1_GIF = byteArrayOf(
+        0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00, 0x01, 0x00,
+        0x80.toByte(), 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x21, 0xf9.toByte(), 0x04, 0x01, 0x00, 0x00, 0x00, 0x00,
+        0x2c, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00,
+        0x00, 0x02, 0x02, 0x44, 0x01, 0x00, 0x3b
+    )
+
     // Vzorci oglasnih, sledilnih in analitičnih poti (Path Rules)
     private val BLOCKED_PATH_PATTERNS = listOf(
-        "/pagead/", "/api/stats/ads", "/ptracking", "/get_midroll_info",
-        "/ads.js", "/ad.js", "/adservice.", "/pixel.", "collect?v=",
-        "/metrika", "/watch.js", "/tag.js", "/monetag/", "/popunder",
+        "/pagead/", "/pagead2/", "/api/stats/ads", "/ptracking", "/get_midroll_info",
+        "/ad_status", "/ads/v1/", "/ads/v2/", "/ad_break", "/adserver/", "/adsystem/",
+        "/adservices/", "/ads.js", "/ad.js", "/adservice.", "/pixel.", "collect?v=",
+        "/metrika", "/watch.js", "/tag.js", "/monetag/", "/popunder", "/pop-under",
         "/_xa/ads", "/_xa/", "justservingfiles.net", "etahub.com",
         "delivery.trafficjunky", "trafficjunky", "tsyndicate",
-        "disable-devtool", "devtools-detector"
+        "disable-devtool", "devtools-detector",
+        "google-analytics.com/g/collect", "google-analytics.com/analytics.js",
+        "googletagmanager.com/gtm.js", "googletagmanager.com/gtag/js"
     )
 
     init {
@@ -76,17 +88,36 @@ object AdBlockEngine {
             "juicyads.com", "trafficfactory.biz", "realsrv.com", "onclickalgo.com", "onclickperformance.com",
             "onclickmega.com", "onclickgate.com", "syndication.exoclick.com", "syndication.realsrv.com",
             "doublepimp.com", "deloplen.com", "highperformancegate.com", "effectivegate.com", "pussing.com",
-            "propu.sh", "creativecdn.com", "whosamung.us", "traffichaus.com", "bngpt.com", "adnxs.com",
+            "propu.sh", "creativecdn.com", "whosamung.us", "traffichaus.com", "bngpt.com", "adnxs.com", "adnxs-simple.com",
             "trafficstars.com", "livejasmin.com", "bongacams.com", "chaturbate.com", "stripchat.com", "cam4.com",
+            "adtrue.com", "ad-score.com", "runative-syndicate.com", "plugrush.com", "bullionpromotions.com",
+            "vlitag.com", "vidcrunch.com", "aniview.com", "primis.tech", "springserve.com", "smartclip.net",
+            "adhigh.net", "adkernel.com", "adsupply.com", "adtarget.me", "adup-tech.com", "adxprts.com", "airpush.com",
 
-            // Oglasni strežniki in sledilci
+            // Oglasni strežniki, borze in sledilci
             "doubleclick.net", "googleads.g.doubleclick.net", "static.doubleclick.net",
             "googlesyndication.com", "pagead2.googlesyndication.com", "googleadservices.com",
             "adservice.google.com", "adservice.google.si", "amazon-adsystem.com",
-            "taboola.com", "outbrain.com", "criteo.com", "rubiconproject.com",
+            "taboola.com", "outbrain.com", "criteo.com", "criteo.net", "rubiconproject.com",
             "pubmatic.com", "openx.net", "smartadserver.com", "bidswitch.net", "casalemedia.com",
+            "indexexchange.com", "yieldmo.com", "triplelift.com", "gumgum.com", "seedtag.com",
+            "adpushup.com", "ezoic.com", "adthrive.com", "mediavine.com", "media.net", "snigel.com",
+            "flashtalking.com", "moatads.com", "adroll.com", "teads.tv", "spotxchange.com", "spotx.tv",
+            "connatix.com", "kixer.com", "revcontent.com", "mgid.com", "content.ad", "adblade.com",
+            "sharethrough.com", "sovrn.com", "lijit.com", "exponential.com", "tribalfusion.com", "zedo.com",
+            "admob.com", "applovin.com", "unityads.unity3d.com", "ironsrc.com", "inmobi.com",
+            "vungle.com", "liftoff.io", "mintegral.com", "chartboost.com", "fyber.com",
+
+            // Vedenjsko sledenje, telemetrija in profiliranje
             "scorecardresearch.com", "quantserve.com", "hotjar.com", "clarity.ms",
-            "mc.yandex.ru", "metrika.yandex.ru", "an.yandex.ru"
+            "fullstory.com", "logrocket.com", "mouseflow.com", "luckyorange.com", "crazyegg.com",
+            "segment.io", "segment.com", "mixpanel.com", "amplitude.com", "branch.io",
+            "appsflyer.com", "adjust.com", "kochava.com", "singular.net",
+            "connect.facebook.net", "pixel.facebook.com", "analytics.tiktok.com",
+            "mc.yandex.ru", "metrika.yandex.ru", "an.yandex.ru",
+
+            // Potisna vsiljiva omrežja (Push scams)
+            "pushwelcome.com", "news-feed2.com", "notifpush.com", "pushassist.com", "truepush.com"
         )
         for (d in adsAndGambling) blockedTrie.insert(d)
     }
@@ -176,15 +207,16 @@ object AdBlockEngine {
                          lower.contains("ads_batch") || lower.contains("/ads?") ||
                          lower.contains("trafficjunky"))
 
+            val isImage = lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg") ||
+                          lower.endsWith(".gif") || lower.endsWith(".webp") || lower.endsWith(".svg") ||
+                          lower.contains("/pixel") || lower.contains("/banner") || lower.contains("/ad-image")
+
             val mime = when {
                 isXml -> "application/xml"
                 isJson -> "application/json"
+                isImage -> "image/gif"
                 lower.endsWith(".js") || lower.contains(".js?") -> "application/javascript"
                 lower.endsWith(".css") || lower.contains(".css?") -> "text/css"
-                lower.endsWith(".png") -> "image/png"
-                lower.endsWith(".jpg") || lower.endsWith(".jpeg") -> "image/jpeg"
-                lower.endsWith(".gif") -> "image/gif"
-                lower.endsWith(".svg") -> "image/svg+xml"
                 lower.endsWith(".html") -> "text/html"
                 else -> "text/plain"
             }
@@ -192,6 +224,7 @@ object AdBlockEngine {
             val contentBytes = when {
                 isXml -> "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<VAST version=\"3.0\"/>".toByteArray(Charsets.UTF_8)
                 isJson -> "{\"adPlacements\":[],\"ads\":[],\"adsBatch\":{},\"status\":\"ok\",\"success\":true}".toByteArray(Charsets.UTF_8)
+                isImage -> TRANSPARENT_1X1_GIF
                 lower.endsWith(".js") || lower.contains(".js?") -> "// Safeer AdBlock Neutralized\n".toByteArray(Charsets.UTF_8)
                 else -> ByteArray(0)
             }

@@ -22,6 +22,10 @@ class ChromiumEngineView @JvmOverloads constructor(
     companion object {
         const val MOBILE_USER_AGENT = "Mozilla/5.0 (Linux; Android 15; SM-S931B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Mobile Safari/537.36"
         const val DESKTOP_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
+        val PRIVACY_HEADERS = mapOf(
+            "Sec-GPC" to "1",
+            "DNT" to "1"
+        )
     }
 
     var isDesktopMode: Boolean = false
@@ -126,12 +130,30 @@ class ChromiumEngineView @JvmOverloads constructor(
         }
     }
 
+    override fun loadUrl(url: String) {
+        val sanitized = UrlSanitizer.sanitize(url)
+        if (sanitized.startsWith("http://", ignoreCase = true) || sanitized.startsWith("https://", ignoreCase = true)) {
+            super.loadUrl(sanitized, PRIVACY_HEADERS)
+        } else {
+            super.loadUrl(sanitized)
+        }
+    }
+
+    override fun loadUrl(url: String, additionalHttpHeaders: Map<String, String>) {
+        val sanitized = UrlSanitizer.sanitize(url)
+        val combined = additionalHttpHeaders.toMutableMap()
+        if (!combined.containsKey("Sec-GPC")) combined["Sec-GPC"] = "1"
+        if (!combined.containsKey("DNT")) combined["DNT"] = "1"
+        super.loadUrl(sanitized, combined)
+    }
+
     /**
      * Odpri URL kot nov dokument. Na YouTube nikoli ne uporabi location.replace —
      * SPA sicer obdrži stari predvajalnik in predvaja napačen video.
      */
     fun navigateDocument(url: String) {
-        val target = normalizeExternalUrl(url)
+        val sanitized = UrlSanitizer.sanitize(url)
+        val target = normalizeExternalUrl(sanitized)
         stopLoading()
         evaluateJavascript(
             """
@@ -408,6 +430,20 @@ class ChromiumEngineView @JvmOverloads constructor(
                         } catch (_: Exception) {}
                     }
                     return true
+                }
+
+                // 4. Kirurško čiščenje sledilnih parametrov (Query Tracker Stripping) ob kliku na povezavo
+                val method = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    request.method ?: "GET"
+                } else {
+                    "GET"
+                }
+                if (isMainFrame && !method.equals("POST", ignoreCase = true) && (scheme == "http" || scheme == "https")) {
+                    val sanitized = UrlSanitizer.sanitize(urlStr)
+                    if (sanitized != urlStr) {
+                        view?.loadUrl(sanitized)
+                        return true
+                    }
                 }
 
                 // Za vsa legitimna spletna mesta dovoli normalno odpiranje

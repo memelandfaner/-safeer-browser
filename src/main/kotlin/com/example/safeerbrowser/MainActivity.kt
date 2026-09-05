@@ -133,11 +133,12 @@ class MainActivity : android.app.Activity() {
     }
 
     private fun openUrlInBrowser(url: String) {
+        val sanitized = UrlSanitizer.sanitize(url)
         val activeTab = tabManager.getActiveTab()
         if (activeTab != null) {
-            activeTab.webView.navigateDocument(url)
+            activeTab.webView.navigateDocument(sanitized)
         } else {
-            tabManager.createTab(this, url, true)
+            tabManager.createTab(this, sanitized, true)
         }
     }
 
@@ -326,7 +327,7 @@ class MainActivity : android.app.Activity() {
     private fun performNavigation(input: String) {
         if (input.isEmpty()) return
 
-        val finalUrl = when {
+        val rawUrl = when {
             input.startsWith("http://", ignoreCase = true) || input.startsWith("https://", ignoreCase = true) || input.startsWith("file://", ignoreCase = true) -> {
                 input
             }
@@ -338,6 +339,7 @@ class MainActivity : android.app.Activity() {
             }
         }
 
+        val finalUrl = UrlSanitizer.sanitize(rawUrl)
         openUrlInBrowser(finalUrl)
     }
 
