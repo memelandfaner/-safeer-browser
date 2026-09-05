@@ -119,6 +119,15 @@ object ThreatBlockEngine {
     }
 
     /**
+     * Preveri, ali kategorija grožnje spada med kritične C2/Malware strežnike (pravilo Zero-Bypass).
+     */
+    fun isCriticalThreat(category: String?): Boolean {
+        if (category == null) return false
+        val c = category.lowercase()
+        return c.contains("c2") || c.contains("botnet") || c.contains("malware") || c.contains("zlonamerna")
+    }
+
+    /**
      * Preveri, ali URL ali gostitelj predstavlja varnostno grožnjo.
      * Vrne podrobnosti o grožnji ali null, če je domena varna.
      */
@@ -130,12 +139,19 @@ object ThreatBlockEngine {
             val host = uri.host?.lowercase()?.trim() ?: return null
             if (host.isEmpty()) return null
 
-            // Preveri začasne izjeme za to sejo
+            val match = threatTrie.findMatch(host) ?: return null
+
+            // 🔒 ZERO-BYPASS PRAVILO: Kritične C2 in Malware grožnje NIKOLI nimajo izjeme!
+            if (isCriticalThreat(match.category)) {
+                return match
+            }
+
+            // Manj nevarne kategorije (phishing/ad opozorila) lahko imajo sejne izjeme
             if (sessionBypassedDomains.contains(host)) {
                 return null
             }
 
-            return threatTrie.findMatch(host)
+            return match
         } catch (e: Exception) {
             return null
         }
@@ -148,10 +164,16 @@ object ThreatBlockEngine {
 
     /**
      * Odobri domeno za to sejo (uporabnik je izbral 'Nadaljuj na lastno odgovornost').
+     * Kritične C2/Malware domene se brezpogojno zavrnejo.
      */
     fun allowForSession(domain: String) {
         val clean = domain.trim().lowercase()
         if (clean.isNotEmpty()) {
+            val match = threatTrie.findMatch(clean)
+            if (match != null && isCriticalThreat(match.category)) {
+                android.util.Log.w("SafeerSecurity", "🔒 Zero-Bypass: zavrnjen poskus obvoza za kritično grožnjo '$clean' (${match.category})")
+                return
+            }
             sessionBypassedDomains.add(clean)
         }
     }
@@ -177,7 +199,22 @@ object ThreatBlockEngine {
         val domain = match.matchedDomain
         val category = match.category ?: "Varnostna grožnja"
         val source = match.sourceFeed ?: "Varnostni ščit Safeer Browser"
-        val bypassToken = createBypassToken(domain, blockedUrl)
+        val isCritical = isCriticalThreat(category)
+
+        val bypassActionHtml = if (isCritical) {
+            """
+            <div style="margin-top: 14px; padding: 12px; background: rgba(255, 68, 68, 0.12); border: 1px solid rgba(255, 68, 68, 0.35); border-radius: 12px; font-size: 13px; color: #ff8888; text-align: center; line-height: 1.4;">
+                🔒 <strong>Pravilo ničelnega obvoza (Zero-Bypass):</strong><br>Ta domena je identificirana kot kritični Botnet C2 ali Malware strežnik. Zaradi zaščite naprave obvoz ni dovoljen.
+            </div>
+            """.trimIndent()
+        } else {
+            val bypassToken = createBypassToken(domain, blockedUrl)
+            """
+            <a class="btn btn-danger-outline" href="safeer://bypass-threat?token=$bypassToken">
+                Nadaljuj na lastno odgovornost (Odkleni za to sejo)
+            </a>
+            """.trimIndent()
+        }
 
         return """
         <!DOCTYPE html>
@@ -318,9 +355,7 @@ object ThreatBlockEngine {
                     ⬅ Nazaj na varno (Priporočeno)
                 </button>
                 
-                <a class="btn btn-danger-outline" href="safeer://bypass-threat?token=$bypassToken">
-                    Nadaljuj na lastno odgovornost (Odkleni za to sejo)
-                </a>
+                $bypassActionHtml
 
                 <div class="footer-text">
                     Zaščita Safeer Threat Shield • abuse.ch Feodo / URLhaus / ThreatFox

@@ -5,11 +5,26 @@
 set -e
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TOOLS_DIR="${ANDROID_BUILD_TOOLS:-/home/janez/Namizje/Neimenovana mapa/streamN-TV2/android_tv/.tools}"
 
-if [ ! -d "$TOOLS_DIR" ]; then
-    echo "❌ Napaka: Orodja za gradnjo niso najdena v: $TOOLS_DIR"
-    echo "Nastavite spremenljivko ANDROID_BUILD_TOOLS ali namestite orodja."
+# Samodejno odkrivanje orodij za gradnjo (Build Tools Discovery)
+if [ -n "$ANDROID_BUILD_TOOLS" ] && [ -d "$ANDROID_BUILD_TOOLS" ]; then
+    TOOLS_DIR="$ANDROID_BUILD_TOOLS"
+elif [ -d "$DIR/.tools" ]; then
+    TOOLS_DIR="$DIR/.tools"
+elif [ -d "$DIR/../streamN-TV2/android_tv/.tools" ]; then
+    TOOLS_DIR="$DIR/../streamN-TV2/android_tv/.tools"
+elif [ -d "$HOME/.tools/android" ]; then
+    TOOLS_DIR="$HOME/.tools/android"
+elif [ -d "/home/janez/Namizje/Neimenovana mapa/streamN-TV2/android_tv/.tools" ]; then
+    TOOLS_DIR="/home/janez/Namizje/Neimenovana mapa/streamN-TV2/android_tv/.tools"
+else
+    TOOLS_DIR=""
+fi
+
+if [ -z "$TOOLS_DIR" ] || [ ! -d "$TOOLS_DIR" ]; then
+    echo "❌ Napaka: Orodja za gradnjo niso bila najdena."
+    echo "👉 Nastavite okoljsko spremenljivko: export ANDROID_BUILD_TOOLS=/pot/do/orodij"
+    echo "👉 Zahtevana orodja v mapi: kotlinc/, aapt2, r8.jar, android.jar, uber-apk-signer.jar"
     exit 1
 fi
 
@@ -64,13 +79,30 @@ jar -uf "$BUILD_DIR/unaligned.apk" classes.dex
 cd "$DIR"
 
 echo "✍️ 5/5: Podpisujem APK paket z uber-apk-signer..."
-java -jar "$TOOLS_DIR/uber-apk-signer.jar" \
-    --apks "$BUILD_DIR/unaligned.apk" \
-    --out "$BUILD_DIR/signed" \
-    --allowResign
+if [ -n "$RELEASE_KEYSTORE" ] && [ -f "$RELEASE_KEYSTORE" ]; then
+    echo "🔑 Uporabljam produkcijski podpisni ključ ($RELEASE_KEYSTORE)..."
+    java -jar "$TOOLS_DIR/uber-apk-signer.jar" \
+        --apks "$BUILD_DIR/unaligned.apk" \
+        --out "$BUILD_DIR/signed" \
+        --ks "$RELEASE_KEYSTORE" \
+        --ksAlias "${RELEASE_KEY_ALIAS:-safeer}" \
+        --ksPass "${RELEASE_KEY_PASS:-safeer123}" \
+        --allowResign
+else
+    echo "ℹ️ Podpisujem z v3 debug/beta podpisom (nastavite RELEASE_KEYSTORE za produkcijo)..."
+    java -jar "$TOOLS_DIR/uber-apk-signer.jar" \
+        --apks "$BUILD_DIR/unaligned.apk" \
+        --out "$BUILD_DIR/signed" \
+        --allowResign
+fi
+
+SIGNED_APK=$(find "$BUILD_DIR/signed" -type f -name "*Signed.apk" | head -n 1)
+if [ -z "$SIGNED_APK" ] || [ ! -f "$SIGNED_APK" ]; then
+    echo "❌ Napaka: Podpisan APK paket ni bil ustvarjen v $BUILD_DIR/signed"
+    exit 1
+fi
 
 FINAL_APK="$RELEASE_DIR/safeer-mobile-release.apk"
-SIGNED_APK="$BUILD_DIR/signed/unaligned-aligned-debugSigned.apk"
 cp "$SIGNED_APK" "$FINAL_APK"
 cp "$FINAL_APK" "$RELEASE_DIR/safeer-browser-release.apk"
 cp "$FINAL_APK" "$DIR/Safeer-Mobile.apk"
