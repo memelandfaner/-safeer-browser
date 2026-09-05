@@ -67,7 +67,7 @@ object UserScriptManager {
                         '.ad-container:not(#player):not(#player-container):not(#player-container-id):not(.html5-video-player)',
                         '[class*="dating-popup"]', '[id*="dating-popup"]', '[class*="fake-download"]',
                         '.download-button-ad', 'div[class*="download-arrow"]',
-                        '.removeAds', 'a[href*="casino"]', '.topAd', '.bottomAd',
+                        '.removeAds', '.topAd', '.bottomAd',
                         '.wideBanner', '.underPlayerAd', '.commercial-unit', '.ad-zone',
                         '.ad-banner-overlay', '.jw-ad-container', '.plyr__ad', '.vjs-ad'
                     ].join(', ');
@@ -87,7 +87,7 @@ object UserScriptManager {
                         if (isPlayerElement(dlg)) continue;
                         var txt = (dlg.innerText || dlg.textContent || '').trim().toLowerCase();
                         if (txt.includes('battery damaged') || txt.includes('virus detected') || 
-                            txt.includes('vpn recommended') || txt.includes('whatsapp za seks') ||
+                            txt.includes('vpn recommended') ||
                             (txt.includes('disable your ad blocker') && txt.includes('disable'))) {
                             try { dlg.remove(); } catch(e) {}
                         }
@@ -119,14 +119,12 @@ object UserScriptManager {
                 if (a && a.href) {
                     var h = a.href.toLowerCase();
                     if (h.includes('doubleclick') || h.includes('googleads') || h.includes('monetag') ||
-                        h.includes('onclick') || h.includes('adsterra') || h.includes('popads') ||
+                        h.includes('adsterra') || h.includes('popads') ||
                         h.includes('popcash') || h.includes('hilltop') || h.includes('propu.sh') ||
-                        h.includes('highperformance') || h.includes('deloplen') || h.includes('20bet') ||
-                        h.includes('1xbet') || h.includes('casino') || h.includes('pussing') ||
-                        h.includes('effectivegate') || h.includes('dating') || h.includes('stripchat')) {
+                        h.includes('highperformance') || h.includes('deloplen') ||
+                        h.includes('effectivegate') || h.includes('stripchat')) {
                         e.preventDefault();
                         e.stopImmediatePropagation();
-                        a.remove();
                     }
                 }
             }, true);

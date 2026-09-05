@@ -45,6 +45,10 @@ class ChromiumEngineView @JvmOverloads constructor(
     var onSecurityChanged: ((Boolean) -> Unit)? = null
     var onPageLoaded: ((String, String) -> Unit)? = null
     var onFullscreenToggled: ((View?, WebChromeClient.CustomViewCallback?) -> Unit)? = null
+    var onPermissionRequested: ((PermissionRequest) -> Unit)? = null
+    var onGeolocationRequested: ((String, GeolocationPermissions.Callback) -> Unit)? = null
+    var onCreateWindowRequested: ((isDialog: Boolean, isUserGesture: Boolean, resultMsg: android.os.Message) -> Boolean)? = null
+    var onCloseWindowRequested: (() -> Unit)? = null
 
     private var customView: View? = null
     private var customViewCallback: WebChromeClient.CustomViewCallback? = null
@@ -88,7 +92,7 @@ class ChromiumEngineView @JvmOverloads constructor(
             allowContentAccess = true
             mediaPlaybackRequiresUserGesture = false
             mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
-            setSupportMultipleWindows(false)
+            setSupportMultipleWindows(true)
             javaScriptCanOpenWindowsAutomatically = false
             
             setSupportZoom(true)
@@ -112,9 +116,19 @@ class ChromiumEngineView @JvmOverloads constructor(
         fun getStats(): String {
             val ads = AdBlockEngine.blockedAdsCount.get()
             val threats = ThreatBlockEngine.totalBlockedThreats.get()
-            val dataMb = String.format(java.util.Locale.US, "%.1f", (ads * 140L + threats * 220L) / 1024.0 / 1024.0)
-            val timeMin = String.format(java.util.Locale.US, "%.1f", (ads * 1.4 + threats * 2.0) / 60.0)
-            return "{\"ads\": $ads, \"threats\": $threats, \"dataMb\": \"$dataMb MB\", \"timeMin\": \"$timeMin min\"}"
+            val totalSavedKb = (ads * 45L) + (threats * 120L)
+            val dataMb = if (totalSavedKb >= 1024) {
+                String.format(java.util.Locale.US, "%.1f MB", totalSavedKb / 1024.0)
+            } else {
+                "$totalSavedKb KB"
+            }
+            val totalSec = (ads * 1.0) + (threats * 1.5)
+            val timeMin = if (totalSec >= 60) {
+                String.format(java.util.Locale.US, "%.1f min", totalSec / 60.0)
+            } else {
+                String.format(java.util.Locale.US, "%.0f s", totalSec)
+            }
+            return "{\"ads\": $ads, \"threats\": $threats, \"dataMb\": \"$dataMb\", \"timeMin\": \"$timeMin\"}"
         }
 
         @android.webkit.JavascriptInterface
@@ -246,8 +260,18 @@ class ChromiumEngineView @JvmOverloads constructor(
                 isUserGesture: Boolean,
                 resultMsg: android.os.Message?
             ): Boolean {
-                // 🛑 Popolna zaščita pred pojavnimi okni in ugrabitvijo oken
+                if (resultMsg == null) return false
+                if (!isUserGesture) return false // Popolna zaščita pred samodejnimi popunderji brez uporabniškega klika
+                val handler = onCreateWindowRequested
+                if (handler != null) {
+                    return handler.invoke(isDialog, isUserGesture, resultMsg)
+                }
                 return false
+            }
+
+            override fun onCloseWindow(window: WebView?) {
+                super.onCloseWindow(window)
+                onCloseWindowRequested?.invoke()
             }
 
             override fun onProgressChanged(view: WebView?, newProgress: Int) {
@@ -289,6 +313,11 @@ class ChromiumEngineView @JvmOverloads constructor(
                     return
                 }
 
+                if (onGeolocationRequested != null) {
+                    onGeolocationRequested?.invoke(targetOrigin, callback)
+                    return
+                }
+
                 val act = context as? android.app.Activity
                 if (act == null || act.isFinishing || act.isDestroyed) {
                     callback.invoke(origin, false, false)
@@ -318,6 +347,11 @@ class ChromiumEngineView @JvmOverloads constructor(
 
             override fun onPermissionRequest(request: PermissionRequest?) {
                 if (request == null) return
+                if (onPermissionRequested != null) {
+                    onPermissionRequested?.invoke(request)
+                    return
+                }
+
                 val act = context as? android.app.Activity
                 if (act == null || act.isFinishing || act.isDestroyed) {
                     request.deny()
@@ -469,8 +503,8 @@ class ChromiumEngineView @JvmOverloads constructor(
                     return adResponse
                 }
 
-                // 🎬 3. YouTube Watch & Shorts Document-Start Injekcija (0 oglasov pred zagonom videa)
-                if (isMainFrame && isYouTubeWatchUrl(url)) {
+                // 🎬 3. YouTube Document-Start Injekcija (0 oglasov pred zagonom videa)
+                if (isMainFrame && isYouTubeHtmlDocument(url)) {
                     val interceptedYt = interceptAndSanitizeYouTubeWatch(url, settings.userAgentString)
                     if (interceptedYt != null) {
                         return interceptedYt
@@ -562,13 +596,16 @@ class ChromiumEngineView @JvmOverloads constructor(
         }
     }
 
-    private fun isYouTubeWatchUrl(url: String): Boolean {
+    private fun isYouTubeHtmlDocument(url: String): Boolean {
         return try {
             val uri = Uri.parse(url)
             val host = uri.host?.lowercase() ?: return false
-            val path = uri.path ?: return false
-            (host.contains("youtube.com") || host.contains("youtu.be")) &&
-                (path.startsWith("/watch") || path.startsWith("/shorts") || path.startsWith("/v/"))
+            if (!host.contains("youtube.com") && !host.contains("youtu.be")) return false
+            val path = uri.path?.lowercase() ?: "/"
+            !path.startsWith("/api/") && !path.startsWith("/youtubei/") && !path.startsWith("/videoplayback") &&
+                !path.endsWith(".js") && !path.endsWith(".css") && !path.endsWith(".png") &&
+                !path.endsWith(".jpg") && !path.endsWith(".webp") && !path.endsWith(".svg") &&
+                !path.endsWith(".ico") && !path.endsWith(".woff2") && !path.endsWith(".woff")
         } catch (_: Exception) {
             false
         }
@@ -588,6 +625,7 @@ class ChromiumEngineView @JvmOverloads constructor(
                 }
                 setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
                 setRequestProperty("Accept-Language", "en-US,en;q=0.9,sl;q=0.8")
+                setRequestProperty("Accept-Encoding", "gzip, deflate")
                 setRequestProperty("Sec-Fetch-Dest", "document")
                 setRequestProperty("Sec-Fetch-Mode", "navigate")
             }
@@ -598,15 +636,35 @@ class ChromiumEngineView @JvmOverloads constructor(
                 return null
             }
 
-            val rawHtml = conn.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+            // Shrani morebitne Set-Cookie glave v CookieManager, da se ohranijo prijava in piškotki
+            val cm = CookieManager.getInstance()
+            conn.headerFields["Set-Cookie"]?.forEach { cookieHeader ->
+                cm.setCookie(url, cookieHeader)
+            }
+            conn.headerFields["set-cookie"]?.forEach { cookieHeader ->
+                cm.setCookie(url, cookieHeader)
+            }
+            cm.flush()
+
+            val encoding = conn.contentEncoding?.lowercase() ?: ""
+            val rawInputStream = if (encoding.contains("gzip")) {
+                java.util.zip.GZIPInputStream(conn.inputStream)
+            } else {
+                conn.inputStream
+            }
+
+            val rawHtml = rawInputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
             conn.disconnect()
 
             val bootstrapJs = UserScriptManager.getYoutubeBootstrapScript()
             val scriptTag = "<script type=\"text/javascript\">$bootstrapJs</script>"
 
+            val headRegex = Regex("<head[^>]*>", RegexOption.IGNORE_CASE)
+            val headMatch = headRegex.find(rawHtml)
+
             val modifiedHtml = when {
-                rawHtml.contains("<head>", ignoreCase = true) -> {
-                    val idx = rawHtml.indexOf("<head>", ignoreCase = true) + 6
+                headMatch != null -> {
+                    val idx = headMatch.range.last + 1
                     rawHtml.substring(0, idx) + scriptTag + rawHtml.substring(idx)
                 }
                 rawHtml.contains("<html>", ignoreCase = true) -> {

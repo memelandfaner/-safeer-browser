@@ -44,13 +44,18 @@ class TabManager(
             switchTab(tab.id)
         }
 
-        webView.loadUrl(url)
+        if (url.isNotEmpty() && url != "about:blank") {
+            webView.loadUrl(url)
+        }
         notifyUpdated()
         return tab
     }
 
     fun switchTab(tabId: String) {
         val target = tabs.find { it.id == tabId } ?: return
+        if (activeTabId != null && activeTabId != tabId) {
+            tabs.find { it.id == activeTabId }?.webView?.onPause()
+        }
         activeTabId = tabId
 
         container.removeAllViews()
@@ -58,6 +63,7 @@ class TabManager(
             (target.webView.parent as? ViewGroup)?.removeView(target.webView)
         }
         container.addView(target.webView)
+        target.webView.onResume()
 
         notifyUpdated()
     }

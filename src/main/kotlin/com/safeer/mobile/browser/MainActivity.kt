@@ -1,10 +1,12 @@
 package com.safeer.mobile.browser
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -13,11 +15,23 @@ import android.text.TextWatcher
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.webkit.GeolocationPermissions
+import android.webkit.PermissionRequest
 import android.webkit.WebChromeClient
 import android.widget.*
 import java.net.URLEncoder
 
 class MainActivity : android.app.Activity() {
+
+    companion object {
+        private const val REQ_CODE_PERMISSIONS = 1001
+        private const val REQ_CODE_GEO_PERMISSIONS = 1002
+        private const val REQ_CODE_NOTIFICATION = 1003
+    }
+
+    private var pendingPermissionRequest: PermissionRequest? = null
+    private var pendingGeoOrigin: String? = null
+    private var pendingGeoCallback: GeolocationPermissions.Callback? = null
 
     private lateinit var mainRoot: RelativeLayout
     private lateinit var mobileTopBar: LinearLayout
@@ -76,9 +90,48 @@ class MainActivity : android.app.Activity() {
         // Zaženi posodobitev varnostnih seznamov (Feodo, URLhaus, Phishing Army) v ozadju
         ThreatFeedsUpdater.updateFeedsAsync(this)
 
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            val postNotif = "android.permission.POST_NOTIFICATIONS"
+            if (checkSelfPermission(postNotif) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(postNotif), REQ_CODE_NOTIFICATION)
+            }
+        }
+
         // Odpri začetni zavihek
         val targetUrl = intent?.dataString ?: "file:///android_asset/brave_home.html"
         tabManager.createTab(this, targetUrl, true)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            REQ_CODE_PERMISSIONS -> {
+                val req = pendingPermissionRequest
+                pendingPermissionRequest = null
+                if (req != null) {
+                    val allGranted = grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+                    if (allGranted) {
+                        req.grant(req.resources)
+                    } else {
+                        req.deny()
+                    }
+                }
+            }
+            REQ_CODE_GEO_PERMISSIONS -> {
+                val origin = pendingGeoOrigin
+                val cb = pendingGeoCallback
+                pendingGeoOrigin = null
+                pendingGeoCallback = null
+                if (cb != null && origin != null) {
+                    val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    cb.invoke(origin, granted, false)
+                }
+            }
+        }
     }
 
     override fun onPause() {
@@ -227,6 +280,101 @@ class MainActivity : android.app.Activity() {
                 customVideoCallback = null
                 mobileTopBar.visibility = View.VISIBLE
                 webViewContainer.visibility = View.VISIBLE
+            }
+        }
+
+        wv.onCreateWindowRequested = { isDialog, isUserGesture, resultMsg ->
+            val newTab = tabManager.createTab(this, "about:blank", true)
+            val transport = resultMsg.obj as? android.webkit.WebView.WebViewTransport
+            transport?.webView = newTab.webView
+            resultMsg.sendToTarget()
+            true
+        }
+
+        wv.onCloseWindowRequested = {
+            tabManager.closeTab(this, tab.id)
+        }
+
+        wv.onPermissionRequested = { request ->
+            val resources = request.resources ?: emptyArray()
+            val host = request.origin?.host ?: request.origin?.toString() ?: "Spletna stran"
+
+            val labels = resources.map { res ->
+                when (res) {
+                    PermissionRequest.RESOURCE_AUDIO_CAPTURE -> "🎤 Mikrofon (zvok)"
+                    PermissionRequest.RESOURCE_VIDEO_CAPTURE -> "📷 Kamera (video)"
+                    PermissionRequest.RESOURCE_PROTECTED_MEDIA_ID -> "🔑 Zaščitena medijska vsebina (DRM)"
+                    else -> res.substringAfterLast(".")
+                }
+            }.joinToString("\n• ", prefix = "• ")
+
+            runOnUiThread {
+                try {
+                    AlertDialog.Builder(this)
+                        .setTitle("Zahteva za dovoljenje")
+                        .setMessage("Spletno mesto '$host' želi dostop do naslednjih virov naprave:\n\n$labels\n\nAli dovolite dostop?")
+                        .setPositiveButton("Dovoli") { _, _ ->
+                            val neededSystem = mutableListOf<String>()
+                            if (resources.contains(PermissionRequest.RESOURCE_AUDIO_CAPTURE) &&
+                                checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                                neededSystem.add(Manifest.permission.RECORD_AUDIO)
+                            }
+                            if (resources.contains(PermissionRequest.RESOURCE_VIDEO_CAPTURE) &&
+                                checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                                neededSystem.add(Manifest.permission.CAMERA)
+                            }
+
+                            if (neededSystem.isNotEmpty()) {
+                                pendingPermissionRequest = request
+                                requestPermissions(neededSystem.toTypedArray(), REQ_CODE_PERMISSIONS)
+                            } else {
+                                request.grant(resources)
+                            }
+                        }
+                        .setNegativeButton("Zavrni") { _, _ ->
+                            request.deny()
+                        }
+                        .setOnCancelListener {
+                            request.deny()
+                        }
+                        .show()
+                } catch (_: Exception) {
+                    request.deny()
+                }
+            }
+        }
+
+        wv.onGeolocationRequested = { origin, callback ->
+            runOnUiThread {
+                try {
+                    AlertDialog.Builder(this)
+                        .setTitle("Zahteva za lokacijo")
+                        .setMessage("Spletno mesto '$origin' želi dostop do vaše trenutne geografske lokacije.\n\nAli dovolite dostop?")
+                        .setPositiveButton("Dovoli") { _, _ ->
+                            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                                pendingGeoOrigin = origin
+                                pendingGeoCallback = callback
+                                requestPermissions(
+                                    arrayOf(
+                                        Manifest.permission.ACCESS_FINE_LOCATION,
+                                        Manifest.permission.ACCESS_COARSE_LOCATION
+                                    ),
+                                    REQ_CODE_GEO_PERMISSIONS
+                                )
+                            } else {
+                                callback.invoke(origin, true, false)
+                            }
+                        }
+                        .setNegativeButton("Zavrni") { _, _ ->
+                            callback.invoke(origin, false, false)
+                        }
+                        .setOnCancelListener {
+                            callback.invoke(origin, false, false)
+                        }
+                        .show()
+                } catch (_: Exception) {
+                    callback.invoke(origin, false, false)
+                }
             }
         }
     }

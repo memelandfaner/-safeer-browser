@@ -32,7 +32,11 @@ if [ -s "$TEMP_SHA" ]; then
         if [ "$EXPECTED_SHA" = "$ACTUAL_SHA" ]; then
             echo "🔒 SHA-256 celovitost potrjena ($ACTUAL_SHA)"
         else
-            echo "⚠️ Opozorilo: SHA-256 vsota se ne ujema (Pričakovano: $EXPECTED_SHA, Dobljeno: $ACTUAL_SHA)"
+            echo "❌ NAPAKA: SHA-256 kontrolna vsota se NE ujema!"
+            echo "   Pričakovano: $EXPECTED_SHA"
+            echo "   Dobljeno:    $ACTUAL_SHA"
+            echo "🚨 Prekinjam namestitev zaradi varnosti."
+            exit 1
         fi
     fi
 fi

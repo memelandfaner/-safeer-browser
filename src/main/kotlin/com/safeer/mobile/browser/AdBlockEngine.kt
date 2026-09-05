@@ -36,8 +36,8 @@ object AdBlockEngine {
     private val BLOCKED_PATH_PATTERNS = listOf(
         "/pagead/", "/pagead2/", "/api/stats/ads", "/ptracking", "/get_midroll_info",
         "/ad_status", "/ads/v1/", "/ads/v2/", "/ad_break", "/adserver/", "/adsystem/",
-        "/adservices/", "/ads.js", "/ad.js", "/adservice.", "/pixel.", "collect?v=",
-        "/metrika", "/watch.js", "/tag.js", "/monetag/", "/popunder", "/pop-under",
+        "/adservices/", "/ads.js", "/ad.js", "/adservice.", "/metrika",
+        "/monetag/", "/popunder", "/pop-under",
         "/_xa/ads", "/_xa/", "justservingfiles.net", "etahub.com",
         "delivery.trafficjunky", "trafficjunky", "tsyndicate",
         "disable-devtool", "devtools-detector",
@@ -134,7 +134,8 @@ object AdBlockEngine {
                 if (lower.contains("&ctier=") || lower.contains("?ctier=") ||
                     lower.contains("&oad=") || lower.contains("?oad=") ||
                     lower.contains("&adformat=") || lower.contains("?adformat=") ||
-                    lower.contains("&ad_type=") || lower.contains("?ad_type=")) {
+                    lower.contains("&ad_type=") || lower.contains("?ad_type=") ||
+                    lower.contains("&alr=yes") || lower.contains("?alr=yes")) {
                     return true // Blokiraj oglasni video tok!
                 }
             }

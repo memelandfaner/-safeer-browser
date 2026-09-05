@@ -27,8 +27,8 @@
   - Brskalnik **nikoli avtomatsko ne odobri** dostopa do mikrofona, kamere ali DRM zaščitenih medijev (`onPermissionRequest`). Uporabnik je vedno vprašan s potrditvenim oknom z jasnim izpisom gostitelja (`origin`). Ob preklicu se klic varno zavrne (`deny()`).
 - **Nadzor nad geolokacijo**:
   - Dostop do geografske lokacije zahteva izrecno potrditev uporabnika. Ob zavrnitvi ali zaprtju dialoga je dostop blokiran.
-- **Blokada piškotkov tretjih oseb**:
-  - `setAcceptThirdPartyCookies(false)` onemogoča medstransko sledenje (cross-site tracking).
+- **Popolna podpora za varno prijavo (OAuth 2.0 / SSO) & Zaščita pred popunderji**:
+  - Varno odpiranje avtentikacijskih oken (`onCreateWindow`) zgolj ob neposredni uporabniški interakciji (`isUserGesture`), kar popolnoma prepreči samodejne popunderje in hkrati zagotavlja nemoteno delovanje Google, GitHub in bančnih prijav.
 - **Kanonična zaščita pred Path Traversal**:
   - `MobileFileProvider` preverja kanonične poti (`canonicalFile`), kar preprečuje pobeg iz predvidenih map prek `../` ali simbolnih povezav.
 

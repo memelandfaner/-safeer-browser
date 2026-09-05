@@ -49,8 +49,6 @@ echo "⚙️ 1/5: Prevajam Android XML vire (AAPT2)..."
     -A "$DIR/assets" \
     --min-sdk-version 28 \
     --target-sdk-version 35 \
-    --version-code 1 \
-    --version-name "1.0.0" \
     -o "$BUILD_DIR/resources.apk" \
     --java "$BUILD_DIR/gen" \
     "$BUILD_DIR/compiled_res.zip"
@@ -76,25 +74,37 @@ cd "$BUILD_DIR/dex"
 jar -uf "$BUILD_DIR/unaligned.apk" classes.dex
 cd "$DIR"
 
-echo "✍️ 5/5: Podpisujem APK paket z uber-apk-signer..."
-if [ -n "$RELEASE_KEYSTORE" ] && [ -f "$RELEASE_KEYSTORE" ]; then
-    echo "🔑 Uporabljam produkcijski podpisni ključ ($RELEASE_KEYSTORE)..."
-    java -jar "$TOOLS_DIR/uber-apk-signer.jar" \
-        --apks "$BUILD_DIR/unaligned.apk" \
-        --out "$BUILD_DIR/signed" \
-        --ks "$RELEASE_KEYSTORE" \
-        --ksAlias "${RELEASE_KEY_ALIAS:-safeer}" \
-        --ksPass "${RELEASE_KEY_PASS:-safeer123}" \
-        --allowResign
-else
-    echo "ℹ️ Podpisujem z v3 debug/beta podpisom (nastavite RELEASE_KEYSTORE za produkcijo)..."
-    java -jar "$TOOLS_DIR/uber-apk-signer.jar" \
-        --apks "$BUILD_DIR/unaligned.apk" \
-        --out "$BUILD_DIR/signed" \
-        --allowResign
+echo "✍️ 5/5: Podpisujem APK paket z namenskim produkcijskim ključem..."
+KEYSTORE_DIR="$DIR/keystore"
+DEFAULT_KEYSTORE="$KEYSTORE_DIR/safeer-release.jks"
+RELEASE_KEYSTORE="${RELEASE_KEYSTORE:-$DEFAULT_KEYSTORE}"
+RELEASE_KEY_ALIAS="${RELEASE_KEY_ALIAS:-safeer-browser}"
+RELEASE_KEY_PASS="${RELEASE_KEY_PASS:-SafeerMobile2026SecureReleaseKey}"
+
+if [ ! -f "$RELEASE_KEYSTORE" ]; then
+    echo "🔑 Generiram namenski produkcijski release keystore ($RELEASE_KEYSTORE)..."
+    mkdir -p "$KEYSTORE_DIR"
+    keytool -genkeypair -v \
+        -keystore "$RELEASE_KEYSTORE" \
+        -alias "$RELEASE_KEY_ALIAS" \
+        -keyalg RSA \
+        -keysize 2048 \
+        -validity 10000 \
+        -storepass "$RELEASE_KEY_PASS" \
+        -keypass "$RELEASE_KEY_PASS" \
+        -dname "CN=Safeer Mobile Browser, OU=Safeer Security, O=Safeer, L=Ljubljana, ST=Slovenia, C=SI"
 fi
 
-SIGNED_APK=$(find "$BUILD_DIR/signed" -type f -name "*Signed.apk" | head -n 1)
+java -jar "$TOOLS_DIR/uber-apk-signer.jar" \
+    --apks "$BUILD_DIR/unaligned.apk" \
+    --out "$BUILD_DIR/signed" \
+    --ks "$RELEASE_KEYSTORE" \
+    --ksAlias "$RELEASE_KEY_ALIAS" \
+    --ksPass "$RELEASE_KEY_PASS" \
+    --ksKeyPass "$RELEASE_KEY_PASS" \
+    --allowResign
+
+SIGNED_APK=$(find "$BUILD_DIR/signed" -type f -iname "*signed.apk" | head -n 1)
 if [ -z "$SIGNED_APK" ] || [ ! -f "$SIGNED_APK" ]; then
     echo "❌ Napaka: Podpisan APK paket ni bil ustvarjen v $BUILD_DIR/signed"
     exit 1
@@ -109,7 +119,7 @@ cp "$FINAL_APK" "$DIR/Safeer-Browser.apk"
 # Generiranje uradnih SHA256SUMS kontrolnih vsot
 cd "$DIR"
 sha256sum Safeer-Browser.apk Safeer-Mobile.apk > "$DIR/SHA256SUMS"
-sha256sum "Release/Artifacts/safeer-mobile-release.apk" "Release/Artifacts/safeer-browser-release.apk" > "$RELEASE_DIR/SHA256SUMS"
+(cd "$RELEASE_DIR" && sha256sum safeer-mobile-release.apk safeer-browser-release.apk > "$RELEASE_DIR/SHA256SUMS")
 
 # Sinhronizacija v spletno mapo za prenos (če je nastavljena)
 if [ -n "$WEB_MOB_DIR" ] && [ -d "$WEB_MOB_DIR" ]; then

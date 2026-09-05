@@ -8,6 +8,7 @@ tv_test/
 *.key
 *.keystore
 *.jks
+keystore/
 *.token
 *secret*
 *credential*
