@@ -57,7 +57,8 @@ class ChromiumEngineView @JvmOverloads constructor(
     private fun setupSettings() {
         setLayerType(View.LAYER_TYPE_HARDWARE, null)
         try {
-            WebView.setWebContentsDebuggingEnabled(true)
+            val isDebug = (0 != (context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE))
+            WebView.setWebContentsDebuggingEnabled(isDebug)
         } catch (_: Exception) {}
 
         // 🔊 100% Native Strojni Vklop Zvoka (Unmute STREAM_MUSIC)
@@ -84,10 +85,10 @@ class ChromiumEngineView @JvmOverloads constructor(
             javaScriptEnabled = true
             domStorageEnabled = true
             databaseEnabled = true
-            allowFileAccess = true
+            allowFileAccess = false
             allowContentAccess = true
             mediaPlaybackRequiresUserGesture = false
-            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
             setSupportMultipleWindows(false)
             javaScriptCanOpenWindowsAutomatically = false
             
@@ -112,13 +113,19 @@ class ChromiumEngineView @JvmOverloads constructor(
         fun getStats(): String {
             val ads = AdBlockEngine.blockedAdsCount.get()
             val threats = ThreatBlockEngine.totalBlockedThreats.get()
-            val dataMb = String.format(java.util.Locale.US, "%.1f", ((ads * 140L + threats * 220L) / 1024.0 / 1024.0) + 21.4)
-            val timeMin = String.format(java.util.Locale.US, "%.1f", ((ads * 1.4 + threats * 2.0) / 60.0) + 1.6)
-            return "{\"ads\": ${ads + 1430}, \"threats\": $threats, \"dataMb\": \"$dataMb MB\", \"timeMin\": \"$timeMin min\"}"
+            val dataMb = String.format(java.util.Locale.US, "%.1f", (ads * 140L + threats * 220L) / 1024.0 / 1024.0)
+            val timeMin = String.format(java.util.Locale.US, "%.1f", (ads * 1.4 + threats * 2.0) / 60.0)
+            return "{\"ads\": $ads, \"threats\": $threats, \"dataMb\": \"$dataMb MB\", \"timeMin\": \"$timeMin min\"}"
         }
 
         @android.webkit.JavascriptInterface
         fun navigate(url: String) {
+            val cur = webView.url ?: ""
+            val isLocal = cur.startsWith("file:///android_asset/") || cur.startsWith("safeer://") || cur.isEmpty()
+            if (!isLocal) {
+                android.util.Log.w("SafeerBridge", "Zavrnjen neavtoriziran klic navigate() iz zunanje strani: $cur")
+                return
+            }
             (context as? android.app.Activity)?.runOnUiThread {
                 (webView as? ChromiumEngineView)?.navigateDocument(url) ?: webView.loadUrl(url)
             }
@@ -399,7 +406,22 @@ class ChromiumEngineView @JvmOverloads constructor(
 
             override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
                 onSecurityChanged?.invoke(false)
-                handler?.proceed()
+                handler?.cancel()
+
+                val act = context as? android.app.Activity
+                act?.runOnUiThread {
+                    try {
+                        val host = error?.url?.let {
+                            try { java.net.URI(it).host } catch (_: Exception) { null }
+                        } ?: "To spletno mesto"
+
+                        android.app.AlertDialog.Builder(context)
+                            .setTitle("Varnostno opozorilo (SSL)")
+                            .setMessage("Varna povezava z '$host' ni mogoča, ker je varnostni certifikat neveljaven ali potekel.\n\nDostop je bil zaradi zaščite vaših podatkov prekinjen.")
+                            .setPositiveButton("V redu", null)
+                            .show()
+                    } catch (_: Exception) {}
+                }
             }
         }
     }

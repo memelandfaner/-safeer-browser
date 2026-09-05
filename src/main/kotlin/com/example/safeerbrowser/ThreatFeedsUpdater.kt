@@ -47,6 +47,17 @@ object ThreatFeedsUpdater {
         return hash.joinToString("") { "%02x".format(it) }
     }
 
+    private fun isValidDomainName(name: String): Boolean {
+        val n = name.trim().lowercase()
+        if (!n.contains(".") || n.startsWith(".") || n.endsWith(".")) return false
+        if (n.startsWith("localhost") || n.startsWith("127.0.0.1")) return false
+        val parts = n.split(".")
+        if (parts.size < 2) return false
+        // Če so vsi segmenti številčni, gre za IPv4 in ne veljavno domensko ime
+        if (parts.all { it.isNotEmpty() && it.all { c -> c.isDigit() } }) return false
+        return n.all { it.isLetterOrDigit() || it == '.' || it == '-' }
+    }
+
     /**
      * Prenese in posodobi varnostne sezname v ozadju.
      */
@@ -87,7 +98,7 @@ object ThreatFeedsUpdater {
                                 parts[0]
                             }
 
-                            if (domain.contains(".") && !domain.startsWith("localhost") && !domain.startsWith("127.0.0.1")) {
+                            if (isValidDomainName(domain)) {
                                 ThreatBlockEngine.addThreat(domain, feed.category, feed.name)
                                 totalAdded++
                             }
