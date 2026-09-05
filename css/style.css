@@ -1194,6 +1194,250 @@ section, header, footer, main {
   color: #fff;
 }
 
+/* --- Linux Mint & Ubuntu Sovereign Spotlight Section --- */
+.linux-spotlight-section {
+  padding: 85px 0;
+  background: 
+    radial-gradient(circle at 15% 25%, rgba(135, 207, 62, 0.09) 0%, transparent 55%),
+    radial-gradient(circle at 85% 75%, rgba(0, 210, 255, 0.06) 0%, transparent 50%),
+    var(--bg-base);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  position: relative;
+}
+
+.linux-spotlight-header {
+  max-width: 920px;
+  margin: 0 auto 36px auto;
+  text-align: center;
+}
+
+.linux-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(135, 207, 62, 0.12);
+  border: 1px solid rgba(135, 207, 62, 0.35);
+  color: #a3e635;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 6px 18px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 16px;
+}
+
+.linux-spotlight-title {
+  font-size: clamp(2.1rem, 3.8vw, 2.9rem);
+  line-height: 1.22;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  margin-bottom: 24px;
+}
+
+.linux-quote-banner {
+  position: relative;
+  background: linear-gradient(145deg, rgba(16, 26, 18, 0.75), rgba(12, 18, 28, 0.75));
+  border: 1px solid rgba(135, 207, 62, 0.3);
+  border-radius: var(--radius-lg);
+  padding: 24px 32px;
+  margin: 0 auto 40px auto;
+  max-width: 860px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), 0 0 24px rgba(135, 207, 62, 0.08);
+  backdrop-filter: blur(16px);
+}
+
+.linux-quote-text {
+  font-size: 1.15rem;
+  line-height: 1.65;
+  color: #e2e8f0;
+  font-weight: 500;
+  text-align: center;
+  font-style: italic;
+}
+
+.linux-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 36px;
+}
+
+@media (max-width: 960px) {
+  .linux-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.linux-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.linux-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(135, 207, 62, 0.6), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.linux-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(135, 207, 62, 0.4);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4), 0 0 20px rgba(135, 207, 62, 0.1);
+}
+
+.linux-card:hover::before {
+  opacity: 1;
+}
+
+.linux-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.linux-card-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.linux-card-tag {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #87cf3e;
+}
+
+.linux-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 12px;
+  line-height: 1.35;
+}
+
+.linux-card-desc {
+  font-size: 0.94rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 20px;
+  flex-grow: 1;
+}
+
+.linux-card-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(135, 207, 62, 0.08);
+  border: 1px solid rgba(135, 207, 62, 0.25);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #a3e635;
+}
+
+/* Benchmark Bar */
+.linux-benchmark-bar {
+  background: rgba(10, 15, 24, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: 24px 30px;
+  margin-bottom: 36px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+}
+
+.linux-bench-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.linux-bench-headline {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.linux-bench-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 840px) {
+  .linux-bench-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .linux-bench-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bench-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.bench-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.bench-metric {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #87cf3e;
+  font-family: var(--font-mono);
+  margin-bottom: 4px;
+}
+
+.bench-sub {
+  font-size: 0.74rem;
+  color: #64748b;
+}
+
+/* Linux Spotlight CTA row */
+.linux-cta-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 /* --- UserScripts Showcase Section --- */
 .userscripts-section {
   padding: 80px 0;
