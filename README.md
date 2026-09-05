@@ -3,6 +3,8 @@
 ### **Safeer Browser v1.0.2 — Stable Release**
 *Open-source Android browser with local malware, phishing, C2 and tracker protection.*
 
+🌐 **Uradna spletna stran & predstavitveni portal:** [https://memelandfaner.github.io/-safeer-browser/](https://memelandfaner.github.io/-safeer-browser/)
+
 > ⚠️ **Safeer is a security layer, not a guarantee against all online threats.**  
 > Safeer zmanjšuje tveganje in blokira znane grožnje; ne zagotavlja zaščite pred vsemi novimi ali neznanimi grožnjami (Zero-Day).
 
