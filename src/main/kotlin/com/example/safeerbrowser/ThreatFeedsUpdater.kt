@@ -59,11 +59,14 @@ object ThreatFeedsUpdater {
     }
 
     /**
-     * Prenese in posodobi varnostne sezname v ozadju.
+     * Prenese in posodobi varnostne sezname v ozadju z atomsko zamenjavo drevesa (Atomic Trie Swap).
      */
     fun updateFeedsAsync(context: Context, onComplete: ((totalAdded: Int) -> Unit)? = null) {
         Thread {
             var totalAdded = 0
+            val newTrie = DomainSuffixTrie()
+            ThreatBlockEngine.loadSeedThreatDatabase(newTrie)
+
             for (feed in FEEDS) {
                 try {
                     val conn = (URL(feed.url).openConnection() as HttpURLConnection).apply {
@@ -99,7 +102,7 @@ object ThreatFeedsUpdater {
                             }
 
                             if (isValidDomainName(domain)) {
-                                ThreatBlockEngine.addThreat(domain, feed.category, feed.name)
+                                newTrie.insert(domain, feed.category, feed.name)
                                 totalAdded++
                             }
                         }
@@ -107,6 +110,12 @@ object ThreatFeedsUpdater {
                     conn.disconnect()
                 } catch (_: Exception) {}
             }
+
+            // Če so bili novi viri uspešno preneseni, atomsko zamenjamo celotno drevo groženj
+            if (totalAdded > 0) {
+                ThreatBlockEngine.swapThreatTrie(newTrie)
+            }
+
             onComplete?.invoke(totalAdded)
         }.start()
     }

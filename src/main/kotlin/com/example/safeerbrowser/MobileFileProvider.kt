@@ -72,16 +72,30 @@ class MobileFileProvider : ContentProvider() {
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int = 0
     override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<out String>?): Int = 0
 
+    private fun safeChild(parent: File?, child: String): File {
+        if (parent == null) throw FileNotFoundException("Korenska mapa shrambe ni na voljo")
+        val cleanChild = child.removePrefix("/").replace('\\', '/')
+        val base = parent.canonicalFile
+        val target = File(base, cleanChild).canonicalFile
+        val basePath = base.path
+        val targetPath = target.path
+        if (!targetPath.startsWith(basePath + File.separator) && targetPath != basePath) {
+            throw SecurityException("Zavrnjen poskus path traversal: $child")
+        }
+        return target
+    }
+
     private fun getFileForUri(uri: Uri): File {
         val path = uri.path ?: throw FileNotFoundException("Prazen URI")
         val ctx = context ?: throw FileNotFoundException("Context ni na voljo")
         
         val file = if (path.startsWith("/external_files/")) {
-            File(ctx.getExternalFilesDir(null)?.parentFile?.parentFile?.parentFile, path.removePrefix("/external_files/"))
+            val base = ctx.getExternalFilesDir(null) ?: ctx.filesDir
+            safeChild(base, path.removePrefix("/external_files/"))
         } else if (path.startsWith("/cache_files/")) {
-            File(ctx.cacheDir, path.removePrefix("/cache_files/"))
+            safeChild(ctx.cacheDir, path.removePrefix("/cache_files/"))
         } else {
-            File(ctx.filesDir, path)
+            safeChild(ctx.filesDir, path)
         }
         
         if (!file.exists()) {

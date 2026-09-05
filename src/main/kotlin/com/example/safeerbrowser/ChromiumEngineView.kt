@@ -71,15 +71,9 @@ class ChromiumEngineView @JvmOverloads constructor(
         val cm = CookieManager.getInstance()
         cm.setAcceptCookie(true)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            cm.setAcceptThirdPartyCookies(this, true)
+            // Blokada sledilnih piškotkov tretjih oseb za maksimalno zasebnost
+            cm.setAcceptThirdPartyCookies(this, false)
         }
-        try {
-            cm.setCookie(".youtube.com", "SOCS=CAESEwgDEgk0ODE3Nzk3MjQaAnNsIAEaBgiA_LyaBg; path=/; domain=.youtube.com; SameSite=Lax")
-            cm.setCookie(".youtube.com", "CONSENT=YES+cb.20230531-04-p0.sl+FX+999; path=/; domain=.youtube.com")
-            cm.setCookie(".google.com", "SOCS=CAESEwgDEgk0ODE3Nzk3MjQaAnNsIAEaBgiA_LyaBg; path=/; domain=.google.com; SameSite=Lax")
-            cm.setCookie(".google.com", "CONSENT=YES+cb.20230531-04-p0.sl+FX+999; path=/; domain=.google.com")
-            cm.flush()
-        } catch (_: Exception) {}
 
         settings.apply {
             javaScriptEnabled = true
@@ -265,11 +259,80 @@ class ChromiumEngineView @JvmOverloads constructor(
                 origin: String?,
                 callback: GeolocationPermissions.Callback?
             ) {
-                callback?.invoke(origin, true, false)
+                if (callback == null) return
+                val targetOrigin = origin ?: ""
+                if (targetOrigin.isEmpty()) {
+                    callback.invoke(origin, false, false)
+                    return
+                }
+
+                val act = context as? android.app.Activity
+                if (act == null || act.isFinishing || act.isDestroyed) {
+                    callback.invoke(origin, false, false)
+                    return
+                }
+
+                act.runOnUiThread {
+                    try {
+                        android.app.AlertDialog.Builder(context)
+                            .setTitle("Zahteva za lokacijo")
+                            .setMessage("Spletno mesto '$targetOrigin' želi dostop do vaše trenutne geografske lokacije.\n\nAli dovolite dostop?")
+                            .setPositiveButton("Dovoli") { _, _ ->
+                                callback.invoke(origin, true, false)
+                            }
+                            .setNegativeButton("Zavrni") { _, _ ->
+                                callback.invoke(origin, false, false)
+                            }
+                            .setOnCancelListener {
+                                callback.invoke(origin, false, false)
+                            }
+                            .show()
+                    } catch (_: Exception) {
+                        callback.invoke(origin, false, false)
+                    }
+                }
             }
 
             override fun onPermissionRequest(request: PermissionRequest?) {
-                request?.grant(request.resources)
+                if (request == null) return
+                val act = context as? android.app.Activity
+                if (act == null || act.isFinishing || act.isDestroyed) {
+                    request.deny()
+                    return
+                }
+
+                val resources = request.resources ?: emptyArray()
+                val host = request.origin?.host ?: request.origin?.toString() ?: "Spletna stran"
+
+                // Prijazna imena zahtevanih dovoljenj
+                val labels = resources.map { res ->
+                    when (res) {
+                        PermissionRequest.RESOURCE_AUDIO_CAPTURE -> "🎤 Mikrofon (zvok)"
+                        PermissionRequest.RESOURCE_VIDEO_CAPTURE -> "📷 Kamera (video)"
+                        PermissionRequest.RESOURCE_PROTECTED_MEDIA_ID -> "🔑 Zaščitena medijska vsebina (DRM)"
+                        else -> res.substringAfterLast(".")
+                    }
+                }.joinToString("\n• ", prefix = "• ")
+
+                act.runOnUiThread {
+                    try {
+                        android.app.AlertDialog.Builder(context)
+                            .setTitle("Zahteva za dovoljenje")
+                            .setMessage("Spletno mesto '$host' želi dostop do naslednjih virov naprave:\n\n$labels\n\nAli dovolite dostop?")
+                            .setPositiveButton("Dovoli") { _, _ ->
+                                request.grant(resources)
+                            }
+                            .setNegativeButton("Zavrni") { _, _ ->
+                                request.deny()
+                            }
+                            .setOnCancelListener {
+                                request.deny()
+                            }
+                            .show()
+                    } catch (_: Exception) {
+                        request.deny()
+                    }
+                }
             }
 
             override fun onConsoleMessage(consoleMessage: android.webkit.ConsoleMessage?): Boolean {
@@ -291,15 +354,15 @@ class ChromiumEngineView @JvmOverloads constructor(
                     true
                 }
 
-                // 1. Odklep nevarne domene na lastno odgovornost (iz varnostnega opozorila)
+                // 1. Odklep nevarne domene na lastno odgovornost z enokratnim varnostnim žetonom
                 if (urlStr.startsWith("safeer://bypass-threat", ignoreCase = true)) {
-                    val domainToBypass = uri.getQueryParameter("domain")
-                    val targetUrl = uri.getQueryParameter("url")
-                    if (!domainToBypass.isNullOrEmpty()) {
-                        ThreatBlockEngine.allowForSession(domainToBypass)
-                    }
-                    if (!targetUrl.isNullOrEmpty()) {
-                        view?.loadUrl(targetUrl)
+                    val token = uri.getQueryParameter("token") ?: ""
+                    val bypass = ThreatBlockEngine.consumeBypassToken(token)
+                    if (bypass != null) {
+                        ThreatBlockEngine.allowForSession(bypass.domain)
+                        view?.loadUrl(bypass.targetUrl)
+                    } else {
+                        android.util.Log.w("SafeerSecurity", "Zavrnjen neveljaven ali potekel bypass token.")
                     }
                     return true
                 }

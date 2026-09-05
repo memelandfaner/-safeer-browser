@@ -24,23 +24,55 @@ object ThreatBlockEngine {
     val blockedIocCount = AtomicLong(0)
     val totalBlockedThreats = AtomicLong(0)
 
-    // Hitri Domain Suffix Trie za grožnje
-    private val threatTrie = DomainSuffixTrie()
+    // Hitri Domain Suffix Trie za grožnje (podpora za atomsko zamenjavo ob posodobitvi feedov)
+    @Volatile
+    private var threatTrie = DomainSuffixTrie()
 
     // Začasno odobrena spletna mesta (uporabnik je izrecno kliknil 'Nadaljuj na lastno odgovornost' za to sejo)
     private val sessionBypassedDomains = ConcurrentHashMap.newKeySet<String>()
+
+    // Enokratni kriptografski žetoni za varno potrditev obvoza varnostnega opozorila
+    data class PendingBypass(val domain: String, val targetUrl: String, val expiryMs: Long)
+    private val pendingBypasses = ConcurrentHashMap<String, PendingBypass>()
 
     // Dogodek ob blokadi
     var onThreatBlocked: ((domain: String, category: String, source: String, isMainFrame: Boolean) -> Unit)? = null
 
     init {
-        loadSeedThreatDatabase()
+        loadSeedThreatDatabase(threatTrie)
+    }
+
+    /**
+     * Zamenja celotno drevo groženj z novim atomskim triejem brez prekinitev.
+     */
+    fun swapThreatTrie(newTrie: DomainSuffixTrie) {
+        threatTrie = newTrie
+    }
+
+    /**
+     * Ustvari enokratni žeton za varen obvoz varnostnega zaslona.
+     */
+    fun createBypassToken(domain: String, targetUrl: String): String {
+        val now = System.currentTimeMillis()
+        pendingBypasses.entries.removeIf { it.value.expiryMs < now }
+        val token = java.util.UUID.randomUUID().toString().replace("-", "")
+        pendingBypasses[token] = PendingBypass(domain, targetUrl, now + 300_000L) // 5 minut veljavnosti
+        return token
+    }
+
+    /**
+     * Porabi enokratni žeton in vrne podatke o obvozu, če je veljaven.
+     */
+    fun consumeBypassToken(token: String): PendingBypass? {
+        val entry = pendingBypasses.remove(token) ?: return null
+        if (System.currentTimeMillis() > entry.expiryMs) return null
+        return entry
     }
 
     /**
      * Vnaprej naložena semenska baza znanih nevarnih C2, malware in phishing domen.
      */
-    private fun loadSeedThreatDatabase() {
+    fun loadSeedThreatDatabase(trie: DomainSuffixTrie = threatTrie) {
         // 1. abuse.ch Feodo Tracker (Botnet C2 strežniki - Dridex, Emotet, QakBot, TrickBot)
         val feodoC2 = listOf(
             "feodotracker.abuse.ch", "c2-tracker.net", "botnet-master.org", "dridex-panel.cc",
@@ -49,7 +81,7 @@ object ThreatBlockEngine {
             "vidar-c2.top", "raccoon-gate.com", "asyncrat-host.duckdns.org", "njrat-beacon.biz",
             "remcos-c2.org", "agenttesla-gate.net", "formbook-panel.cc", "xworm-controller.top"
         )
-        for (d in feodoC2) threatTrie.insert(d, category = "Botnet C2 Server", sourceFeed = "abuse.ch Feodo Tracker")
+        for (d in feodoC2) trie.insert(d, category = "Botnet C2 Server", sourceFeed = "abuse.ch Feodo Tracker")
 
         // 2. abuse.ch URLhaus & ThreatFox (Zlonamerna koda / Malware distribution & IOC)
         val urlhausMalware = listOf(
@@ -59,7 +91,7 @@ object ThreatBlockEngine {
             "23vlcfp.cfd", "2lizguk.buzz", "x91kza.monster", "dl-android-update.top",
             "system-patch-android.click", "security-alert-center.top", "device-scan-security.cc"
         )
-        for (d in urlhausMalware) threatTrie.insert(d, category = "Zlonamerna koda (Malware)", sourceFeed = "abuse.ch URLhaus / ThreatFox")
+        for (d in urlhausMalware) trie.insert(d, category = "Zlonamerna koda (Malware)", sourceFeed = "abuse.ch URLhaus / ThreatFox")
 
         // 3. Phishing Army & Lažno predstavljanje (Kraja gesel in bančnih podatkov)
         val phishingDomains = listOf(
@@ -68,7 +100,7 @@ object ThreatBlockEngine {
             "microsoft-auth-verify.cc", "nlb-klik-prijava.com", "nkbm-varnostni-pregled.net",
             "posta-slovenije-paket.top", "dhl-slovenia-slednje.cc", "si-pass-prijava.info"
         )
-        for (d in phishingDomains) threatTrie.insert(d, category = "Spletno ribarjenje (Phishing)", sourceFeed = "Phishing Army")
+        for (d in phishingDomains) trie.insert(d, category = "Spletno ribarjenje (Phishing)", sourceFeed = "Phishing Army")
 
         // 4. StevenBlack Malware & Agresivna stavniška omrežja z nevarno kodo
         val stevenBlackMalware = listOf(
@@ -76,7 +108,7 @@ object ThreatBlockEngine {
             "parimatch-aff.com", "monetag-loader.com", "richpush-ads.co", "onclickalgo.com",
             "syndication.exoclick.com"
         )
-        for (d in stevenBlackMalware) threatTrie.insert(d, category = "Nevarno oglasno/stavno omrežje", sourceFeed = "StevenBlack Unified")
+        for (d in stevenBlackMalware) trie.insert(d, category = "Nevarno oglasno/stavno omrežje", sourceFeed = "StevenBlack Unified")
     }
 
     /**
@@ -145,8 +177,7 @@ object ThreatBlockEngine {
         val domain = match.matchedDomain
         val category = match.category ?: "Varnostna grožnja"
         val source = match.sourceFeed ?: "Varnostni ščit Safeer Browser"
-        val encodedUrl = Uri.encode(blockedUrl)
-        val encodedDomain = Uri.encode(domain)
+        val bypassToken = createBypassToken(domain, blockedUrl)
 
         return """
         <!DOCTYPE html>
@@ -287,7 +318,7 @@ object ThreatBlockEngine {
                     ⬅ Nazaj na varno (Priporočeno)
                 </button>
                 
-                <a class="btn btn-danger-outline" href="safeer://bypass-threat?domain=$encodedDomain&url=$encodedUrl">
+                <a class="btn btn-danger-outline" href="safeer://bypass-threat?token=$bypassToken">
                     Nadaljuj na lastno odgovornost (Odkleni za to sejo)
                 </a>
 

@@ -5,7 +5,14 @@
 set -e
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TOOLS_DIR="/home/janez/Namizje/Neimenovana mapa/streamN-TV2/android_tv/.tools"
+TOOLS_DIR="${ANDROID_BUILD_TOOLS:-/home/janez/Namizje/Neimenovana mapa/streamN-TV2/android_tv/.tools}"
+
+if [ ! -d "$TOOLS_DIR" ]; then
+    echo "❌ Napaka: Orodja za gradnjo niso najdena v: $TOOLS_DIR"
+    echo "Nastavite spremenljivko ANDROID_BUILD_TOOLS ali namestite orodja."
+    exit 1
+fi
+
 KOTLINC="$TOOLS_DIR/kotlinc/bin/kotlinc"
 KOTLIN_LIB="$TOOLS_DIR/kotlinc/lib/kotlin-stdlib.jar"
 BUILD_DIR="$DIR/build"
@@ -65,11 +72,12 @@ java -jar "$TOOLS_DIR/uber-apk-signer.jar" \
 FINAL_APK="$RELEASE_DIR/safeer-mobile-release.apk"
 SIGNED_APK="$BUILD_DIR/signed/unaligned-aligned-debugSigned.apk"
 cp "$SIGNED_APK" "$FINAL_APK"
+cp "$FINAL_APK" "$RELEASE_DIR/safeer-browser-release.apk"
 cp "$FINAL_APK" "$DIR/Safeer-Mobile.apk"
 cp "$FINAL_APK" "$DIR/Safeer-Browser.apk"
 
 # Sinhronizacija v spletno mapo za prenos
-WEB_MOB_DIR="/home/janez/Namizje/safeer-web/assets/mobile"
+WEB_MOB_DIR="${WEB_MOB_DIR:-/home/janez/Namizje/safeer-web/assets/mobile}"
 if [ -d "$WEB_MOB_DIR" ]; then
     cp -f "$FINAL_APK" "$WEB_MOB_DIR/Safeer-Mobile.apk"
     cp -f "$FINAL_APK" "$WEB_MOB_DIR/Safeer-Browser.apk"
