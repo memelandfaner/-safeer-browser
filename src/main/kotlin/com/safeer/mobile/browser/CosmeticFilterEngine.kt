@@ -1,4 +1,4 @@
-package com.example.safeerbrowser
+package com.safeer.mobile.browser
 
 /**
  * 🎨 CosmeticFilterEngine

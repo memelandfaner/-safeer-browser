@@ -1,4 +1,4 @@
-package com.example.safeerbrowser
+package com.safeer.mobile.browser
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -11,6 +11,7 @@ import android.os.Build
 import android.util.AttributeSet
 import android.view.View
 import android.webkit.*
+import java.io.ByteArrayInputStream
 
 @SuppressLint("SetJavaScriptEnabled")
 class ChromiumEngineView @JvmOverloads constructor(
@@ -75,8 +76,8 @@ class ChromiumEngineView @JvmOverloads constructor(
         val cm = CookieManager.getInstance()
         cm.setAcceptCookie(true)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // Blokada sledilnih piškotkov tretjih oseb za maksimalno zasebnost
-            cm.setAcceptThirdPartyCookies(this, false)
+            // Omogoči za nemoteno prijavo (OAuth 2.0, Google Sign-In, bančništvo)
+            cm.setAcceptThirdPartyCookies(this, true)
         }
 
         settings.apply {
@@ -389,30 +390,28 @@ class ChromiumEngineView @JvmOverloads constructor(
                     return true
                 }
 
-                // 2. Blokiraj le resnične botnet/malware grožnje in znane oglasne domene
-                val host = uri.host?.lowercase()?.trim() ?: ""
+                // 2. Blokiraj le resnične botnet/malware grožnje
                 if (ThreatBlockEngine.isThreat(urlStr)) {
                     view?.let { wv ->
                         val match = ThreatBlockEngine.checkThreat(urlStr)
                         if (match != null) {
                             val html = ThreatBlockEngine.createSecurityInterstitialHtml(urlStr, match)
-                            wv.loadDataWithBaseURL("https://$host", html, "text/html", "UTF-8", null)
+                            wv.loadDataWithBaseURL("safeer://security-interstitial", html, "text/html", "UTF-8", null)
                         }
                     }
                     return true
                 }
 
-                // Blokiraj klik na znana oglasna omrežja (popunderji)
-                if (AdBlockEngine.shouldBlockUrl(urlStr)) {
-                    return true
-                }
-
-                // 3. Odpri posebne sheme v ustreznih aplikacijah
+                // 3. Odpri posebne zunanje sheme v ustreznih aplikacijah z zaščito pred ugrabitvijo Intentov
                 val scheme = uri.scheme?.lowercase() ?: ""
-                if (scheme != "http" && scheme != "https" && scheme != "file" && scheme != "about") {
+                if (scheme != "http" && scheme != "https" && scheme != "file" && scheme != "about" && scheme != "safeer") {
                     try {
                         val intent = if (urlStr.startsWith("intent:", ignoreCase = true)) {
-                            Intent.parseUri(urlStr, Intent.URI_INTENT_SCHEME)
+                            val parsed = Intent.parseUri(urlStr, Intent.URI_INTENT_SCHEME)
+                            parsed.addCategory(Intent.CATEGORY_BROWSABLE)
+                            parsed.component = null
+                            parsed.selector = null
+                            parsed
                         } else {
                             Intent(Intent.ACTION_VIEW, uri)
                         }
@@ -465,7 +464,45 @@ class ChromiumEngineView @JvmOverloads constructor(
                 }
 
                 // ⚡ 2. Napredni AdBlock & Sledilci (Suffix Trie, Streaming Guard & Path Rules)
-                return AdBlockEngine.handleIntercept(url)
+                val adResponse = AdBlockEngine.handleIntercept(url)
+                if (adResponse != null) {
+                    return adResponse
+                }
+
+                // 🎬 3. YouTube Watch & Shorts Document-Start Injekcija (0 oglasov pred zagonom videa)
+                if (isMainFrame && isYouTubeWatchUrl(url)) {
+                    val interceptedYt = interceptAndSanitizeYouTubeWatch(url, settings.userAgentString)
+                    if (interceptedYt != null) {
+                        return interceptedYt
+                    }
+                }
+
+                return null
+            }
+
+            override fun onReceivedError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                error: WebResourceError?
+            ) {
+                super.onReceivedError(view, request, error)
+                val isMain = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    request?.isForMainFrame == true
+                } else {
+                    true
+                }
+
+                if (isMain) {
+                    val failingUrl = request?.url?.toString() ?: ""
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        when (error?.errorCode) {
+                            ERROR_CONNECT, ERROR_HOST_LOOKUP, ERROR_TIMEOUT, ERROR_UNKNOWN -> {
+                                val html = getOfflineErrorHtml(failingUrl)
+                                view?.loadDataWithBaseURL("safeer://offline", html, "text/html", "UTF-8", null)
+                            }
+                        }
+                    }
+                }
             }
 
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
@@ -525,21 +562,146 @@ class ChromiumEngineView @JvmOverloads constructor(
         }
     }
 
+    private fun isYouTubeWatchUrl(url: String): Boolean {
+        return try {
+            val uri = Uri.parse(url)
+            val host = uri.host?.lowercase() ?: return false
+            val path = uri.path ?: return false
+            (host.contains("youtube.com") || host.contains("youtu.be")) &&
+                (path.startsWith("/watch") || path.startsWith("/shorts") || path.startsWith("/v/"))
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    private fun interceptAndSanitizeYouTubeWatch(url: String, userAgent: String): WebResourceResponse? {
+        return try {
+            val conn = (java.net.URL(url).openConnection() as java.net.HttpURLConnection).apply {
+                requestMethod = "GET"
+                instanceFollowRedirects = true
+                connectTimeout = 6000
+                readTimeout = 8000
+                setRequestProperty("User-Agent", userAgent)
+                val cookies = CookieManager.getInstance().getCookie(url)
+                if (!cookies.isNullOrEmpty()) {
+                    setRequestProperty("Cookie", cookies)
+                }
+                setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+                setRequestProperty("Accept-Language", "en-US,en;q=0.9,sl;q=0.8")
+                setRequestProperty("Sec-Fetch-Dest", "document")
+                setRequestProperty("Sec-Fetch-Mode", "navigate")
+            }
+
+            val code = conn.responseCode
+            if (code !in 200..299) {
+                conn.disconnect()
+                return null
+            }
+
+            val rawHtml = conn.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+            conn.disconnect()
+
+            val bootstrapJs = UserScriptManager.getYoutubeBootstrapScript()
+            val scriptTag = "<script type=\"text/javascript\">$bootstrapJs</script>"
+
+            val modifiedHtml = when {
+                rawHtml.contains("<head>", ignoreCase = true) -> {
+                    val idx = rawHtml.indexOf("<head>", ignoreCase = true) + 6
+                    rawHtml.substring(0, idx) + scriptTag + rawHtml.substring(idx)
+                }
+                rawHtml.contains("<html>", ignoreCase = true) -> {
+                    val idx = rawHtml.indexOf("<html>", ignoreCase = true) + 6
+                    rawHtml.substring(0, idx) + "<head>" + scriptTag + "</head>" + rawHtml.substring(idx)
+                }
+                else -> scriptTag + rawHtml
+            }
+
+            val responseHeaders = mutableMapOf<String, String>(
+                "Access-Control-Allow-Origin" to "*",
+                "Cache-Control" to "no-cache, no-store, must-revalidate"
+            )
+
+            WebResourceResponse(
+                "text/html",
+                "UTF-8",
+                code,
+                "OK",
+                responseHeaders,
+                ByteArrayInputStream(modifiedHtml.toByteArray(Charsets.UTF_8))
+            )
+        } catch (e: Exception) {
+            android.util.Log.d("SafeerYT", "Bypass intercept error: ${e.message}")
+            null
+        }
+    }
+
+    private fun getOfflineErrorHtml(failingUrl: String): String {
+        val safeUrl = failingUrl.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;")
+        return """
+        <!DOCTYPE html>
+        <html lang="sl">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Povezava ni uspela - Safeer Browser</title>
+            <style>
+                * { box-sizing: border-box; margin: 0; padding: 0; }
+                body {
+                    background-color: #06090f;
+                    color: #e2e8f0;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                    min-height: 100vh;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 24px;
+                    text-align: center;
+                }
+                .card {
+                    background: #111827;
+                    border: 1px solid #1f2937;
+                    border-radius: 20px;
+                    padding: 32px 24px;
+                    max-width: 440px;
+                    width: 100%;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                }
+                .icon { font-size: 48px; margin-bottom: 16px; }
+                h1 { font-size: 20px; font-weight: 700; color: #f8fafc; margin-bottom: 12px; }
+                p { font-size: 14px; color: #94a3b8; line-height: 1.5; margin-bottom: 20px; }
+                .url-badge { font-size: 12px; color: #64748b; word-break: break-all; margin-bottom: 24px; display: block; }
+                .btn {
+                    background: #2563eb;
+                    color: #fff;
+                    border: none;
+                    padding: 14px 28px;
+                    border-radius: 12px;
+                    font-size: 15px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    width: 100%;
+                    box-shadow: 0 4px 14px rgba(37,99,235,0.4);
+                }
+                .btn:active { background: #1d4ed8; }
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <div class="icon">🌐</div>
+                <h1>Spletne strani ni mogoče naložiti</h1>
+                <p>Preverite internetno povezavo ali pravilnost spletnega naslova.</p>
+                <span class="url-badge">$safeUrl</span>
+                <button class="btn" onclick="location.reload()">Poskusi znova</button>
+            </div>
+        </body>
+        </html>
+        """.trimIndent()
+    }
+
     fun isFullscreenVideoActive(): Boolean = customView != null
 
     fun exitFullscreenVideo() {
         webChromeClient?.onHideCustomView()
-    }
-
-    override fun onWindowVisibilityChanged(visibility: Int) {
-        super.onWindowVisibilityChanged(View.VISIBLE)
-    }
-
-    override fun onVisibilityChanged(changedView: View, visibility: Int) {
-        super.onVisibilityChanged(changedView, View.VISIBLE)
-    }
-
-    override fun dispatchWindowVisibilityChanged(visibility: Int) {
-        super.dispatchWindowVisibilityChanged(View.VISIBLE)
     }
 }

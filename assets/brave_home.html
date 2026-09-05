@@ -470,7 +470,7 @@
             <div class="engine-chip" onclick="setEngine('duckduckgo', this)">DuckDuckGo</div>
             <div class="engine-chip" onclick="setEngine('youtube', this)">YouTube</div>
             <div class="engine-chip" onclick="setEngine('brave', this)">Brave Search</div>
-            <div class="engine-chip" onclick="setEngine('streamnexus', this)">StreamNexus</div>
+            <div class="engine-chip" onclick="setEngine('wikipedia', this)">Wikipedia</div>
         </div>
     </div>
 
@@ -490,7 +490,7 @@
     <!-- 🛡️ Footer -->
     <div class="footer-badge">
         <div class="pulse-dot"></div>
-        <span>Brave-Style Safeer Shield & Anti-Threat Engine</span>
+        <span>Safeer Shield & Anti-Threat Engine</span>
     </div>
 
 </div>
@@ -506,7 +506,7 @@
         
         var input = document.getElementById('searchInput');
         if (engine === 'youtube') input.placeholder = 'Išči na YouTube...';
-        else if (engine === 'streamnexus') input.placeholder = 'Išči filme in serije...';
+        else if (engine === 'wikipedia') input.placeholder = 'Išči v Wikipediji...';
         else if (engine === 'duckduckgo') input.placeholder = 'Zasebno iskanje DuckDuckGo...';
         else if (engine === 'brave') input.placeholder = 'Brave Search...';
         else input.placeholder = 'Iščite ali vnesite naslov spleta...';
@@ -530,8 +530,8 @@
                 targetUrl = 'https://duckduckgo.com/?q=' + encodeURIComponent(q);
             } else if (currentEngine === 'brave') {
                 targetUrl = 'https://search.brave.com/search?q=' + encodeURIComponent(q);
-            } else if (currentEngine === 'streamnexus') {
-                targetUrl = 'https://hydrahd.ws/search/' + encodeURIComponent(q);
+            } else if (currentEngine === 'wikipedia') {
+                targetUrl = 'https://sl.wikipedia.org/w/index.php?search=' + encodeURIComponent(q);
             } else {
                 targetUrl = 'https://www.google.com/search?q=' + encodeURIComponent(q);
             }
@@ -551,13 +551,11 @@
     // --- Dynamic Favorites & Multimedia Engine ---
     var isEditFavoritesMode = false;
     var defaultFavoritesList = [
-        { title: "Xplore TV", url: "https://www.xploretv.si/livetv", mark: "📺", color: "#e31837" },
         { title: "YouTube", url: "https://www.youtube.com", mark: "▶️", color: "#cc0000" },
-        { title: "Filmi", url: "https://hydrahd.ws/", mark: "🎬", color: "#0284c7" },
         { title: "24ur", url: "https://www.24ur.com", mark: "📰", color: "#1256a8" },
         { title: "RTV SLO", url: "https://www.rtvslo.si", mark: "📡", color: "#0284c7" },
+        { title: "SiOL", url: "https://siol.net", mark: "🌐", color: "#0ea5e9" },
         { title: "ChatGPT", url: "https://chatgpt.com", mark: "🤖", color: "#10a37f" },
-        { title: "Kripto", url: "https://cryptoquant.com", mark: "🪙", color: "#f59e0b" },
         { title: "GitHub", url: "https://github.com", mark: "🐙", color: "#64748b" },
         { title: "Reddit", url: "https://www.reddit.com", mark: "📱", color: "#ff4500" },
         { title: "Wikipedija", url: "https://sl.wikipedia.org", mark: "📖", color: "#94a3b8" },

@@ -1,23 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.safeerbrowser"
-    android:versionCode="1"
-    android:versionName="1.0.0">
+    package="com.safeer.mobile.browser"
+    android:versionCode="2"
+    android:versionName="1.0.1">
 
     <uses-sdk
         android:minSdkVersion="28"
-        android:targetSdkVersion="34" />
+        android:targetSdkVersion="35" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-feature android:name="android.hardware.touchscreen" android:required="true" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.location" android:required="false" />
 
     <supports-screens
         android:smallScreens="true"
@@ -37,7 +41,7 @@
         android:supportsRtl="true">
 
         <activity
-            android:name="com.example.safeerbrowser.MainActivity"
+            android:name="com.safeer.mobile.browser.MainActivity"
             android:label="@string/app_name"
             android:icon="@mipmap/ic_launcher"
             android:exported="true"
@@ -61,7 +65,7 @@
         </activity>
 
         <provider
-            android:name="com.example.safeerbrowser.MobileFileProvider"
+            android:name="com.safeer.mobile.browser.MobileFileProvider"
             android:authorities="com.safeer.mobile.browser.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">

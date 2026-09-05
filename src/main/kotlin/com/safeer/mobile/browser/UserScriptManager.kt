@@ -1,14 +1,13 @@
-package com.example.safeerbrowser
+package com.safeer.mobile.browser
 
 import android.webkit.WebView
 
 object UserScriptManager {
 
     private const val DARK_MODE_AMOLED_CSS = """
-        /* Samsung Galaxy AMOLED True Black Engine */
-        html, body {
-            background-color: #000000 !important;
-            color: #f1f5f9 !important;
+        /* Safeer Native Dark Mode Engine */
+        :root {
+            color-scheme: dark !important;
         }
     """
 
@@ -47,14 +46,6 @@ object UserScriptManager {
         (function() {
             if (window._safeer_popunder_shield_active) return;
             window._safeer_popunder_shield_active = true;
-
-            // 🚫 1. Popolna nevtralizacija window.open popunderjev
-            try {
-                window.open = function(url, target, features) {
-                    console.log('[Safeer AdBlock] Preprečen window.open:', url);
-                    return null;
-                };
-            } catch(e) {}
 
             function isPlayerElement(el) {
                 if (!el || el.nodeType !== 1) return true;
@@ -424,12 +415,6 @@ object UserScriptManager {
                 );
                 for (var i = 0; i < skipControls.length; i++) {
                     if (isVisible(skipControls[i]) && !isBlockedSkipTarget(compactText(skipControls[i]))) return true;
-                }
-                var labels = player.querySelectorAll('span, yt-formatted-string, button, [role="button"]');
-                for (var j = 0; j < labels.length; j++) {
-                    var txt = compactText(labels[j]);
-                    if ((txt.indexOf('sponzorirano') !== -1 || txt.indexOf('sponsored') !== -1) && isVisible(labels[j])) return true;
-                    if (isSkipLabel(txt) && isVisible(labels[j])) return true;
                 }
                 return false;
             }
@@ -806,30 +791,14 @@ object UserScriptManager {
                         }
 
                         var isAd = playerHasAd();
-                        clickSkipButtons();
-                        if (moviePlayer && typeof moviePlayer.skipAd === 'function' && isAd) {
-                            try { moviePlayer.skipAd(); } catch(_) {}
-                        }
-
-                        // 🚫 Samo potrjen preroll: pospeši/preskoči oglas, originalni video ostane pri 1x
+                        // 🚫 Samo potrjen preroll: klikni gumb za preskok, originalni video ostane pri 1x
                         if (isAd) {
                             video.muted = true;
-                            if (isFinite(video.duration) && video.duration > 0 && video.duration < 120) {
-                                video.currentTime = video.duration;
-                            }
-                            video.playbackRate = 16.0;
+                            clickSkipButtons();
                         } else {
                             if (video.playbackRate > 2.0) {
                                 video.playbackRate = 1.0;
-                                video.muted = false;
                             }
-                            if (video.muted) {
-                                video.muted = false;
-                            }
-                            if (video.volume < 1.0) {
-                                video.volume = 1.0;
-                            }
-
                             if (video.paused && !video.ended && !video._safeer_user_paused) {
                                 var playPromise = video.play();
                                 if (playPromise !== undefined) {
@@ -838,13 +807,14 @@ object UserScriptManager {
                             }
                         }
 
-                        // 🔊 Vklop zvoka in takojšen izbris Mute gumba
-                        var unmuteBtns = document.querySelectorAll(
-                            '.ytp-unmute, .ytp-unmute-inner, .ytp-unmute-animated, .ytp-unmute-box, ' +
-                            'button[aria-label*="Vklopite zvok"], button[aria-label*="Unmute"]'
-                        );
-                        for (var u = 0; u < unmuteBtns.length; u++) {
-                            try { unmuteBtns[u].click(); unmuteBtns[u].remove(); } catch(_) {}
+                        // Enkraten vklop zvoka ob začetku novega videa, če je bil utišan zaradi autoplay pravil
+                        if (!this.initialPlayDone && video && video.muted) {
+                            var unmuteBtn = document.querySelector(
+                                '.ytp-unmute, button[aria-label*="Vklopite zvok"], button[aria-label*="Unmute"]'
+                            );
+                            if (unmuteBtn) {
+                                try { unmuteBtn.click(); } catch(_) {}
+                            }
                         }
 
                     } catch(e) {}
@@ -1134,6 +1104,10 @@ object UserScriptManager {
         })();
     """
 
+    fun getYoutubeBootstrapScript(): String {
+        return GPC_AND_DNT_JS + "\n" + YOUTUBE_FREEDOM_MOBILE_JS
+    }
+
     fun injectEarlyScript(webView: WebView, isDesktop: Boolean = false) {
         webView.evaluateJavascript(GPC_AND_DNT_JS, null)
         val cosmeticCss = CosmeticFilterEngine.buildCosmeticCss()
@@ -1142,7 +1116,6 @@ object UserScriptManager {
             webView.evaluateJavascript(WINDOWS_CHROME_ENVIRONMENT_JS, null)
         }
         webView.evaluateJavascript(ANTI_POPUNDER_SHIELD_JS, null)
-        webView.evaluateJavascript(BACKGROUND_PLAYBACK_JS, null)
         webView.evaluateJavascript(YOUTUBE_FREEDOM_MOBILE_JS, null)
         webView.evaluateJavascript(STREAMING_INSTANT_START_JS, null)
     }
@@ -1155,7 +1128,6 @@ object UserScriptManager {
             webView.evaluateJavascript(WINDOWS_CHROME_ENVIRONMENT_JS, null)
         }
         webView.evaluateJavascript(ANTI_POPUNDER_SHIELD_JS, null)
-        webView.evaluateJavascript(BACKGROUND_PLAYBACK_JS, null)
         webView.evaluateJavascript(YOUTUBE_FREEDOM_MOBILE_JS, null)
         webView.evaluateJavascript(STREAMING_INSTANT_START_JS, null)
 

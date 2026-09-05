@@ -1,4 +1,4 @@
-package com.example.safeerbrowser
+package com.safeer.mobile.browser
 
 import android.content.Context
 import java.io.BufferedReader
@@ -21,9 +21,9 @@ object ThreatFeedsUpdater {
 
     private val FEEDS = listOf(
         ThreatFeed(
-            name = "abuse.ch Feodo Tracker",
-            url = "https://feodotracker.abuse.ch/downloads/ipblocklist.txt",
-            category = "Botnet C2 Server"
+            name = "abuse.ch ThreatFox IOC",
+            url = "https://threatfox.abuse.ch/downloads/hostfile/",
+            category = "Botnet C2 & Malware IOC"
         ),
         ThreatFeed(
             name = "abuse.ch URLhaus",
@@ -36,6 +36,10 @@ object ThreatFeedsUpdater {
             category = "Spletno ribarjenje (Phishing)"
         )
     )
+
+    private const val PREFS_NAME = "safeer_security_prefs"
+    private const val KEY_LAST_UPDATE = "last_threat_update_time"
+    private const val CACHE_DURATION_MS = 24 * 60 * 60 * 1000L // 24 ur
 
     /**
      * Izračuna SHA-256 kontrolno vsoto vsebine za varnostno beleženje integritete (Security Audit Log).
@@ -60,7 +64,17 @@ object ThreatFeedsUpdater {
     /**
      * Prenese in posodobi varnostne sezname v ozadju z atomsko zamenjavo drevesa (Atomic Trie Swap).
      */
-    fun updateFeedsAsync(context: Context, onComplete: ((totalAdded: Int) -> Unit)? = null) {
+    fun updateFeedsAsync(context: Context, force: Boolean = false, onComplete: ((totalAdded: Int) -> Unit)? = null) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val lastUpdate = prefs.getLong(KEY_LAST_UPDATE, 0L)
+        val now = System.currentTimeMillis()
+
+        if (!force && (now - lastUpdate < CACHE_DURATION_MS)) {
+            android.util.Log.i("SafeerSecurity", "Varnostni seznami so posodobljeni (cache velja še ${((CACHE_DURATION_MS - (now - lastUpdate)) / 3600000)} ur).")
+            onComplete?.invoke(0)
+            return
+        }
+
         Thread {
             var totalAdded = 0
             val newTrie = DomainSuffixTrie()
@@ -97,7 +111,7 @@ object ThreatFeedsUpdater {
                                 parts[0]
                             }
 
-                            if (isValidDomainName(domain)) {
+                            if (isValidDomainName(domain) && !ThreatBlockEngine.isNeverBlockDomain(domain)) {
                                 newTrie.insert(domain, feed.category, feed.name)
                                 totalAdded++
                             }
@@ -107,9 +121,10 @@ object ThreatFeedsUpdater {
                 } catch (_: Exception) {}
             }
 
-            // Če so bili novi viri uspešno preneseni, atomsko zamenjamo celotno drevo groženj
+            // Če so bili novi viri uspešno preneseni, atomsko zamenjamo celotno drevo groženj in shranimo čas
             if (totalAdded > 0) {
                 ThreatBlockEngine.swapThreatTrie(newTrie)
+                prefs.edit().putLong(KEY_LAST_UPDATE, System.currentTimeMillis()).apply()
             }
 
             onComplete?.invoke(totalAdded)

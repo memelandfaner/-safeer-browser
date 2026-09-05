@@ -98,3 +98,5 @@ Skripta samostojno prevede vire z AAPT2, prevede Kotlin kodo s `kotlinc`, generi
 
 - **Varnostna omejitev**: Noben spletni brskalnik ali varnostni filter ne more zagotoviti 100 % zaščite pred vsemi novimi ali neznanimi grožnjami (Zero-Day). Safeer Browser uporablja več nivojev zaščite za občutno zmanjšanje napadalne površine in tveganja.
 - **Vsebine in licence**: Kozmetično filtriranje oglasov uporablja odprta pravila skupnosti EasyList. Varnostne sezname zagotavljajo abuse.ch, Phishing Army in StevenBlack pod ustreznimi odprtimi pogoji uporabe.
+- **Licenca**: Projekt je izdan pod licenco [Apache License 2.0](LICENSE).
+- **Zasebnost**: Podrobnosti o ravnanju s podatki najdete v dokumentu [PRIVACY_POLICY.md](PRIVACY_POLICY.md).

@@ -1,4 +1,4 @@
-package com.example.safeerbrowser
+package com.safeer.mobile.browser
 
 import android.net.Uri
 import android.webkit.WebResourceResponse
@@ -60,36 +60,23 @@ object AdBlockEngine {
             "sparkasse.si", "revolut.com", "n26.com", "delavska-hranilnica.si",
             "bks-bank.si", "unicreditbank.si", "lon.si", "gorenjska-banka.si",
             "rtvslo.si", "24ur.com", "siol.net", "github.com",
-            "themoviedb.org", "tmdb.org", "image.tmdb.org", "api.themoviedb.org",
-            "streamex.sh", "streamex.ws", "vidlink.pro", "vidsrc.me", "vidsrc.in", "vidsrc.pm",
-            "vidsrc.net", "vidsrc.to", "vidsrc.xyz", "autoembed.co", "autoembed.cc", "multiembed.mov",
-            "2embed.cc", "111movies.com", "hydrahd.ws", "megacloud.tv", "rabbitstream.net",
-            "dokicloud.one", "vizcloud.online", "filemoon.sx", "streamtape.com", "vidgod.me",
-            "peach.stream", "cinemanos.com", "core.streamex.sh", "streamwish.to", "doodstream.com",
-            "pornhub.com", "phncdn.com", "phncdn.net"
+            "gov.si", "e-uprava.gov.si", "posta.si", "si-pass.si", "rekono.si",
+            "cloudflare.com", "apple.com", "microsoft.com", "xploretv.si"
         )
         for (d in trusted) whitelistTrie.insert(d)
     }
 
     private fun initializeBlockedDomains() {
-        val adsAndGambling = listOf(
-            // Stavniške & Casino platforme
-            "20bet.com", "20bet.top", "20bet-aff.com", "1xbet.com", "1xbet.mobi", "1xbet-partner.com",
-            "betwinner.com", "melbet.com", "mostbet.com", "vulkanvegas.com", "parimatch.com", "ggbet.com",
-            "betsson.com", "unibet.com", "bet365.com", "betway.com", "bwin.com", "campobet.com",
-            "rabona.com", "fezbet.com", "librabet.com", "nomini.com", "wazamba.com", "sportaza.com",
-            "greatwin.com", "casinia.com", "spinanga.com", "boomerang-casino.com", "pin-up.casino",
-
-            // Popunderji, In-Page Push & Agresivna oglasna omrežja (vključno z video preroll & bannerji)
+        val adsAndTrackers = listOf(
+            // Popunderji, In-Page Push & Agresivna oglasna omrežja
             "popads.net", "popcash.net", "monetag.com", "adcash.com", "propellerads.com",
             "exoclick.com", "trafficjunky.com", "trafficjunky.net", "ads.trafficjunky.net", "delivery.trafficjunky.net",
-            "tsyndicate.com", "et-code.com", "ero-advertising.com", "clickadu.com", "adsterra.com", "adxad.com",
+            "tsyndicate.com", "clickadu.com", "adsterra.com", "adxad.com",
             "hilltopads.com", "hilltopads.net", "richpush.co", "pushground.com", "admaven.com", "rollerads.com",
             "juicyads.com", "trafficfactory.biz", "realsrv.com", "onclickalgo.com", "onclickperformance.com",
             "onclickmega.com", "onclickgate.com", "syndication.exoclick.com", "syndication.realsrv.com",
             "doublepimp.com", "deloplen.com", "highperformancegate.com", "effectivegate.com", "pussing.com",
             "propu.sh", "creativecdn.com", "whosamung.us", "traffichaus.com", "bngpt.com", "adnxs.com", "adnxs-simple.com",
-            "trafficstars.com", "livejasmin.com", "bongacams.com", "chaturbate.com", "stripchat.com", "cam4.com",
             "adtrue.com", "ad-score.com", "runative-syndicate.com", "plugrush.com", "bullionpromotions.com",
             "vlitag.com", "vidcrunch.com", "aniview.com", "primis.tech", "springserve.com", "smartclip.net",
             "adhigh.net", "adkernel.com", "adsupply.com", "adtarget.me", "adup-tech.com", "adxprts.com", "airpush.com",
@@ -119,7 +106,7 @@ object AdBlockEngine {
             // Potisna vsiljiva omrežja (Push scams)
             "pushwelcome.com", "news-feed2.com", "notifpush.com", "pushassist.com", "truepush.com"
         )
-        for (d in adsAndGambling) blockedTrie.insert(d)
+        for (d in adsAndTrackers) blockedTrie.insert(d)
     }
 
     /**
@@ -136,50 +123,39 @@ object AdBlockEngine {
         if (!isEnabled || url.isEmpty()) return false
         val lower = url.lowercase()
 
-        // 1. Devtools zaščita (disable-devtool.js vedno blokiraj)
+        // 1. Razčleni gostitelja
+        val uri = try { Uri.parse(lower) } catch (_: Exception) { null }
+        val host = uri?.host?.lowercase()?.trim() ?: ""
+
+        // 2. Preveri belo listo (z izjemo oglasnih googlevideo tokov)
+        if (host.isNotEmpty() && whitelistTrie.matches(host)) {
+            // Če gre za googlevideo, preveri, ali vsebuje parametre oglasa
+            if (host.contains("googlevideo.com")) {
+                if (lower.contains("&ctier=") || lower.contains("?ctier=") ||
+                    lower.contains("&oad=") || lower.contains("?oad=") ||
+                    lower.contains("&adformat=") || lower.contains("?adformat=") ||
+                    lower.contains("&ad_type=") || lower.contains("?ad_type=")) {
+                    return true // Blokiraj oglasni video tok!
+                }
+            }
+            return false // Legitimna vsebina na beli listi je dovoljena
+        }
+
+        // 3. Devtools zaščita (disable-devtool.js vedno blokiraj)
         if (lower.contains("disable-devtool") || lower.contains("devtools-detector")) {
             return true
         }
 
-        // 2. Preverjanje poti (Path Rules)
+        // 4. Domensko preverjanje v Trie (O(k))
+        if (host.isNotEmpty() && blockedTrie.matches(host)) {
+            return true
+        }
+
+        // 5. Preverjanje poti (Path Rules) za oglasne skripte
         for (pattern in BLOCKED_PATH_PATTERNS) {
             if (lower.contains(pattern)) {
                 return true
             }
-        }
-
-        // 3. Domensko preverjanje v Trie (O(k))
-        try {
-            val uri = Uri.parse(lower)
-            val host = uri.host?.lowercase()?.trim() ?: ""
-
-            if (host.isNotEmpty()) {
-                // Če je blokirana domena v Trie (tudi če ponuja .m3u8 ali .mp4 oglas), blokiraj takoj!
-                if (blockedTrie.matches(host)) {
-                    return true
-                }
-
-                // Če je na beli listi, dovoli
-                if (whitelistTrie.matches(host)) {
-                    return false
-                }
-            }
-        } catch (_: Exception) {}
-
-        // 4. 🎬 Video Media Guard: Dovoli veljavne video toke in segmente preverjenih medijskih strežnikov
-        if (lower.contains(".m3u8") || lower.contains(".ts") || lower.contains("/hls/") || 
-            lower.contains("/embed/") || lower.contains("googlevideo.com") ||
-            lower.contains("youtube.com/youtubei") || lower.contains("youtube.com/s/player") ||
-            lower.contains("youtube.com/watch") || lower.contains("youtube.com/api/") ||
-            lower.contains("youtube.com/results") || lower.contains("ytimg.com") ||
-            lower.contains("phncdn.com") || lower.contains("phncdn.net")) {
-            // Če je specifičen oglasni strežnik, ga blokiraj
-            if (lower.contains("googleads") || lower.contains("pagead") || lower.contains("adservice") ||
-                lower.contains("doubleclick") || lower.contains("ad.youtube.com") || lower.contains("ads.youtube.com") ||
-                lower.contains("trafficjunky") || lower.contains("tsyndicate")) {
-                return true
-            }
-            return false
         }
 
         return false

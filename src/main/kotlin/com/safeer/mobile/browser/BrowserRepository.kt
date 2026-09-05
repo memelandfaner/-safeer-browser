@@ -1,4 +1,4 @@
-package com.example.safeerbrowser
+package com.safeer.mobile.browser
 
 import android.content.ContentValues
 import android.content.Context
@@ -70,7 +70,7 @@ class BrowserRepository(context: Context) : SQLiteOpenHelper(context, DATABASE_N
         val defaults = listOf(
             Bookmark(0, "Google Iskalnik", "https://www.google.com", "🔍"),
             Bookmark(0, "YouTube", "https://www.youtube.com", "📺"),
-            Bookmark(0, "StreamNexus Filmi", "https://hydrahd.ws/", "🎬"),
+            Bookmark(0, "DuckDuckGo", "https://duckduckgo.com", "🦆"),
             Bookmark(0, "ChatGPT AI", "https://chatgpt.com", "💬"),
             Bookmark(0, "RTV Slovenija", "https://www.rtvslo.si", "📰"),
             Bookmark(0, "Wikipedia", "https://sl.wikipedia.org", "📖"),
@@ -139,6 +139,9 @@ class BrowserRepository(context: Context) : SQLiteOpenHelper(context, DATABASE_N
             put(COL_HIST_TIME, System.currentTimeMillis())
         }
         db.insert(TABLE_HISTORY, null, cv)
+        try {
+            db.execSQL("DELETE FROM $TABLE_HISTORY WHERE $COL_HIST_ID NOT IN (SELECT $COL_HIST_ID FROM $TABLE_HISTORY ORDER BY $COL_HIST_TIME DESC LIMIT 1000)")
+        } catch (_: Exception) {}
     }
 
     fun getHistory(limit: Int = 100): List<HistoryItem> {

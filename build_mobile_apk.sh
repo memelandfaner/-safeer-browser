@@ -15,8 +15,6 @@ elif [ -d "$DIR/../streamN-TV2/android_tv/.tools" ]; then
     TOOLS_DIR="$DIR/../streamN-TV2/android_tv/.tools"
 elif [ -d "$HOME/.tools/android" ]; then
     TOOLS_DIR="$HOME/.tools/android"
-elif [ -d "/home/janez/Namizje/Neimenovana mapa/streamN-TV2/android_tv/.tools" ]; then
-    TOOLS_DIR="/home/janez/Namizje/Neimenovana mapa/streamN-TV2/android_tv/.tools"
 else
     TOOLS_DIR=""
 fi
@@ -50,7 +48,7 @@ echo "⚙️ 1/5: Prevajam Android XML vire (AAPT2)..."
     --rename-manifest-package "com.safeer.mobile.browser" \
     -A "$DIR/assets" \
     --min-sdk-version 28 \
-    --target-sdk-version 34 \
+    --target-sdk-version 35 \
     --version-code 1 \
     --version-name "1.0.0" \
     -o "$BUILD_DIR/resources.apk" \
@@ -61,15 +59,15 @@ echo "☕ 2/5: Prevajam Kotlin izvorno kodo (kotlinc)..."
 "$KOTLINC" -cp "$TOOLS_DIR/android.jar:$BUILD_DIR/gen" \
     -d "$BUILD_DIR/classes" \
     -jvm-target 1.8 \
-    "$DIR/src/main/kotlin/com/example/safeerbrowser/"*.kt \
-    "$BUILD_DIR/gen/com/example/safeerbrowser/R.java"
+    "$DIR/src/main/kotlin/com/safeer/mobile/browser/"*.kt \
+    "$BUILD_DIR/gen/com/safeer/mobile/browser/R.java"
 
 echo "⚡ 3/5: Prevajam v Dalvik Executable (D8)..."
 java -cp "$TOOLS_DIR/r8.jar" com.android.tools.r8.D8 \
     --min-api 28 \
     --output "$BUILD_DIR/dex" \
     --lib "$TOOLS_DIR/android.jar" \
-    "$BUILD_DIR/classes/com/example/safeerbrowser/"*.class \
+    "$BUILD_DIR/classes/com/safeer/mobile/browser/"*.class \
     "$KOTLIN_LIB"
 
 echo "📦 4/5: Sestavljam APK paket..."
@@ -113,13 +111,12 @@ cd "$DIR"
 sha256sum Safeer-Browser.apk Safeer-Mobile.apk > "$DIR/SHA256SUMS"
 sha256sum "Release/Artifacts/safeer-mobile-release.apk" "Release/Artifacts/safeer-browser-release.apk" > "$RELEASE_DIR/SHA256SUMS"
 
-# Sinhronizacija v spletno mapo za prenos
-WEB_MOB_DIR="${WEB_MOB_DIR:-/home/janez/Namizje/safeer-web/assets/mobile}"
-if [ -d "$WEB_MOB_DIR" ]; then
+# Sinhronizacija v spletno mapo za prenos (če je nastavljena)
+if [ -n "$WEB_MOB_DIR" ] && [ -d "$WEB_MOB_DIR" ]; then
     cp -f "$FINAL_APK" "$WEB_MOB_DIR/Safeer-Mobile.apk"
     cp -f "$FINAL_APK" "$WEB_MOB_DIR/Safeer-Browser.apk"
     cp -f "$DIR/SHA256SUMS" "$WEB_MOB_DIR/SHA256SUMS"
-    echo "🌐 Sinhronizirano v safeer-web/assets/mobile/"
+    echo "🌐 Sinhronizirano v $WEB_MOB_DIR"
 fi
 
 echo ""

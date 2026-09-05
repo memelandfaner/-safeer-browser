@@ -1,4 +1,4 @@
-package com.example.safeerbrowser
+package com.safeer.mobile.browser
 
 import android.net.Uri
 import android.webkit.WebResourceResponse
@@ -38,6 +38,28 @@ object ThreatBlockEngine {
     // Dogodek ob blokadi
     var onThreatBlocked: ((domain: String, category: String, source: String, isMainFrame: Boolean) -> Unit)? = null
 
+    // 🛡️ Stroga bela lista domen, ki jih Threat Shield NIKOLI ne sme blokirati
+    private val NEVER_BLOCK_WHITELIST = hashSetOf(
+        "google.com", "youtube.com", "googlevideo.com", "googleapis.com", "gstatic.com", "ytimg.com",
+        "duckduckgo.com", "wikipedia.org", "wikimedia.org", "github.com", "githubusercontent.com",
+        "microsoft.com", "apple.com", "mozilla.org", "android.com",
+        // Slovenske bančne, javne in novičarske storitve
+        "gov.si", "nlb.si", "nkbm.si", "skb.si", "intesasanpaolobank.si", "dh.si",
+        "delavska-hranilnica.si", "sparkasse.si", "bks-bank.si", "unicreditbank.si",
+        "posta.si", "rtvslo.si", "24ur.com", "siol.net", "zvezapotrosnikov.si",
+        // Gostitelji varnostnih feedov
+        "abuse.ch", "phishing.army"
+    )
+
+    fun isNeverBlockDomain(host: String): Boolean {
+        val h = host.lowercase().trim()
+        if (NEVER_BLOCK_WHITELIST.contains(h)) return true
+        for (w in NEVER_BLOCK_WHITELIST) {
+            if (h.endsWith(".$w")) return true
+        }
+        return false
+    }
+
     init {
         loadSeedThreatDatabase(threatTrie)
     }
@@ -75,7 +97,7 @@ object ThreatBlockEngine {
     fun loadSeedThreatDatabase(trie: DomainSuffixTrie = threatTrie) {
         // 1. abuse.ch Feodo Tracker (Botnet C2 strežniki - Dridex, Emotet, QakBot, TrickBot)
         val feodoC2 = listOf(
-            "feodotracker.abuse.ch", "c2-tracker.net", "botnet-master.org", "dridex-panel.cc",
+            "c2-tracker.net", "botnet-master.org", "dridex-panel.cc",
             "emotet-feed.com", "qakbot-gate.biz", "trickbot-c2.top", "icedid-network.cc",
             "bazarloader-c2.net", "cobaltstrike-beacon.info", "lokibot-panel.ru", "redline-stealer.cc",
             "vidar-c2.top", "raccoon-gate.com", "asyncrat-host.duckdns.org", "njrat-beacon.biz",
@@ -85,7 +107,7 @@ object ThreatBlockEngine {
 
         // 2. abuse.ch URLhaus & ThreatFox (Zlonamerna koda / Malware distribution & IOC)
         val urlhausMalware = listOf(
-            "urlhaus.abuse.ch", "threatfox.abuse.ch", "malware-drop.com", "payload-delivery.cc",
+            "malware-drop.com", "payload-delivery.cc",
             "evil-apk-download.net", "stealer-gate.org", "cryptominer-pool.top", "ransomware-host.xyz",
             "dropper-server.ru", "trojan-source.cc", "apk-injector.top", "malicious-script.biz",
             "23vlcfp.cfd", "2lizguk.buzz", "x91kza.monster", "dl-android-update.top",
@@ -95,7 +117,7 @@ object ThreatBlockEngine {
 
         // 3. Phishing Army & Lažno predstavljanje (Kraja gesel in bančnih podatkov)
         val phishingDomains = listOf(
-            "phishing.army", "login-bank-verification.com", "secure-account-update.net",
+            "login-bank-verification.com", "secure-account-update.net",
             "verify-paypal-center.com", "apple-id-suspended.info", "google-account-recovery.top",
             "microsoft-auth-verify.cc", "nlb-klik-prijava.com", "nkbm-varnostni-pregled.net",
             "posta-slovenije-paket.top", "dhl-slovenia-slednje.cc", "si-pass-prijava.info"
@@ -138,6 +160,11 @@ object ThreatBlockEngine {
             val uri = Uri.parse(url)
             val host = uri.host?.lowercase()?.trim() ?: return null
             if (host.isEmpty()) return null
+
+            // 🛡️ NIKOLI ne blokiraj zaupanja vrednih domen
+            if (isNeverBlockDomain(host)) {
+                return null
+            }
 
             val match = threatTrie.findMatch(host) ?: return null
 
@@ -192,14 +219,22 @@ object ThreatBlockEngine {
         }
     }
 
+    private fun htmlEscape(s: String): String {
+        return s.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#x27;")
+    }
+
     /**
      * Ustvari privlačen AMOLED Red varnostni opozorilni zaslon (Security Interstitial Page) za glavno okno.
      */
     fun createSecurityInterstitialHtml(blockedUrl: String, match: DomainSuffixTrie.MatchResult): String {
-        val domain = match.matchedDomain
-        val category = match.category ?: "Varnostna grožnja"
-        val source = match.sourceFeed ?: "Varnostni ščit Safeer Browser"
-        val isCritical = isCriticalThreat(category)
+        val domain = htmlEscape(match.matchedDomain)
+        val category = htmlEscape(match.category ?: "Varnostna grožnja")
+        val source = htmlEscape(match.sourceFeed ?: "Varnostni ščit Safeer Browser")
+        val isCritical = isCriticalThreat(match.category)
 
         val bypassActionHtml = if (isCritical) {
             """

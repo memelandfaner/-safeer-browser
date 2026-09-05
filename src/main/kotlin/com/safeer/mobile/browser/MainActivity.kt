@@ -1,4 +1,4 @@
-package com.example.safeerbrowser
+package com.safeer.mobile.browser
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
@@ -81,46 +81,22 @@ class MainActivity : android.app.Activity() {
         tabManager.createTab(this, targetUrl, true)
     }
 
-    private var wakeLock: android.os.PowerManager.WakeLock? = null
-
-    private fun acquireWakeLock() {
-        try {
-            if (wakeLock == null) {
-                val pm = getSystemService(Context.POWER_SERVICE) as? android.os.PowerManager
-                wakeLock = pm?.newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK, "Safeer:BackgroundAudioWakeLock")
-                wakeLock?.setReferenceCounted(false)
-            }
-            if (wakeLock?.isHeld == false) {
-                wakeLock?.acquire(2 * 60 * 60 * 1000L)
-            }
-        } catch (_: Exception) {}
-    }
-
-    private fun releaseWakeLock() {
-        try {
-            if (wakeLock?.isHeld == true) {
-                wakeLock?.release()
-            }
-        } catch (_: Exception) {}
-    }
-
     override fun onPause() {
         super.onPause()
-        acquireWakeLock()
+        tabManager.getActiveTab()?.webView?.onPause()
     }
 
     override fun onResume() {
         super.onResume()
+        tabManager.getActiveTab()?.webView?.onResume()
     }
 
     override fun onStop() {
         super.onStop()
-        acquireWakeLock()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        releaseWakeLock()
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -637,7 +613,7 @@ class MainActivity : android.app.Activity() {
     private fun showFindInPage() {
         findInPageBar.visibility = View.VISIBLE
         editFindText.requestFocus()
-        showKeyboard()
+        showKeyboard(editFindText)
 
         val activeWv = tabManager.getActiveTab()?.webView
         activeWv?.setFindListener { activeMatchOrdinal, numberOfMatches, _ ->
@@ -740,18 +716,18 @@ class MainActivity : android.app.Activity() {
         btnFindClose.setOnClickListener {
             tabManager.getActiveTab()?.webView?.clearMatches()
             findInPageBar.visibility = View.GONE
-            hideKeyboard()
+            hideKeyboard(editFindText)
         }
     }
 
-    private fun showKeyboard() {
+    private fun showKeyboard(target: View = editUrl) {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-        imm?.showSoftInput(editUrl, InputMethodManager.SHOW_IMPLICIT)
+        imm?.showSoftInput(target, InputMethodManager.SHOW_IMPLICIT)
     }
 
-    private fun hideKeyboard() {
+    private fun hideKeyboard(target: View = editUrl) {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-        imm?.hideSoftInputFromWindow(editUrl.windowToken, 0)
+        imm?.hideSoftInputFromWindow(target.windowToken, 0)
     }
 
     override fun onBackPressed() {
