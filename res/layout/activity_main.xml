@@ -3,7 +3,7 @@
     android:id="@+id/mainRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_pure_black">
+    android:background="@color/bg_primary">
 
     <!-- Mobile Top Navigation Toolbar (Chrome / Opera Hybrid) -->
     <LinearLayout
@@ -92,6 +92,30 @@
                 android:textSize="13sp"
                 android:background="@drawable/bg_mobile_icon_button" />
         </LinearLayout>
+
+        <!-- Reload (🔄) Button -->
+        <Button
+            android:id="@+id/btnReload"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/bg_mobile_icon_button"
+            android:text="🔄"
+            android:textColor="@color/text_primary"
+            android:textSize="15sp"
+            android:contentDescription="Osveži stran" />
+
+        <!-- Bookmark Star (⭐) Button -->
+        <Button
+            android:id="@+id/btnStar"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/bg_mobile_icon_button"
+            android:text="☆"
+            android:textColor="@color/accent_cyan"
+            android:textSize="16sp"
+            android:contentDescription="Dodaj med priljubljene" />
 
         <!-- 3. Add Tab (+) Button -->
         <Button

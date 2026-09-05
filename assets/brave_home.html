@@ -541,11 +541,16 @@
     }
 
     function openUrl(url) {
+        if (!url) return;
         if (window.SafeerBridge && typeof window.SafeerBridge.navigate === 'function') {
-            window.SafeerBridge.navigate(url);
-        } else {
-            window.location.href = url;
+            try {
+                window.SafeerBridge.navigate(url);
+                return;
+            } catch (err) {
+                console.error('SafeerBridge navigate error:', err);
+            }
         }
+        window.location.href = url;
     }
 
     // --- Dynamic Favorites & Multimedia Engine ---

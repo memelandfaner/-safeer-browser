@@ -36,10 +36,16 @@ class ChromiumEngineView @JvmOverloads constructor(
         }
     }
 
+    @Volatile
+    var currentUserAgent: String = ""
+        private set
+
     var isDesktopMode: Boolean = false
         set(value) {
             field = value
-            settings.userAgentString = if (value) DESKTOP_USER_AGENT else defaultMobileUserAgent
+            val ua = if (value) DESKTOP_USER_AGENT else defaultMobileUserAgent
+            currentUserAgent = ua
+            settings.userAgentString = ua
             settings.useWideViewPort = value
             settings.loadWithOverviewMode = value
         }
@@ -109,7 +115,9 @@ class ChromiumEngineView @JvmOverloads constructor(
             loadWithOverviewMode = isDesktopMode
             
             cacheMode = WebSettings.LOAD_DEFAULT
-            userAgentString = if (isDesktopMode) DESKTOP_USER_AGENT else defaultMobileUserAgent
+            val ua = if (isDesktopMode) DESKTOP_USER_AGENT else defaultMobileUserAgent
+            currentUserAgent = ua
+            userAgentString = ua
         }
 
         addJavascriptInterface(SafeerWebAppInterface(context, this), "SafeerBridge")
@@ -146,14 +154,25 @@ class ChromiumEngineView @JvmOverloads constructor(
 
         @android.webkit.JavascriptInterface
         fun navigate(url: String) {
-            val cur = webView.url ?: ""
-            val isLocal = cur.startsWith("file:///android_asset/") || cur.startsWith("safeer://") || cur.isEmpty()
-            if (!isLocal) {
-                android.util.Log.w("SafeerBridge", "Zavrnjen neavtoriziran klic navigate() iz zunanje strani: $cur")
-                return
+            val target = url.trim()
+            if (target.isEmpty()) return
+            val runner = Runnable {
+                val cur = webView.url ?: ""
+                val isLocal = cur.startsWith("file:///android_asset/") || cur.startsWith("safeer://") || cur.isEmpty()
+                if (!isLocal) {
+                    android.util.Log.w("SafeerBridge", "Zavrnjen neavtoriziran klic navigate() iz zunanje strani: $cur")
+                    return@Runnable
+                }
+                (webView as? ChromiumEngineView)?.navigateDocument(target) ?: webView.loadUrl(target)
             }
-            (context as? android.app.Activity)?.runOnUiThread {
-                (webView as? ChromiumEngineView)?.navigateDocument(url) ?: webView.loadUrl(url)
+            val act = (context as? android.app.Activity)
+                ?: ((context as? android.content.ContextWrapper)?.baseContext as? android.app.Activity)
+            if (act != null) {
+                act.runOnUiThread(runner)
+            } else if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
+                runner.run()
+            } else {
+                webView.post(runner)
             }
         }
     }
@@ -518,7 +537,8 @@ class ChromiumEngineView @JvmOverloads constructor(
 
                 // 🎬 3. YouTube Document-Start Injekcija (0 oglasov pred zagonom videa)
                 if (isMainFrame && isYouTubeHtmlDocument(url)) {
-                    val interceptedYt = interceptAndSanitizeYouTubeWatch(url, settings.userAgentString)
+                    val ua = if (currentUserAgent.isNotEmpty()) currentUserAgent else defaultMobileUserAgent
+                    val interceptedYt = interceptAndSanitizeYouTubeWatch(url, ua)
                     if (interceptedYt != null) {
                         return interceptedYt
                     }

@@ -41,6 +41,8 @@ class MainActivity : android.app.Activity() {
     private lateinit var editUrl: EditText
     private lateinit var btnClearUrl: TextView
     private lateinit var btnSearchTrigger: TextView
+    private lateinit var btnReload: Button
+    private lateinit var btnStar: Button
     private lateinit var btnAddTab: Button
     private lateinit var btnTabCount: Button
     private lateinit var btnMenu: Button
@@ -91,6 +93,7 @@ class MainActivity : android.app.Activity() {
         }
 
         initViews()
+        setupWindowInsets()
         setupTabManager()
         setupOmnibox()
         setupTopButtons()
@@ -230,6 +233,8 @@ class MainActivity : android.app.Activity() {
         editUrl = findViewById(R.id.editUrl)
         btnClearUrl = findViewById(R.id.btnClearUrl)
         btnSearchTrigger = findViewById(R.id.btnSearchTrigger)
+        btnReload = findViewById(R.id.btnReload)
+        btnStar = findViewById(R.id.btnStar)
         btnAddTab = findViewById(R.id.btnAddTab)
         btnTabCount = findViewById(R.id.btnTabCount)
         btnMenu = findViewById(R.id.btnMenu)
@@ -248,6 +253,76 @@ class MainActivity : android.app.Activity() {
         btnFindPrev = findViewById(R.id.btnFindPrev)
         btnFindNext = findViewById(R.id.btnFindNext)
         btnFindClose = findViewById(R.id.btnFindClose)
+    }
+
+    private fun getStatusBarHeight(): Int {
+        val resId = resources.getIdentifier("status_bar_height", "dimen", "android")
+        if (resId > 0) {
+            val h = resources.getDimensionPixelSize(resId)
+            if (h > 0) return h
+        }
+        return (24 * resources.displayMetrics.density).toInt()
+    }
+
+    private fun getNavigationBarHeight(): Int {
+        val resId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
+        if (resId > 0) {
+            val h = resources.getDimensionPixelSize(resId)
+            if (h > 0) return h
+        }
+        return (48 * resources.displayMetrics.density).toInt()
+    }
+
+    private fun applySystemBarInsets(statusBarHeight: Int, navBarHeight: Int) {
+        val baseToolbarHeight = (56 * resources.displayMetrics.density).toInt()
+        val totalToolbarHeight = baseToolbarHeight + statusBarHeight
+        val lp = mobileTopBar.layoutParams
+        if (lp != null && lp.height != totalToolbarHeight) {
+            lp.height = totalToolbarHeight
+            mobileTopBar.layoutParams = lp
+        }
+        mobileTopBar.setPadding(
+            mobileTopBar.paddingLeft,
+            statusBarHeight,
+            mobileTopBar.paddingRight,
+            mobileTopBar.paddingBottom
+        )
+
+        tabSwitcherOverlay.setPadding(0, statusBarHeight, 0, navBarHeight)
+
+        val rootLp = webViewContainer.layoutParams as? RelativeLayout.LayoutParams
+        if (rootLp != null && rootLp.bottomMargin != navBarHeight) {
+            rootLp.bottomMargin = navBarHeight
+            webViewContainer.layoutParams = rootLp
+        }
+    }
+
+    private fun setupWindowInsets() {
+        val initialStatusBar = getStatusBarHeight()
+        val initialNavBar = getNavigationBarHeight()
+        applySystemBarInsets(initialStatusBar, initialNavBar)
+
+        mainRoot.setOnApplyWindowInsetsListener { _, insets ->
+            val statusBarHeight = if (android.os.Build.VERSION.SDK_INT >= 30) {
+                val sb = insets.getInsets(android.view.WindowInsets.Type.statusBars()).top
+                if (sb > 0) sb else getStatusBarHeight()
+            } else {
+                @Suppress("DEPRECATION")
+                val sb = insets.systemWindowInsetTop
+                if (sb > 0) sb else getStatusBarHeight()
+            }
+            val navBarHeight = if (android.os.Build.VERSION.SDK_INT >= 30) {
+                val nb = insets.getInsets(android.view.WindowInsets.Type.navigationBars()).bottom
+                if (nb > 0) nb else getNavigationBarHeight()
+            } else {
+                @Suppress("DEPRECATION")
+                val nb = insets.systemWindowInsetBottom
+                if (nb > 0) nb else getNavigationBarHeight()
+            }
+            applySystemBarInsets(statusBarHeight, navBarHeight)
+            insets
+        }
+        mainRoot.requestApplyInsets()
     }
 
     private fun setupTabManager() {
@@ -315,6 +390,7 @@ class MainActivity : android.app.Activity() {
             if (customView != null) {
                 customVideoView = customView
                 customVideoCallback = callback
+                mainRoot.setPadding(0, 0, 0, 0)
                 mobileTopBar.visibility = View.GONE
                 webViewContainer.visibility = View.GONE
                 mainRoot.addView(
@@ -330,6 +406,7 @@ class MainActivity : android.app.Activity() {
                 customVideoCallback = null
                 mobileTopBar.visibility = View.VISIBLE
                 webViewContainer.visibility = View.VISIBLE
+                mainRoot.requestApplyInsets()
             }
         }
 
@@ -433,8 +510,13 @@ class MainActivity : android.app.Activity() {
         editUrl.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 val currentUrl = tabManager.getActiveTab()?.url ?: ""
-                editUrl.setText(currentUrl)
-                editUrl.selectAll()
+                val isLocal = currentUrl.isEmpty() || currentUrl.startsWith("file:///android_asset/") || currentUrl == "about:blank"
+                if (isLocal) {
+                    editUrl.setText("")
+                } else {
+                    editUrl.setText(currentUrl)
+                    editUrl.selectAll()
+                }
                 btnClearUrl.visibility = if (editUrl.text.isNotEmpty()) View.VISIBLE else View.GONE
             } else {
                 btnClearUrl.visibility = View.GONE
@@ -476,7 +558,16 @@ class MainActivity : android.app.Activity() {
         }
     }
 
+    private fun updateStarState(url: String? = null) {
+        val targetUrl = url ?: tabManager.getActiveTab()?.url ?: ""
+        val isBm = if (targetUrl.isNotEmpty() && !targetUrl.startsWith("file:///android_asset/")) {
+            repository.isBookmarked(targetUrl)
+        } else false
+        btnStar.text = if (isBm) "⭐" else "☆"
+    }
+
     private fun updateOmniboxDisplay(url: String, title: String?) {
+        updateStarState(url)
         if (editUrl.hasFocus()) return
 
         if (url.isEmpty() || url == "about:blank" || url.startsWith("file:///android_asset/brave_home.html")) {
@@ -520,6 +611,35 @@ class MainActivity : android.app.Activity() {
     private fun setupTopButtons() {
         btnHome.setOnClickListener {
             tabManager.getActiveTab()?.webView?.loadUrl("file:///android_asset/brave_home.html")
+        }
+
+        btnReload.setOnClickListener {
+            val activeTab = tabManager.getActiveTab()
+            activeTab?.webView?.reload()
+        }
+
+        btnStar.setOnClickListener {
+            val activeTab = tabManager.getActiveTab()
+            val curUrl = activeTab?.url ?: ""
+            if (curUrl.isNotEmpty() && !curUrl.startsWith("file:///android_asset/")) {
+                val isBm = repository.isBookmarked(curUrl)
+                if (isBm) {
+                    repository.removeBookmark(curUrl)
+                    btnStar.text = "☆"
+                    Toast.makeText(this, getString(R.string.toast_bookmark_removed), Toast.LENGTH_SHORT).show()
+                } else {
+                    repository.addBookmark(activeTab?.webView?.title ?: "Zaznamek", curUrl)
+                    btnStar.text = "⭐"
+                    Toast.makeText(this, getString(R.string.toast_bookmark_added), Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                showBookmarksDialog()
+            }
+        }
+
+        btnStar.setOnLongClickListener {
+            showBookmarksDialog()
+            true
         }
 
         btnAddTab.setOnClickListener {
@@ -681,6 +801,7 @@ class MainActivity : android.app.Activity() {
                 repository.addBookmark(wv?.title ?: "Zaznamek", curUrl)
                 Toast.makeText(this, getString(R.string.toast_bookmark_added), Toast.LENGTH_SHORT).show()
             }
+            updateStarState(curUrl)
             dialog.dismiss()
         }
 
@@ -896,7 +1017,7 @@ class MainActivity : android.app.Activity() {
 
         // 4. Info
         val tvInfo = TextView(this).apply {
-            text = "\nSafeer Mobile Browser v1.0.2 (Build 3) • Target SDK 36\nSafeer is a security layer, not a guarantee against all online threats."
+            text = "\nSafeer Mobile Browser v1.0.3 (Build 4) • Target SDK 36\nSafeer is a security layer, not a guarantee against all online threats."
             textSize = 11f
             setTextColor(Color.parseColor("#64748b"))
             setPadding(0, 16, 0, 0)

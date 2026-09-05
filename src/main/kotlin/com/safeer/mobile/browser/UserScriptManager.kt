@@ -1,5 +1,6 @@
 package com.safeer.mobile.browser
 
+import android.net.Uri
 import android.webkit.WebView
 
 object UserScriptManager {
@@ -1106,7 +1107,34 @@ object UserScriptManager {
         return GPC_AND_DNT_JS + "\n" + YOUTUBE_FREEDOM_MOBILE_JS
     }
 
+    fun isLocalAsset(url: String?): Boolean {
+        if (url.isNullOrEmpty()) return false
+        return url.startsWith("file:///android_asset/", ignoreCase = true) ||
+               url.startsWith("safeer://", ignoreCase = true) ||
+               url.startsWith("about:", ignoreCase = true)
+    }
+
+    fun isGoogleDomain(url: String?): Boolean {
+        if (url.isNullOrEmpty()) return false
+        val lower = url.lowercase()
+        val host = try { Uri.parse(url).host?.lowercase() ?: "" } catch (_: Exception) { "" }
+        if (host.contains("youtube") || host.contains("googlevideo") || host.contains("ytimg")) return false
+        return host == "google.com" || host.endsWith(".google.com") ||
+               host == "google.si" || host.endsWith(".google.si") ||
+               host.contains(".google.") || host.startsWith("google.") ||
+               host.contains("recaptcha") ||
+               host.contains("gstatic.com") ||
+               host.contains("googleapis.com") ||
+               lower.contains("google.com/search") ||
+               lower.contains("google.si/search") ||
+               lower.contains("/recaptcha")
+    }
+
     fun injectEarlyScript(webView: WebView, isDesktop: Boolean = false) {
+        val currentUrl = try { webView.url } catch (_: Exception) { null }
+        if (isLocalAsset(currentUrl)) return
+        if (isGoogleDomain(currentUrl)) return
+
         webView.evaluateJavascript(GPC_AND_DNT_JS, null)
         val cosmeticCss = CosmeticFilterEngine.buildCosmeticCss()
         injectCss(webView, cosmeticCss, "safeer-cosmetic-filter")
@@ -1119,6 +1147,10 @@ object UserScriptManager {
     }
 
     fun injectOnPageFinished(webView: WebView, isDarkMode: Boolean, isDesktop: Boolean = false) {
+        val currentUrl = try { webView.url } catch (_: Exception) { null }
+        if (isLocalAsset(currentUrl)) return
+        if (isGoogleDomain(currentUrl)) return
+
         webView.evaluateJavascript(GPC_AND_DNT_JS, null)
         val cosmeticCss = CosmeticFilterEngine.buildCosmeticCss()
         injectCss(webView, cosmeticCss, "safeer-cosmetic-filter")
