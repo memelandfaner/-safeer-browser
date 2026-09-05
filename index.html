@@ -52,10 +52,7 @@
       <div class="hero-split-grid">
         <!-- Left Column: Copy & Actions -->
         <div>
-          <div class="hero-badge">
-            <span class="pulse-dot"></span>
-            <span data-i18n="badge_active">Safeer v1.0.2 — Stable Release • Target SDK 36</span>
-          </div>
+
 
           <h1 class="hero-title">
             <span data-i18n="hero_t1">Varnejši na telefonu.</span><br>
@@ -94,15 +91,59 @@
           </div>
         </div>
 
-        <!-- Right Column: Interactive Live Showcase Frame -->
+        <!-- Right Column: Interactive Multi-Device Platform Showcase with Tabs -->
         <div class="showcase-panel">
+          <!-- Primary Platform Switcher Tabs -->
           <div class="showcase-switch-bar">
-            <button class="switch-tab active" id="tabMobileShowcase" data-i18n="tab_mob">📱 Telefon (Galaxy S25)</button>
-            <button class="switch-tab" id="tabTvShowcase" data-i18n="tab_tv">📺 4K TV</button>
-            <button class="switch-tab" id="tabDesktopShowcase" data-i18n="tab_desktop">🍃 Linux Mint Namizje</button>
+            <button class="switch-tab active" id="tabMobileShowcase" onclick="switchPlatformShowcase('mobile')">
+              <span>📱 Telefon (Android)</span>
+            </button>
+            <button class="switch-tab" id="tabTvShowcase" onclick="switchPlatformShowcase('tv')">
+              <span>📺 4K Android TV</span>
+            </button>
+            <button class="switch-tab" id="tabDesktopShowcase" onclick="switchPlatformShowcase('desktop')">
+              <span>🍃 Linux Mint Namizje</span>
+            </button>
           </div>
 
-          <div class="device-frame-wrap">
+          <!-- Sub-tabs for Mobile Screenshots -->
+          <div class="showcase-subtabs-bar" id="subtabsMobile">
+            <button class="subtab-btn active" onclick="switchScreenshot('mobile', 'shield', this)">
+              🛡️ C2 Ščit &amp; Blokada
+            </button>
+            <button class="subtab-btn" onclick="switchScreenshot('mobile', 'stats', this)">
+              📊 Števec Groženj
+            </button>
+            <button class="subtab-btn" onclick="switchScreenshot('mobile', 'search', this)">
+              🔍 Iskanje &amp; Portali
+            </button>
+            <button class="subtab-btn" onclick="switchScreenshot('mobile', 'youtube', this)">
+              🎵 YouTube v ozadju
+            </button>
+          </div>
+
+          <!-- Sub-tabs for TV Screenshots -->
+          <div class="showcase-subtabs-bar" id="subtabsTv" style="display:none;">
+            <button class="subtab-btn active" onclick="switchScreenshot('tv', 'home', this)">
+              📺 4K Domači portal
+            </button>
+            <button class="subtab-btn" onclick="switchScreenshot('tv', 'dpad', this)">
+              🎮 60 FPS D-Pad Fokus
+            </button>
+            <button class="subtab-btn" onclick="switchScreenshot('tv', 'portals', this)">
+              📑 Upravitelj portalov
+            </button>
+          </div>
+
+          <!-- Sub-tabs for Desktop Screenshots -->
+          <div class="showcase-subtabs-bar" id="subtabsDesktop" style="display:none;">
+            <button class="subtab-btn active" onclick="switchScreenshot('desktop', 'main', this)">
+              🍃 Suvereno Namizje &amp; Awesomebar
+            </button>
+          </div>
+
+          <!-- Interactive Device Screen Frame -->
+          <div class="device-frame-wrap" id="deviceFrameWrap">
             <div class="browser-header-strip">
               <div class="dots-group">
                 <span class="dot" style="background:#ef4444;"></span>
@@ -111,159 +152,23 @@
               </div>
               <div class="url-capsule">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                <span id="showcaseUrl">safeer://home</span>
+                <span id="showcaseUrl">safeer://shield-blocked</span>
               </div>
               <div class="header-status-badge">
                 <span class="pulse-dot"></span>
-                <span id="showcaseStatusText">C2 Ščit 100%</span>
+                <span id="showcaseStatusText">Aktivna Zaščita</span>
               </div>
             </div>
 
-            <!-- Dynamic Live Screen Area -->
-            <div class="showcase-screen-container" id="showcaseContainer">
-              
-              <!-- 1. Live Mobile View (Default) -->
-              <div class="live-screen-view active" id="liveMobileView">
-                <div class="mobile-mockup-inner">
-                  <div class="mock-top-bar">
-                    <span class="mock-time">10:24</span>
-                    <div class="mock-icons">
-                      <span>5G</span>
-                      <span>100% 🔋</span>
-                    </div>
-                  </div>
+            <!-- Screenshot Display Stage -->
+            <div class="screenshot-display-wrap" id="screenshotStage">
+              <img id="mainShowcaseImg" src="assets/mobile/safeer_front.png" alt="Safeer Posnetek Zaslona" class="showcase-active-img">
+            </div>
 
-                  <!-- Safeer Shield Hero Card -->
-                  <div class="mock-shield-card">
-                    <div class="mock-shield-header">
-                      <div class="mock-shield-icon">🛡️</div>
-                      <div class="mock-shield-title">
-                        <strong>Safeer Shield v1.0.2</strong>
-                        <span class="mock-shield-sub">Lokalna C2 &amp; AdBlock Zaščita</span>
-                      </div>
-                      <span class="mock-shield-active">AKTIVNA</span>
-                    </div>
-                    <div class="mock-stats-row">
-                      <div class="mock-stat-col">
-                        <span class="mock-stat-num" style="color:var(--accent-cyan);">1.430</span>
-                        <span class="mock-stat-label">Blokirano</span>
-                      </div>
-                      <div class="mock-stat-col">
-                        <span class="mock-stat-num" style="color:var(--accent-emerald);">21.4 MB</span>
-                        <span class="mock-stat-label">Prihranjeno</span>
-                      </div>
-                      <div class="mock-stat-col">
-                        <span class="mock-stat-num" style="color:#c084fc;">0.2 ms</span>
-                        <span class="mock-stat-label">O(k) Trie</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Omnibox Search -->
-                  <div class="mock-omnibox">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <span class="mock-omnibox-text">Iščite z Google, DuckDuckGo ali Brave...</span>
-                    <div class="mock-engine-chips">
-                      <span class="chip-active">Google</span>
-                      <span>DuckDuckGo</span>
-                      <span>Brave</span>
-                    </div>
-                  </div>
-
-                  <!-- Quick Tiles Grid -->
-                  <div class="mock-tiles-grid">
-                    <div class="mock-tile">
-                      <span class="tile-icon">📰</span>
-                      <span class="tile-name">24ur.com</span>
-                      <span class="tile-badge">0 Sledilcev</span>
-                    </div>
-                    <div class="mock-tile">
-                      <span class="tile-icon">📺</span>
-                      <span class="tile-name">RTV SLO</span>
-                      <span class="tile-badge">Hitri predvajalnik</span>
-                    </div>
-                    <div class="mock-tile highlight-yt">
-                      <span class="tile-icon">🎵</span>
-                      <span class="tile-name">YouTube</span>
-                      <span class="tile-badge" style="color:var(--accent-cyan);">0 Oglasov • Ozadje</span>
-                    </div>
-                    <div class="mock-tile">
-                      <span class="tile-icon">🐙</span>
-                      <span class="tile-name">GitHub</span>
-                      <span class="tile-badge">Open Source</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 2. Live TV View -->
-              <div class="live-screen-view" id="liveTvView" style="display:none;">
-                <div class="tv-mockup-inner">
-                  <div class="tv-banner-strip">
-                    <span>📺 TV-Browser-2 • Media3 4K ExoPlayer</span>
-                    <span class="tv-focus-badge">D-Pad 60 FPS Fokus</span>
-                  </div>
-                  <div class="tv-tiles-row">
-                    <div class="tv-tile active-focus" id="tvTile0">
-                      <div class="tv-tile-thumb" style="background:linear-gradient(135deg, #1e1b4b, #312e81);">🎬</div>
-                      <span class="tv-tile-title">YouTube 4K (0 Ads)</span>
-                    </div>
-                    <div class="tv-tile" id="tvTile1">
-                      <div class="tv-tile-thumb" style="background:linear-gradient(135deg, #064e3b, #047857);">📡</div>
-                      <span class="tv-tile-title">Xplore TV Live</span>
-                    </div>
-                    <div class="tv-tile" id="tvTile2">
-                      <div class="tv-tile-thumb" style="background:linear-gradient(135deg, #701a75, #a21caf);">📻</div>
-                      <span class="tv-tile-title">RTV Slovenija 4K</span>
-                    </div>
-                    <div class="tv-tile" id="tvTile3">
-                      <div class="tv-tile-thumb" style="background:linear-gradient(135deg, #0c4a6e, #0284c7);">⛅</div>
-                      <span class="tv-tile-title">ARSO Vreme HD</span>
-                    </div>
-                  </div>
-                  <div class="tv-remote-controls-bar">
-                    <div class="tv-color-buttons">
-                      <span style="color:#ef4444;">🔴 Novice</span>
-                      <span style="color:#10b981;">🟢 Video</span>
-                      <span style="color:#f59e0b;">🟡 Portali</span>
-                      <span style="color:#38bdf8;">🔵 Media3</span>
-                    </div>
-                    <div class="tv-dpad-mini">
-                      <button onclick="navigateTvShowcase(-1)" title="Prejšnji kanal">◄</button>
-                      <span>D-Pad</span>
-                      <button onclick="navigateTvShowcase(1)" title="Naslednji kanal">►</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 3. Live Linux Desktop View -->
-              <div class="live-screen-view" id="liveDesktopView" style="display:none;">
-                <div class="desktop-mockup-inner">
-                  <div class="desktop-term-bar">
-                    <span class="term-prompt">janez@linux-mint:~$</span>
-                    <span class="term-cmd">safeer --new-window http://localhost:8080</span>
-                  </div>
-                  <div class="desktop-awesomebar-mock">
-                    <div class="awesomebar-row">
-                      <span style="color:#87cf3e;">🍃 Awesomebar:</span>
-                      <span style="color:#f8fafc;">localhost:8080 • Razvoj &amp; Splet</span>
-                      <span class="socket-badge">● Unix socket aktiven</span>
-                    </div>
-                  </div>
-                  <div class="desktop-features-grid">
-                    <div class="desk-feat-item">
-                      <strong>Customizer Studio</strong>
-                      <span>Prilagoditev tem (AMOLED, Cyberpunk, Midnight) in lasten CSS.</span>
-                    </div>
-                    <div class="desk-feat-item">
-                      <strong>Vgrajen Tampermonkey</strong>
-                      <span>Samodejni zagon uporabniških JavaScript skript brez razširitev.</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
+            <!-- Dynamic Feature Caption below screenshot -->
+            <div class="showcase-footer-caption" id="showcaseFooterCaption">
+              <span class="caption-icon" id="captionIcon">🛡️</span>
+              <span id="showcaseCaptionText"><strong>Lokalni Varnostni Ščit:</strong> Prestreže zlonamerna spletna mesta, botnete (Dridex, Emotet) in trojance pred nalaganjem (abuse.ch O(k) Trie).</span>
             </div>
           </div>
 
@@ -413,16 +318,6 @@
           </div>
         </div>
 
-        <!-- Card 5: Customization & UserScripts (Tampermonkey Engine) -->
-        <div class="bento-card" style="grid-column: span 2;">
-          <div class="bento-content">
-            <span class="bento-tag" style="color:#a855f7;">Popolna prilagoditev &amp; Razširljivost</span>
-            <h3 class="bento-title">Oblikujte svoj brskalnik. Dodajte lastne JavaScript skripte.</h3>
-            <p class="bento-desc">
-              Safeer daje uporabnikom popolno ustvarjalno svobodo: izbirajte med temami (Midnight, Mint Emerald, Cyberpunk Neon, AMOLED Black), prilagodite vsako podrobnost z lastnim CSS-jem in dodajte svoje JavaScript skripte (Greasemonkey / Tampermonkey slog) za samodejno preskakovanje oglasov in uvodov, odstranjevanje pasic ali prilagajanje poljubnih spletnih strani.
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   </section>
@@ -430,50 +325,45 @@
   <!-- Interactive UserScripts & Customization Showcase Section -->
   <section class="userscripts-section" id="userscripts">
     <div class="container">
-      <div class="userscripts-badge-wrap">
-        <span class="userscripts-badge">✨ NOVOST • POPOLNA DIGITALNA SUVERENOST</span>
+      <div class="userscripts-header text-center">
+        <span class="userscripts-badge">✨ VGRAJEN TAMPERMONKEY • 100% DIGITALNA SUVERENOST</span>
+        <h2 class="userscripts-title">
+          Tvoj brskalnik. Tvoja pravila.<br class="hide-mobile">
+          <span class="highlight-cyan">Dodaj svojo skripto v 10 sekundah.</span>
+        </h2>
+        <p class="userscripts-lead">
+          Zakaj bi se prilagajali spletnim stranem, če se spletne strani lahko prilagodijo vam? Safeer prinaša vgrajen <strong>Tampermonkey / Greasemonkey mehanizem</strong> za samodejno izvajanje lastnih JavaScript uporabniških skript brez nameščanja zunanjih vtičnikov.
+        </p>
       </div>
 
-      <div class="userscripts-grid">
-        <!-- Left: Copy & Value Proposition -->
-        <div class="userscripts-info">
-          <div class="userscripts-intro-wrap">
-            <h2 class="userscripts-title">
-              Tvoj brskalnik. Tvoja pravila.<br>
-              <span class="highlight-cyan">Dodaj svojo skripto v 10 sekundah.</span>
-            </h2>
-            <p class="userscripts-lead">
-              Zakaj bi se prilagajali spletnim stranem, če se spletne strani lahko prilagodijo vam? Safeer prinaša vgrajen <strong>Tampermonkey / Greasemonkey mehanizem</strong> za samodejno izvajanje lastnih JavaScript uporabniških skript brez nameščanja zunanjih vtičnikov.
-            </p>
-          </div>
-
-          <div class="feature-bullets">
-            <div class="bullet-item">
-              <div class="bullet-icon">⚡</div>
-              <div>
-                <h4>Enostavno dodajanje in urejanje</h4>
-                <p>Kliknite ikono 🧩, poimenujte skripto, vnesite spletno stran in prilepite kodo. Brskalnik poskrbi za vse ostalo.</p>
-              </div>
-            </div>
-
-            <div class="bullet-item">
-              <div class="bullet-icon">🎨</div>
-              <div>
-                <h4>Oblikovanje po meri &amp; Lasten CSS</h4>
-                <p>Izbirajte med 4 vgrajenimi temami (Midnight, Mint Emerald, Cyberpunk, AMOLED) ali z lastnim CSS-jem preuredite videz katerega koli elementa.</p>
-              </div>
-            </div>
-
-            <div class="bullet-item">
-              <div class="bullet-icon">🔒</div>
-              <div>
-                <h4>100% zasebno &amp; lokalno izvajanje</h4>
-                <p>Vse vaše skripte se izvajajo lokalno v vaši napravi, brez sledenja, brez oblačnih strežnikov in brez ogrožanja zasebnosti.</p>
-              </div>
+      <div class="userscripts-content-grid">
+        <!-- Left: Feature Cards & Actions -->
+        <div class="userscripts-cards-col">
+          <div class="feature-card-glass">
+            <div class="feature-card-icon">⚡</div>
+            <div class="feature-card-body">
+              <h4>Enostavno dodajanje in urejanje</h4>
+              <p>Kliknite ikono 🧩, poimenujte skripto, vnesite spletno stran in prilepite kodo. Brskalnik poskrbi za vse ostalo.</p>
             </div>
           </div>
 
-          <div class="userscripts-cta-wrap" style="display:flex; gap:12px; flex-wrap:wrap;">
+          <div class="feature-card-glass">
+            <div class="feature-card-icon">🎨</div>
+            <div class="feature-card-body">
+              <h4>Oblikovanje po meri &amp; Lasten CSS</h4>
+              <p>Izbirajte med 4 vgrajenimi temami (Midnight, Mint Emerald, Cyberpunk, AMOLED) ali z lastnim CSS-jem preuredite videz katerega koli elementa.</p>
+            </div>
+          </div>
+
+          <div class="feature-card-glass">
+            <div class="feature-card-icon">🔒</div>
+            <div class="feature-card-body">
+              <h4>100% zasebno &amp; lokalno izvajanje</h4>
+              <p>Vse vaše skripte se izvajajo lokalno v vaši napravi, brez sledenja, brez oblačnih strežnikov in brez ogrožanja zasebnosti.</p>
+            </div>
+          </div>
+
+          <div class="userscripts-cta-row">
             <a href="assets/desktop/safeer-browser-linux.tar.gz" download class="btn-pill-green">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
               <span>Prenesi Safeer Linux (Customizer &amp; Skripte)</span>
@@ -485,8 +375,8 @@
           </div>
         </div>
 
-        <!-- Right: Interactive Code Window Mockup -->
-        <div class="userscripts-interactive">
+        <!-- Right: Interactive Code Window Mockup (starts at top level) -->
+        <div class="userscripts-code-col">
           <div class="code-window">
             <div class="code-window-header">
               <div class="window-dots">

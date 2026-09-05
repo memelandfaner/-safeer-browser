@@ -453,58 +453,153 @@ window.navigateTvShowcase = function(direction) {
   tiles[currentTvTileIndex]?.classList.add('active-focus');
 };
 
-function setupShowcaseSwitcher() {
+const screenshotData = {
+  mobile: {
+    shield: {
+      img: 'assets/mobile/safeer_front.png',
+      url: 'safeer://shield-blocked',
+      status: 'Aktivna Zaščita',
+      icon: '🛡️',
+      caption: '<strong>Lokalni Varnostni Ščit:</strong> Prestreže zlonamerna spletna mesta, botnete (Dridex, Emotet) in trojance pred nalaganjem v pomnilnik (abuse.ch O(k) Trie).'
+    },
+    stats: {
+      img: 'assets/mobile/threat_dialog_screen.png',
+      url: 'safeer://shield-stats',
+      status: '48 Blokiranih',
+      icon: '📊',
+      caption: '<strong>Nadzorna plošča in statistika:</strong> Pregled v realnem času nad blokiranimi C2 strežniki, sledilci in preprečenimi nevarnimi prenosi.'
+    },
+    search: {
+      img: 'assets/mobile/search_6_rtv_slovenij.png',
+      url: 'https://www.google.com/search?q=rtv+slovenija',
+      status: 'Čisto Brskanje',
+      icon: '🔍',
+      caption: '<strong>Čisto in hitro brskanje:</strong> Nemoteno iskanje in branje novic brez oglasnih pasic, pojavnih oken in invazivnih sledilnih skript.'
+    },
+    youtube: {
+      img: 'assets/mobile/live_youtube_playback.png',
+      url: 'https://m.youtube.com',
+      status: '0 Oglasov • Ozadje',
+      icon: '🎵',
+      caption: '<strong>YouTube z ugasnjenim zaslonom:</strong> Nemoteno poslušanje glasbe in podcastov v ozadju z zaklenjenim telefonom brez oglasnih prekinitev.'
+    }
+  },
+  tv: {
+    home: {
+      img: 'assets/tv/tv_home_screen.png',
+      url: 'tv://home',
+      status: '4K TV Portali',
+      icon: '📺',
+      caption: '<strong>4K Android TV Domači Portal:</strong> Velike pregledne ploščice za hiter dostop do novic, videa in TV kanalov z daljinskim upravljalnikom.'
+    },
+    dpad: {
+      img: 'assets/tv/whole_card_focus_final.png',
+      url: 'tv://dpad-spatial-focus',
+      status: '60 FPS D-Pad',
+      icon: '🎮',
+      caption: '<strong>60 FPS D-Pad Fokus:</strong> Cianov fokusni obroč natančno skače med elementi brez zakasnitve – brez nerodnih navideznih mišk.'
+    },
+    portals: {
+      img: 'assets/tv/portal_manager_dialog_verified.png',
+      url: 'tv://portal-manager',
+      status: 'Upravitelj Postaj',
+      icon: '📑',
+      caption: '<strong>Upravitelj TV Portalov:</strong> Preprosto urejanje, razvrščanje in dodajanje lastnih televizijskih postaj in spletnih mest z daljincem.'
+    }
+  },
+  desktop: {
+    main: {
+      img: 'assets/desktop/desktop_mint_showcase.png',
+      url: 'mint://awesomebar',
+      status: 'Unix Socket Aktiven',
+      icon: '🍃',
+      caption: '<strong>Linux Mint Suverena Izdaja:</strong> Awesomebar terminalna orodna vrstica, vgrajen Tampermonkey za skripte ter prilagoditev tem in CSS-ja.'
+    }
+  }
+};
+
+let currentPlatform = 'mobile';
+
+function switchPlatformShowcase(platform) {
+  currentPlatform = platform;
+
   const tabMob = document.getElementById('tabMobileShowcase');
   const tabTv = document.getElementById('tabTvShowcase');
   const tabDesk = document.getElementById('tabDesktopShowcase');
-  
-  const viewMob = document.getElementById('liveMobileView');
-  const viewTv = document.getElementById('liveTvView');
-  const viewDesk = document.getElementById('liveDesktopView');
-  
+
+  [tabMob, tabTv, tabDesk].forEach(t => { if (t) t.classList.remove('active'); });
+  if (platform === 'mobile' && tabMob) tabMob.classList.add('active');
+  if (platform === 'tv' && tabTv) tabTv.classList.add('active');
+  if (platform === 'desktop' && tabDesk) tabDesk.classList.add('active');
+
+  const subMob = document.getElementById('subtabsMobile');
+  const subTv = document.getElementById('subtabsTv');
+  const subDesk = document.getElementById('subtabsDesktop');
+
+  if (subMob) subMob.style.display = (platform === 'mobile') ? 'flex' : 'none';
+  if (subTv) subTv.style.display = (platform === 'tv') ? 'flex' : 'none';
+  if (subDesk) subDesk.style.display = (platform === 'desktop') ? 'flex' : 'none';
+
+  const activeSubBar = (platform === 'mobile') ? subMob : (platform === 'tv') ? subTv : subDesk;
+  if (activeSubBar) {
+    const firstBtn = activeSubBar.querySelector('.subtab-btn');
+    if (firstBtn) {
+      activeSubBar.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+      firstBtn.classList.add('active');
+    }
+  }
+
+  const firstKey = Object.keys(screenshotData[platform])[0];
+  updateScreenshotView(platform, firstKey);
+}
+
+function switchScreenshot(platform, key, btn) {
+  window._showcaseManualSwitched = true;
+  currentPlatform = platform;
+
+  if (btn && btn.parentElement) {
+    btn.parentElement.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  updateScreenshotView(platform, key);
+}
+
+function updateScreenshotView(platform, key) {
+  const data = screenshotData[platform] && screenshotData[platform][key];
+  if (!data) return;
+
+  const imgEl = document.getElementById('mainShowcaseImg');
   const urlEl = document.getElementById('showcaseUrl');
-  const statusText = document.getElementById('showcaseStatusText');
+  const statusEl = document.getElementById('showcaseStatusText');
+  const captionEl = document.getElementById('showcaseCaptionText');
+  const iconEl = document.getElementById('captionIcon');
+  const stageEl = document.getElementById('screenshotStage');
 
-  if (!tabMob || !tabTv || !viewMob) return;
-
-  function deactivateAll() {
-    tabMob.classList.remove('active');
-    tabTv.classList.remove('active');
-    if (tabDesk) tabDesk.classList.remove('active');
-    
-    if (viewMob) viewMob.style.display = 'none';
-    if (viewTv) viewTv.style.display = 'none';
-    if (viewDesk) viewDesk.style.display = 'none';
+  if (imgEl) {
+    imgEl.src = data.img;
+    imgEl.alt = data.status;
   }
 
-  tabMob.addEventListener('click', () => {
-    window._showcaseManualSwitched = true;
-    deactivateAll();
-    tabMob.classList.add('active');
-    if (viewMob) viewMob.style.display = 'block';
-    if (urlEl) urlEl.textContent = 'safeer://home';
-    if (statusText) statusText.textContent = 'C2 Ščit 100%';
-  });
+  if (urlEl) urlEl.textContent = data.url;
+  if (statusEl) statusEl.textContent = data.status;
+  if (captionEl) captionEl.innerHTML = data.caption;
+  if (iconEl) iconEl.textContent = data.icon;
 
-  tabTv.addEventListener('click', () => {
-    window._showcaseManualSwitched = true;
-    deactivateAll();
-    tabTv.classList.add('active');
-    if (viewTv) viewTv.style.display = 'block';
-    if (urlEl) urlEl.textContent = 'tv://home';
-    if (statusText) statusText.textContent = 'Media3 60 FPS';
-  });
-
-  if (tabDesk) {
-    tabDesk.addEventListener('click', () => {
-      window._showcaseManualSwitched = true;
-      deactivateAll();
-      tabDesk.classList.add('active');
-      if (viewDesk) viewDesk.style.display = 'block';
-      if (urlEl) urlEl.textContent = 'mint://awesomebar';
-      if (statusText) statusText.textContent = 'Socket Active';
-    });
+  if (stageEl) {
+    if (platform === 'mobile') {
+      stageEl.style.height = '420px';
+    } else {
+      stageEl.style.height = '360px';
+    }
   }
+}
+
+window.switchPlatformShowcase = switchPlatformShowcase;
+window.switchScreenshot = switchScreenshot;
+
+function setupShowcaseSwitcher() {
+  switchPlatformShowcase('mobile');
 }
 
 // --- 5. Generate Inline SVG QR Codes on Load ---
