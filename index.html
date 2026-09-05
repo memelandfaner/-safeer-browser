@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Safeer Browser | Brez oglasov. Varen na telefonu in 4K TV.</title>
+  <meta name="description" content="Safeer Browser v1.0.2: Odprtokodni spletni brskalnik z lokalnim varnostnim slojem pred znanimi botneti (abuse.ch), 0 oglasi in predvajanjem v ozadju. Safeer is a security layer, not a guarantee against all online threats.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300d2ff'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/></svg>">
+</head>
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a href="#" class="brand">
+        <div class="brand-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#050811" stroke-width="2.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+        </div>
+        <span>Safeer</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#features" class="nav-link" data-i18n="nav_features">Zmožnosti</a></li>
+        <li><a href="#userscripts" class="nav-link" style="color:#c084fc; font-weight:600;">✨ Skripte</a></li>
+        <li><a href="#security" class="nav-link" data-i18n="nav_security">Varnost</a></li>
+        <li><a href="#compare" class="nav-link" data-i18n="nav_compare">Primerjava</a></li>
+        <li><a href="#download" class="nav-link" data-i18n="nav_download">Prenos</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <div class="lang-toggle">
+          <button class="lang-btn active" data-lang="sl" title="Slovenščina">SL</button>
+          <button class="lang-btn" data-lang="en" title="English">EN</button>
+          <button class="lang-btn" data-lang="de" title="Deutsch">DE</button>
+          <button class="lang-btn" data-lang="es" title="Español">ES</button>
+          <button class="lang-btn" data-lang="fr" title="Français">FR</button>
+          <button class="lang-btn" data-lang="it" title="Italiano">IT</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Split-Screen Hero: Zero Wasted Space -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-split-grid">
+        <!-- Left Column: Copy & Actions -->
+        <div>
+          <div class="hero-badge">
+            <span class="pulse-dot"></span>
+            <span data-i18n="badge_active">Safeer v1.0.2 — Stable Release • Target SDK 36</span>
+          </div>
+
+          <h1 class="hero-title">
+            <span data-i18n="hero_t1">Varnejši na telefonu.</span><br>
+            <span class="highlight-cyan" data-i18n="hero_t2">Brez oglasov.</span><br>
+            <span class="highlight-purple" data-i18n="hero_t3">4K na TV.</span>
+          </h1>
+
+          <p class="hero-lead" data-i18n="hero_lead">
+            Kdor obvladuje brskalnik, določa pravila spleta. Milijon ljudi ima milijon različnih osebnosti, želja in potreb, a en sam neomajen cilj: <strong>odprt, varen in suveren internet na dosegu roke</strong>. Vzemi nadzor v svoje roke – Safeer je 100% odprtokoden projekt, kjer lahko vsakdo naredi fork in ustvari svoj popoln brskalnik.
+          </p>
+
+          <div style="margin: 10px 0 16px 0; padding: 8px 14px; background: rgba(0, 210, 255, 0.08); border: 1px solid rgba(0, 210, 255, 0.25); border-radius: 8px; font-size: 0.83rem; color: #94a3b8; line-height: 1.4;">
+            <span style="color:var(--accent-cyan);">🛡️</span> <span data-i18n="security_disclaimer"><strong>Safeer is a security layer, not a guarantee against all online threats.</strong> Zmanjšuje tveganje in blokira znane grožnje.</span>
+          </div>
+
+          <div class="hero-cta-group">
+            <a href="assets/desktop/safeer-browser-linux.tar.gz" download class="btn-pill-green" id="heroBtnDesktop">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+              <span data-i18n="btn_linux_text">Prenesi za Linux Mint (468 KB)</span>
+            </a>
+            <a href="assets/mobile/Safeer-Mobile.apk" download class="btn-pill-primary" id="heroBtnMob">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+              <span data-i18n="btn_mob_text">Prenesi mobilni brskalnik (1.7 MB)</span>
+            </a>
+            <a href="assets/tv/TV-Browser-2.apk" download class="btn-pill-purple" id="heroBtnTv">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
+              <span data-i18n="btn_tv_text">Prenesi TV brskalnik (8.8 MB)</span>
+            </a>
+          </div>
+
+          <div class="hero-trust-bar">
+            <div class="trust-item"><span class="trust-check">✓</span> <span>0 Oglasov</span></div>
+            <div class="trust-item"><span class="trust-check">✓</span> <span>YouTube v ozadju</span></div>
+            <div class="trust-item"><span class="trust-check">✓</span> <span>abuse.ch C2 Ščit</span></div>
+            <div class="trust-item"><span class="trust-check">✓</span> <span>100% Brezplačno</span></div>
+          </div>
+        </div>
+
+        <!-- Right Column: Interactive Live Showcase Frame -->
+        <div class="showcase-panel">
+          <div class="showcase-switch-bar">
+            <button class="switch-tab active" id="tabMobileShowcase" data-i18n="tab_mob">📱 Telefon (Galaxy S25)</button>
+            <button class="switch-tab" id="tabTvShowcase" data-i18n="tab_tv">📺 4K TV</button>
+            <button class="switch-tab" id="tabDesktopShowcase" data-i18n="tab_desktop">🍃 Linux Mint Namizje</button>
+          </div>
+
+          <div class="device-frame-wrap">
+            <div class="browser-header-strip">
+              <div class="dots-group">
+                <span class="dot" style="background:#ef4444;"></span>
+                <span class="dot" style="background:#f59e0b;"></span>
+                <span class="dot" style="background:#10b981;"></span>
+              </div>
+              <div class="url-capsule">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <span id="showcaseUrl">safeer://home</span>
+              </div>
+            </div>
+
+            <img src="assets/mobile/mobile_home_showcase.png" alt="Safeer Začetna stran" id="showcaseImg" class="showcase-screen">
+
+            <div class="badge-floating top-left">
+              <span style="color:#00d2ff;">🛡️</span>
+              <span data-i18n="badge_c2">Zaščita aktivna</span>
+            </div>
+            <div class="badge-floating bottom-right">
+              <span style="color:#10b981;">⚡</span>
+              <span data-i18n="badge_yt">1.430 Oglasov Blokirano</span>
+            </div>
+          </div>
+
+          <!-- Metrics Strip -->
+          <div class="metrics-strip">
+            <div class="metric-box">
+              <span class="metric-val" style="color:var(--accent-cyan);">0</span>
+              <span class="metric-lbl">Oglasov</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-val" style="color:var(--accent-emerald);">0 ms</span>
+              <span class="metric-lbl">Zakasnitev</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-val" style="color:#c084fc;">120 Hz</span>
+              <span class="metric-lbl">AMOLED</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-val" style="color:#f59e0b;">Media3</span>
+              <span class="metric-lbl">4K ExoPlayer</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bento Grid Section: Dense, Engaging Superpowers -->
+  <section class="bento-section" id="features">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-eyebrow" data-i18n="bento_eyebrow">Ključne prednosti</span>
+        <h2 class="section-h2" data-i18n="bento_title">Zakaj je Safeer v razredu zase.</h2>
+      </div>
+
+      <!-- Bento Row 1 -->
+      <div class="bento-grid">
+        <!-- Card 1: YouTube Screen-Off Freedom (Wide) -->
+        <div class="bento-card accent-card">
+          <div class="bento-content">
+            <span class="bento-tag" style="color:var(--accent-cyan);" data-i18n="card1_tag">Multimedijska svoboda</span>
+            <h3 class="bento-title" data-i18n="card1_title">YouTube z ugasnjenim zaslonom. Brez oglasov.</h3>
+            <p class="bento-desc" data-i18n="card1_desc">
+              Poslušajte glasbo, podcaste in oddaje brez prekinitev. Ugasnite zaslon ali preklopite v drugo aplikacijo – zvok se nemoteno predvaja naprej z znatnim prihrankom baterije.
+            </p>
+          </div>
+          <div class="bento-visual">
+            <img src="assets/mobile/live_youtube_playback.png" alt="YouTube Background Playback" loading="lazy">
+          </div>
+        </div>
+
+        <!-- Card 2: Interactive Threat Shield -->
+        <div class="bento-card" id="security">
+          <div class="bento-content">
+            <span class="bento-tag" style="color:#ef4444;" data-i18n="card2_tag">Kibernetska varnost</span>
+            <h3 class="bento-title" data-i18n="card2_title">Pravi ščit pred botneti (abuse.ch)</h3>
+            <p class="bento-desc" data-i18n="card2_desc">
+              Radix Domain Suffix Trie (O(k)) mikrosekundno preverja zahteve in nemudoma blokira C2 botnete (Dridex, Emotet) ter spletno ribarjenje.
+            </p>
+          </div>
+
+          <div class="threat-interactive-box">
+            <div class="threat-chips-row">
+              <button class="threat-btn active" data-sim="feodo">C2 Botnet</button>
+              <button class="threat-btn" data-sim="urlhaus">Malware Dropper</button>
+              <button class="threat-btn" data-sim="phishing">Lažna banka</button>
+              <button class="threat-btn" data-sim="safe">Varna stran</button>
+            </div>
+            <div class="threat-console" id="threatConsole">
+              <span style="color:#ef4444; font-weight:700; font-size:0.82rem;">⚠️ ZAZNANA IN BLOKIRANA GROŽNJA</span>
+              <p style="color:#cbd5e1; font-size:0.78rem; margin-top:3px;" id="threatConsoleDesc">
+                Dridex/Emotet C2 strežnik takoj prestrežen (abuse.ch Feodo). Povezava je bila prekinjena pred izvajanjem.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bento Row 2: Android TV Interactive Feature Card with Tab Switcher -->
+      <div class="bento-grid-2">
+        <!-- Unified TV Tabbed Experience Card -->
+        <div class="bento-card bento-tv-card" id="cardTvExperience">
+          <div class="bento-content">
+            <div class="tv-tabs-header-wrap">
+              <span class="bento-tag" style="color:#c084fc;">📺 Android TV &amp; Daljinski Upravljalnik</span>
+              
+              <!-- Tab Switcher (Preklop zavihkov) -->
+              <div class="tv-feature-tabs-bar">
+                <button class="tv-tab-btn active" id="btnTvTabDpad" onclick="switchTvBentoTab('dpad')">
+                  🎮 60 FPS
+                </button>
+                <button class="tv-tab-btn" id="btnTvTabPortals" onclick="switchTvBentoTab('portals')">
+                  📑 TV Portali
+                </button>
+              </div>
+            </div>
+
+            <!-- Tab 1: 60 FPS D-Pad Navigacija -->
+            <div class="tv-tab-view active" id="viewTvDpad">
+              <div class="tv-tab-split">
+                <div class="tv-tab-text">
+                  <h3 class="bento-title" data-i18n="card3_title">60 FPS D-Pad navigacija &amp; Media3</h3>
+                  <p class="bento-desc" data-i18n="card3_desc">
+                    Brez nerodnih navideznih mišk. Cianov fokusni obroč natančno skače med elementi z ničelno zakasnitvijo, strojno pospešeni ExoPlayer pa zagotavlja tekoč 4K video na vašem televizorju z gladkim 60 FPS drsenjem.
+                  </p>
+                  <div class="tv-tab-highlights">
+                    <span class="tv-pill-hl">⚡ 60 FPS D-Pad</span>
+                    <span class="tv-pill-hl">🎯 Brez navidezne miške</span>
+                    <span class="tv-pill-hl">🎬 ExoPlayer 4K Media3</span>
+                  </div>
+                </div>
+                <div class="bento-visual tv-visual-box">
+                  <img src="assets/tv/whole_card_focus_final.png" alt="TV D-Pad Spatial Navigation" loading="lazy">
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab 2: TV Portals & Bookmarks -->
+            <div class="tv-tab-view" id="viewTvPortals" style="display:none;">
+              <div class="tv-tab-split">
+                <div class="tv-tab-text">
+                  <h3 class="bento-title" data-i18n="card4_title">Vaše priljubljene strani na dosegu daljinca</h3>
+                  <p class="bento-desc" data-i18n="card4_desc">
+                    Hitro preklapljanje med novicami, vremenom in multimedijo z barvnimi gumbi na daljincu brez dolgotrajnega tipkanja naslovov. Vgrajen upravitelj portalov omogoča preprosto dodajanje in urejanje vaših priljubljenih postaj.
+                  </p>
+                  <div class="tv-tab-highlights">
+                    <span class="tv-pill-hl">🔴 Rdeči gumb: Xplore TV</span>
+                    <span class="tv-pill-hl">🟡 Rumeni gumb: YouTube</span>
+                    <span class="tv-pill-hl">🔵 Modri gumb: 24ur / Novice</span>
+                  </div>
+                </div>
+                <div class="bento-visual tv-visual-box">
+                  <img src="assets/tv/portal_manager_dialog_verified.png" alt="Portal Manager Dialog" loading="lazy">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 5: Customization & UserScripts (Tampermonkey Engine) -->
+        <div class="bento-card" style="grid-column: span 2;">
+          <div class="bento-content">
+            <span class="bento-tag" style="color:#a855f7;">Popolna prilagoditev &amp; Razširljivost</span>
+            <h3 class="bento-title">Oblikujte svoj brskalnik. Dodajte lastne JavaScript skripte.</h3>
+            <p class="bento-desc">
+              Safeer daje uporabnikom popolno ustvarjalno svobodo: izbirajte med temami (Midnight, Mint Emerald, Cyberpunk Neon, AMOLED Black), prilagodite vsako podrobnost z lastnim CSS-jem in dodajte svoje JavaScript skripte (Greasemonkey / Tampermonkey slog) za samodejno preskakovanje oglasov in uvodov, odstranjevanje pasic ali prilagajanje poljubnih spletnih strani.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive UserScripts & Customization Showcase Section -->
+  <section class="userscripts-section" id="userscripts">
+    <div class="container">
+      <div class="userscripts-badge-wrap">
+        <span class="userscripts-badge">✨ NOVOST • POPOLNA DIGITALNA SUVERENOST</span>
+      </div>
+
+      <div class="userscripts-grid">
+        <!-- Left: Copy & Value Proposition -->
+        <div class="userscripts-info">
+          <div class="userscripts-intro-wrap">
+            <h2 class="userscripts-title">
+              Tvoj brskalnik. Tvoja pravila.<br>
+              <span class="highlight-cyan">Dodaj svojo skripto v 10 sekundah.</span>
+            </h2>
+            <p class="userscripts-lead">
+              Zakaj bi se prilagajali spletnim stranem, če se spletne strani lahko prilagodijo vam? Safeer prinaša vgrajen <strong>Tampermonkey / Greasemonkey mehanizem</strong> za samodejno izvajanje lastnih JavaScript uporabniških skript brez nameščanja zunanjih vtičnikov.
+            </p>
+          </div>
+
+          <div class="feature-bullets">
+            <div class="bullet-item">
+              <div class="bullet-icon">⚡</div>
+              <div>
+                <h4>Enostavno dodajanje in urejanje</h4>
+                <p>Kliknite ikono 🧩, poimenujte skripto, vnesite spletno stran in prilepite kodo. Brskalnik poskrbi za vse ostalo.</p>
+              </div>
+            </div>
+
+            <div class="bullet-item">
+              <div class="bullet-icon">🎨</div>
+              <div>
+                <h4>Oblikovanje po meri &amp; Lasten CSS</h4>
+                <p>Izbirajte med 4 vgrajenimi temami (Midnight, Mint Emerald, Cyberpunk, AMOLED) ali z lastnim CSS-jem preuredite videz katerega koli elementa.</p>
+              </div>
+            </div>
+
+            <div class="bullet-item">
+              <div class="bullet-icon">🔒</div>
+              <div>
+                <h4>100% zasebno &amp; lokalno izvajanje</h4>
+                <p>Vse vaše skripte se izvajajo lokalno v vaši napravi, brez sledenja, brez oblačnih strežnikov in brez ogrožanja zasebnosti.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="userscripts-cta-wrap" style="display:flex; gap:12px; flex-wrap:wrap;">
+            <a href="assets/desktop/safeer-browser-linux.tar.gz" download class="btn-pill-green">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+              <span>Prenesi Safeer Linux (Customizer &amp; Skripte)</span>
+            </a>
+            <a href="#download" class="btn-pill-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span>Vsi prenosi (Telefon, TV, Linux)</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Right: Interactive Code Window Mockup -->
+        <div class="userscripts-interactive">
+          <div class="code-window">
+            <div class="code-window-header">
+              <div class="window-dots">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <div class="window-title-tab" id="activeScriptTabTitle">youtube_auto_skip.js</div>
+              <div class="window-badge-status">● AKTIVNA</div>
+            </div>
+
+            <!-- Tab Switcher for Quick Script Presets -->
+            <div class="script-preset-pills">
+              <button class="preset-pill active" onclick="switchScriptDemo(0, this)">1. Preskok oglasov &amp; uvodov</button>
+              <button class="preset-pill" onclick="switchScriptDemo(1, this)">2. Pametni nočni način</button>
+              <button class="preset-pill" onclick="switchScriptDemo(2, this)">3. Čisti splet (Brez pasic)</button>
+            </div>
+
+            <!-- Code Body -->
+            <div class="code-editor-body">
+              <pre id="demoCodeDisplay"><code class="language-javascript">// ==SafeerUserScript==
+// @name         YouTube Samodejni Preskok
+// @match        *://*.youtube.com/*
+// @run-at       document-end
+// ====================
+
+setInterval(() => {
+  const skipBtn = document.querySelector('.ytp-skip-ad-button, .skip-intro-btn');
+  if (skipBtn) {
+    skipBtn.click();
+    console.log('🛡️ Safeer: Oglas samodejno preskočen!');
+  }
+}, 500);</code></pre>
+            </div>
+
+            <div class="code-window-footer">
+              <span class="footer-hint">💡 Kliknite zgornje gumbe za ogled primerov, ki jih lahko takoj uporabite v Safeerju.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Open Source Manifesto: A Million Personalities, One Shared Goal -->
+  <section class="manifesto-section" id="opensource">
+    <div class="container">
+      <div class="manifesto-card">
+        <span class="manifesto-badge">🌍 MANIFEST ODPRTE KODE • MOČ V TVOJIH ROKAH</span>
+        <h2 class="manifesto-title" data-i18n="manifesto_title">Kdor nadzoruje brskalnik, nadzoruje splet.<br><span style="color:var(--accent-cyan);">Vzemi nadzor v svoje roke.</span></h2>
+        <p class="manifesto-text" data-i18n="manifesto_text">
+          <strong>Spletna stran se obnaša natanko tako, kot ji to dopusti tvoj brskalnik.</strong> Preveč časa so tehnološki monopoli odločali o tem, kaj smeš videti, koliko oglasov moraš potrpeti in kako se trguje s tvojo zasebnostjo. Čas je, da pravila znova določaš ti.<br><br>
+          Milijon ljudi ima milijon različnih osebnosti, želja in potreb, a en sam neomajen cilj: <strong>imeti odprt, varen in neukročen internet na dosegu roke</strong>. Safeer zmanjšuje tveganje in blokira znana tveganja kot lokalni varnostni sloj. Projekt je 100% odprtokoden prav zato, da služi kot navdih in odskočna deska: vzemi izvorno kodo v svoje roke, naredi <em>fork</em> in prilagodi svoj brskalnik po lastnih željah in potrebah!
+        </p>
+
+        <div class="manifesto-actions">
+          <a href="https://github.com/memelandfaner/-safeer-browser" target="_blank" class="manifesto-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            <span>Fork Safeer Mobile</span>
+          </a>
+          <a href="https://github.com/memelandfaner/tv-browser-2" target="_blank" class="manifesto-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            <span>Fork TV Browser 2</span>
+          </a>
+          <a href="https://github.com/memelandfaner/linux-mint-safeer-browser" target="_blank" class="manifesto-btn highlight">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            <span>Fork Linux Mint Edition</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comparison Table -->
+  <section class="comparison-section" id="compare">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-eyebrow" data-i18n="comp_eyebrow">Primerjava</span>
+        <h2 class="section-h2" data-i18n="comp_title">Kako se Safeer primerja z drugimi?</h2>
+      </div>
+
+      <div class="table-scroll-hint">👉 <span data-i18n="table_scroll_hint">Podrsajte vodoravno za ogled celotne primerjave</span></div>
+      <div class="table-wrapper">
+        <table class="spec-table">
+          <thead>
+            <tr>
+              <th>Funkcionalnost</th>
+              <th class="col-highlight">🛡️ Safeer Browser</th>
+              <th>Google Chrome / Opera</th>
+              <th>Običajni TV brskalniki</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>C2 Botnet & Malware zaščita (abuse.ch)</td>
+              <td class="col-highlight"><span style="color:#10b981;">✓</span> Vgrajeno (O(k) Trie)</td>
+              <td><span style="color:#64748b;">✗</span> Osnovni filter</td>
+              <td><span style="color:#64748b;">✗</span> Brez zaščite</td>
+            </tr>
+            <tr>
+              <td>YouTube v ozadju z ugasnjenim zaslonom</td>
+              <td class="col-highlight"><span style="color:#10b981;">✓</span> Da (brezplačno)</td>
+              <td><span style="color:#64748b;">✗</span> Plačljiva naročnina</td>
+              <td><span style="color:#64748b;">✗</span> Se zaustavi</td>
+            </tr>
+            <tr>
+              <td>Blokada video oglasov & praznih okvirjev</td>
+              <td class="col-highlight"><span style="color:#10b981;">✓</span> 0 oglasov</td>
+              <td><span style="color:#64748b;">✗</span> Vsi oglasi</td>
+              <td><span style="color:#64748b;">✗</span> Brez blokiranja</td>
+            </tr>
+            <tr>
+              <td>Nativni Media3 ExoPlayer predvajalnik</td>
+              <td class="col-highlight"><span style="color:#10b981;">✓</span> 4K SurfaceView</td>
+              <td><span style="color:#64748b;">✗</span> Standardni web view</td>
+              <td><span style="color:#64748b;">✗</span> Zatikanje</td>
+            </tr>
+            <tr>
+              <td>D-Pad fokusni obroč za daljinec</td>
+              <td class="col-highlight"><span style="color:#10b981;">✓</span> 60 FPS navigacija</td>
+              <td><span style="color:#64748b;">✗</span> Nerodna miška</td>
+              <td><span style="color:#64748b;">✗</span> Počasno drsenje</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download Hub with Inline Instant QR Codes: No Extra Modals Needed -->
+  <section class="download-section" id="download">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-eyebrow" data-i18n="dl_eyebrow">Takojšen prenos</span>
+        <h2 class="section-h2" data-i18n="dl_title">Namestite na svojo napravo.</h2>
+      </div>
+
+      <div class="download-split-grid">
+        <!-- Mobile Card -->
+        <div class="dl-card">
+          <div class="dl-header">
+            <div class="dl-info">
+              <h3 data-i18n="dl_mob_h3">📱 Mobilni brskalnik (Telefon &amp; Tablica)</h3>
+              <p data-i18n="dl_mob_p">Optimizirano za zaslone na dotik, Galaxy S25, tablice in vse Android telefone (120Hz AMOLED).</p>
+              <div class="dl-shortlink" style="margin-top:8px;">
+                <span>Kratka povezava: <a href="https://tinyurl.com/298zn386" target="_blank">tinyurl.com/298zn386</a></span>
+              </div>
+              <div style="margin-top:10px; padding: 6px 10px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px; font-size: 0.78rem; color: #fbbf24; line-height: 1.35;" data-i18n="mob_upgrade_warn">
+                ⚠️ <strong>Nadgradnja z v1.0.0:</strong> Ker ima v1.0.2 uradni certifikat (v1.0.0 debug podpis), pred namestitvijo odstranite staro verzijo (Uninstall).
+              </div>
+            </div>
+            <div class="dl-qr-box" id="qrContainerMob" title="Skenirajte s kamero telefona"></div>
+          </div>
+
+          <div class="dl-actions" style="flex-direction: column; gap: 8px;">
+            <a href="assets/mobile/Safeer-Mobile.apk" download class="btn-pill-primary" style="flex:1; justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span data-i18n="dl_btn_mob">Prenesi mobilni brskalnik APK (1.7 MB)</span>
+            </a>
+            <div style="font-size: 0.70rem; color: #64748b; font-family: monospace; text-align: center;">
+              SHA-256: 71e2b1164b904e57e494f9143731153890aff18d0e63ca80409030f466e97189
+            </div>
+          </div>
+        </div>
+
+        <!-- TV Card -->
+        <div class="dl-card tv-card">
+          <div class="dl-header">
+            <div class="dl-info">
+              <h3 data-i18n="dl_tv_h3">📺 TV brskalnik (Pametni Android TV)</h3>
+              <p data-i18n="dl_tv_p">Optimizirano za Philips TV, Sony, Xiaomi, MediaTek in upravljanje z daljincem.</p>
+              <div class="dl-shortlink" style="margin-top:8px;">
+                <span>Kratka povezava: <a href="https://tinyurl.com/29y9bg9k" target="_blank" style="color:#c084fc;">tinyurl.com/29y9bg9k</a></span>
+              </div>
+            </div>
+            <div class="dl-qr-box" id="qrContainerTv" title="Skenirajte s TV ali telefonom"></div>
+          </div>
+
+          <div class="dl-actions">
+            <a href="assets/tv/TV-Browser-2.apk" download class="btn-pill-purple" style="flex:1; justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span data-i18n="dl_btn_tv">Prenesi TV brskalnik APK (8.8 MB)</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Linux Mint Desktop Card -->
+        <div class="dl-card desktop-card" id="cardDesktop" style="border-color: rgba(135, 207, 62, 0.4);">
+          <div class="dl-header">
+            <div class="dl-info">
+              <h3 style="color:#87cf3e;" data-i18n="dl_desktop_h3">🍃 Linux Mint, Ubuntu &amp; Debian Desktop</h3>
+              <p data-i18n="dl_desktop_p">Popolnoma opremljen za Linux: enotna instanca z Unix socketom, Awesomebar (localhost/razvijalci), Customizer Studio (teme, lasten CSS, UserScripts), 6 svetovnih jezikov in ukaz safeer v terminalu.</p>
+              <div class="dl-shortlink" style="margin-top:8px;">
+                <span>Repozitorij: <a href="https://github.com/memelandfaner/linux-mint-safeer-browser" target="_blank" style="color:#87cf3e;">github.com/linux-mint-safeer</a></span>
+              </div>
+            </div>
+            <div class="dl-qr-box" style="display:flex; align-items:center; justify-content:center; font-size:36px; background:rgba(135, 207, 62, 0.1); border-color:rgba(135, 207, 62, 0.3);">🍃</div>
+          </div>
+
+          <div class="terminal-install-box" style="margin: 12px 0; padding: 8px 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(135,207,62,0.25); border-radius: 8px; font-family: monospace; font-size: 0.76rem; color: #a3e635; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; max-width: 100%;">
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; flex:1;">$ curl -sSL https://raw.githubusercontent.com/memelandfaner/linux-mint-safeer-browser/main/install.sh | bash</span>
+            <button onclick="navigator.clipboard.writeText('curl -sSL https://raw.githubusercontent.com/memelandfaner/linux-mint-safeer-browser/main/install.sh | bash'); this.textContent='✓'; setTimeout(()=>this.textContent='📋', 1500);" style="background:transparent; border:none; color:#87cf3e; cursor:pointer; font-size:0.9rem; flex-shrink:0;" title="Kopiraj ukaz">📋</button>
+          </div>
+
+          <div class="dl-actions">
+            <a href="assets/desktop/safeer-browser-linux.tar.gz" download class="btn-pill-green" style="flex:1; justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span data-i18n="dl_btn_desktop">Prenesi Linux Paket (468 KB)</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <ul class="footer-nav">
+        <li><a href="https://github.com/memelandfaner/-safeer-browser" target="_blank">GitHub Safeer Mobile</a></li>
+        <li><a href="https://github.com/memelandfaner/-safeer-browser/releases/tag/v1.0.2" target="_blank" style="color:var(--accent-cyan); font-weight:600;">Uradni Release v1.0.2</a></li>
+        <li><a href="https://github.com/memelandfaner/tv-browser-2" target="_blank">GitHub TV Browser 2</a></li>
+        <li><a href="https://tinyurl.com/298zn386" target="_blank">Mobile APK Mirror</a></li>
+        <li><a href="https://tinyurl.com/29y9bg9k" target="_blank">TV APK Mirror</a></li>
+      </ul>
+      <p data-i18n="footer_copy">© 2026 Safeer Browser Project. Vrhunska zasebnost, kibernetska varnost in zabava.</p>
+      <p style="margin-top: 8px; font-size: 0.78rem; color: #64748b; line-height: 1.4;" data-i18n="footer_disclaimer">⚖️ Safeer is a security layer, not a guarantee against all online threats. Zmanjšuje tveganje in blokira znana tveganja; ne zagotavlja zaščite pred neznanimi Zero-Day grožnjami. 100% odprta koda pod licenco Apache 2.0 – spodbujamo fork kode in lastno prilagoditev.</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
