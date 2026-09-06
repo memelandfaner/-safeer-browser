@@ -1940,6 +1940,10 @@ function applyLanguage(lang) {
   // Update dynamic script demo simulator
   updateScriptDemoLanguage();
 
+  if (typeof adaptHeroToPlatform === 'function') {
+    adaptHeroToPlatform(detectedDevicePlatform);
+  }
+
   if (typeof DisplayEngine !== 'undefined' && DisplayEngine.refresh) {
     DisplayEngine.refresh();
   }
@@ -2211,18 +2215,91 @@ function updateScreenshotView(platform, key) {
 window.switchPlatformShowcase = switchPlatformShowcase;
 window.switchScreenshot = switchScreenshot;
 
-function setupShowcaseSwitcher() {
-  const ua = (navigator.userAgent || '').toLowerCase();
-  if (ua.includes('android') && (ua.includes('tv') || ua.includes('smart') || ua.includes('aft') || ua.includes('bravia'))) {
-    switchPlatformShowcase('tv');
-  } else if (ua.includes('android') || ua.includes('mobile') || ua.includes('iphone') || ua.includes('ipad')) {
-    switchPlatformShowcase('mobile');
-  } else if (ua.includes('linux')) {
-    switchPlatformShowcase('desktop');
+let detectedDevicePlatform = 'desktop';
+
+function adaptHeroToPlatform(platform) {
+  const btnMob = document.getElementById('heroBtnMob');
+  const btnDesktop = document.getElementById('heroBtnDesktop');
+  const btnTv = document.getElementById('heroBtnTv');
+  const subLinks = document.getElementById('heroSubLinks');
+  if (!btnMob || !btnDesktop || !btnTv) return;
+
+  const isSmall = window.innerWidth <= 768;
+  const lang = typeof currentLang !== 'undefined' ? currentLang : 'sl';
+  const t = {
+    sl: { also: "Na voljo tudi za: ", linux: "🍃 Linux Mint (.deb)", mob: "📱 Android telefon", tv: "📺 Android TV" },
+    en: { also: "Also available for: ", linux: "🍃 Linux Mint (.deb)", mob: "📱 Android phone", tv: "📺 Android TV" },
+    de: { also: "Auch verfügbar für: ", linux: "🍃 Linux Mint (.deb)", mob: "📱 Android Smartphone", tv: "📺 Android TV" },
+    es: { also: "También disponible para: ", linux: "🍃 Linux Mint (.deb)", mob: "📱 Teléfono Android", tv: "📺 Android TV" },
+    fr: { also: "Également disponible pour: ", linux: "🍃 Linux Mint (.deb)", mob: "📱 Téléphone Android", tv: "📺 Android TV" },
+    it: { also: "Disponibile anche per: ", linux: "🍃 Linux Mint (.deb)", mob: "📱 Telefono Android", tv: "📺 Android TV" }
+  }[lang] || { also: "Na voljo tudi za: ", linux: "🍃 Linux Mint (.deb)", mob: "📱 Android telefon", tv: "📺 Android TV" };
+
+  if (platform === 'mobile') {
+    btnMob.style.display = 'inline-flex';
+    if (isSmall) {
+      btnDesktop.style.display = 'none';
+      btnTv.style.display = 'none';
+    } else {
+      btnDesktop.style.display = 'inline-flex';
+      btnTv.style.display = 'inline-flex';
+    }
+    if (subLinks) {
+      subLinks.innerHTML = `<span style="color:#64748b;">${t.also}</span><a href="linux/" style="color:#87cf3e; text-decoration:underline;">${t.linux}</a> • <a href="tv/" style="color:#c084fc; text-decoration:underline;">${t.tv}</a>`;
+    }
+  } else if (platform === 'tv') {
+    btnTv.style.display = 'inline-flex';
+    if (isSmall) {
+      btnMob.style.display = 'none';
+      btnDesktop.style.display = 'none';
+    } else {
+      btnMob.style.display = 'inline-flex';
+      btnDesktop.style.display = 'inline-flex';
+    }
+    if (subLinks) {
+      subLinks.innerHTML = `<span style="color:#64748b;">${t.also}</span><a href="android/" style="color:#00d2ff; text-decoration:underline;">${t.mob}</a> • <a href="linux/" style="color:#87cf3e; text-decoration:underline;">${t.linux}</a>`;
+    }
   } else {
-    switchPlatformShowcase('desktop');
+    // desktop / linux
+    btnDesktop.style.display = 'inline-flex';
+    if (isSmall) {
+      btnMob.style.display = 'none';
+      btnTv.style.display = 'none';
+    } else {
+      btnMob.style.display = 'inline-flex';
+      btnTv.style.display = 'inline-flex';
+    }
+    if (subLinks) {
+      subLinks.innerHTML = `<span style="color:#64748b;">${t.also}</span><a href="android/" style="color:#00d2ff; text-decoration:underline;">${t.mob}</a> • <a href="tv/" style="color:#c084fc; text-decoration:underline;">${t.tv}</a>`;
+    }
   }
 }
+
+function setupShowcaseSwitcher() {
+  const ua = (navigator.userAgent || '').toLowerCase();
+  const isTv = ua.includes('android') && (ua.includes('tv') || ua.includes('smart') || ua.includes('aft') || ua.includes('bravia'));
+  const isMobile = !isTv && (ua.includes('android') || ua.includes('mobile') || ua.includes('iphone') || ua.includes('ipad'));
+  const isLinux = ua.includes('linux') && !ua.includes('android');
+
+  if (isTv) {
+    detectedDevicePlatform = 'tv';
+  } else if (isMobile) {
+    detectedDevicePlatform = 'mobile';
+  } else if (isLinux) {
+    detectedDevicePlatform = 'desktop';
+  } else {
+    detectedDevicePlatform = 'desktop';
+  }
+
+  switchPlatformShowcase(detectedDevicePlatform);
+  adaptHeroToPlatform(detectedDevicePlatform);
+}
+
+window.addEventListener('resize', () => {
+  if (typeof adaptHeroToPlatform === 'function') {
+    adaptHeroToPlatform(detectedDevicePlatform);
+  }
+});
 
 // --- 5. Generate Inline SVG QR Codes on Load ---
 function renderInlineQRs() {

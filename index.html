@@ -25,18 +25,11 @@
         <span>Safeer</span>
       </a>
 
-      <div class="platform-nav-pills hide-mobile">
-        <a href="linux/" class="platform-pill" style="border-color:rgba(135,207,62,0.4); color:#87cf3e;">🍃 Linux Mint</a>
-        <a href="android/" class="platform-pill" style="border-color:rgba(0,210,255,0.4); color:#00d2ff;">📱 Android</a>
-        <a href="tv/" class="platform-pill" style="border-color:rgba(192,132,252,0.4); color:#c084fc;">📺 Android TV</a>
-      </div>
-
       <ul class="nav-links">
-        <li><a href="#platforms" class="nav-link" style="font-weight:700;">Naprave</a></li>
-        <li><a href="linux/" class="nav-link" style="color:#87cf3e;">🍃 Linux</a></li>
-        <li><a href="android/" class="nav-link" style="color:#00d2ff;">📱 Android</a></li>
-        <li><a href="tv/" class="nav-link" style="color:#c084fc;">📺 TV</a></li>
         <li><a href="#security" class="nav-link" data-i18n="nav_security">Varnost</a></li>
+        <li><a href="#tampermonkey" class="nav-link">Skripte</a></li>
+        <li><a href="#platforms" class="nav-link">Platforme</a></li>
+        <li><a href="#compare" class="nav-link" data-i18n="nav_compare">Primerjava</a></li>
         <li><a href="#download" class="nav-link" data-i18n="nav_download">Prenos</a></li>
       </ul>
 
@@ -62,8 +55,7 @@
 
           <h1 class="hero-title">
             <span data-i18n="hero_t1">Varnejši na spletu.</span><br>
-            <span class="highlight-cyan" data-i18n="hero_t2">Brez oglasov.</span><br>
-            <span style="color:#87cf3e;">Izberite svojo napravo.</span>
+            <span class="highlight-cyan" data-i18n="hero_t2">Brez oglasov.</span>
           </h1>
 
           <p class="hero-lead" data-i18n="hero_lead">
@@ -74,17 +66,18 @@
             <span style="color:var(--accent-cyan);">🛡️</span> <span data-i18n="security_disclaimer"><strong>Safeer is a security layer, not a guarantee against all online threats.</strong> Zmanjšuje tveganje in blokira znane grožnje.</span>
           </div>
 
-          <div class="hero-cta-group" style="gap:10px;">
-            <a href="linux/" class="btn-pill-green" id="heroBtnDesktop" style="padding:10px 18px;">
-              <span>🍃 Safeer za Linux Mint (.deb)</span>
-            </a>
-            <a href="android/" class="btn-pill-primary" id="heroBtnMob" style="padding:10px 18px;">
+          <div class="hero-cta-group" id="heroCtaGroup" style="gap:10px;">
+            <a href="android/" class="btn-pill-primary hero-btn-adaptive" id="heroBtnMob" style="padding:11px 20px;">
               <span>📱 Safeer za Android (Telefon &amp; Tablica)</span>
             </a>
-            <a href="tv/" class="btn-pill-purple" id="heroBtnTv" style="padding:10px 18px; background:linear-gradient(135deg, #a855f7, #7c3aed);">
+            <a href="linux/" class="btn-pill-green hero-btn-adaptive" id="heroBtnDesktop" style="padding:11px 20px;">
+              <span>🍃 Safeer za Linux Mint (.deb)</span>
+            </a>
+            <a href="tv/" class="btn-pill-purple hero-btn-adaptive" id="heroBtnTv" style="padding:11px 20px; background:linear-gradient(135deg, #a855f7, #7c3aed);">
               <span>📺 Safeer za 4K Android TV</span>
             </a>
           </div>
+          <div class="hero-sub-links" id="heroSubLinks" style="margin-top: 10px; font-size: 0.83rem; color: #64748b;"></div>
 
           <div class="hero-trust-bar">
             <div class="trust-item"><span class="trust-check">✓</span> <span data-i18n="trust_ads">0 Oglasov</span></div>
@@ -186,9 +179,9 @@
   <section id="platforms" style="padding: 50px 0 30px 0; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(255,255,255,0.06);">
     <div class="container">
       <div class="section-head">
-        <span class="section-eyebrow" style="color:#00d2ff;">IZBIRA NAPRAVE</span>
-        <h2 class="section-h2">Tri naprave. Tri prilagojene izkušnje.</h2>
-        <p style="color:#94a3b8; max-width:650px; margin:8px auto 0 auto; text-align:center;">Kliknite na svojo platformo za namensko predstavitev, specifikacije in namestitvena navodila.</p>
+        <span class="section-eyebrow" style="color:#00d2ff;">PODPRTE PLATFORME</span>
+        <h2 class="section-h2">Ena varnostna vizija. Za vsak vaš zaslon.</h2>
+        <p style="color:#94a3b8; max-width:650px; margin:8px auto 0 auto; text-align:center;">Prilagojena izkušnja za telefon, pametni televizor in namizni računalnik.</p>
       </div>
 
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 36px;">
@@ -216,7 +209,7 @@
         </div>
 
         <!-- Platform 2: Android Phone & Tablet -->
-        <div class="dl-card" style="border-color: rgba(0,210,255,0.45); display:flex; flex-direction:column; justify-content:space-between;">
+        <div class="dl-card platform-card-mobile" style="border-color: rgba(0,210,255,0.45); display:flex; flex-direction:column; justify-content:space-between;">
           <div>
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
               <span style="font-size:2.2rem;">📱</span>
