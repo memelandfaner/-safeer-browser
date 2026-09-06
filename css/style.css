@@ -139,6 +139,31 @@ section, header, footer, main {
   color: #fff;
 }
 
+.platform-nav-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.platform-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.03);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.platform-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .nav-actions {
   display: flex;
   align-items: center;
@@ -1928,8 +1953,22 @@ section, header, footer, main {
   body {
     padding-bottom: 50px;
   }
-  .nav-links {
-    display: none;
+  .nav-links,
+  .platform-nav-pills,
+  .hide-mobile {
+    display: none !important;
+  }
+  .site-header {
+    padding: 10px 0;
+  }
+  .nav-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  #heroBtnMob {
+    order: -1;
   }
   .hero-title {
     font-size: 1.95rem;

@@ -2213,10 +2213,12 @@ window.switchScreenshot = switchScreenshot;
 
 function setupShowcaseSwitcher() {
   const ua = (navigator.userAgent || '').toLowerCase();
-  if (ua.includes('linux') && !ua.includes('android')) {
-    switchPlatformShowcase('desktop');
-  } else if (ua.includes('android') && (ua.includes('tv') || ua.includes('smart') || ua.includes('aft') || ua.includes('bravia'))) {
+  if (ua.includes('android') && (ua.includes('tv') || ua.includes('smart') || ua.includes('aft') || ua.includes('bravia'))) {
     switchPlatformShowcase('tv');
+  } else if (ua.includes('android') || ua.includes('mobile') || ua.includes('iphone') || ua.includes('ipad')) {
+    switchPlatformShowcase('mobile');
+  } else if (ua.includes('linux')) {
+    switchPlatformShowcase('desktop');
   } else {
     switchPlatformShowcase('desktop');
   }
