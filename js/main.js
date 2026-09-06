@@ -2121,9 +2121,9 @@ const screenshotData = {
     main: {
       img: 'assets/desktop/desktop_mint_showcase.png',
       url: 'safeer://home',
-      status: 'Linux Mint v1.0.11',
+      status: 'Linux Mint v1.0.12',
       icon: '🍃',
-      caption: '<strong>Linux Mint &amp; Ubuntu Izdaja v1.0.11:</strong> Nativni GTK3/WebKit2GTK brskalnik z vrstico zaznamkov (Ctrl+Shift+B), DuckDuckGo privzeto, čarovnikom ob prvem zagonu in 0 oglasov na YouTube.'
+      caption: '<strong>Linux Mint &amp; Ubuntu Izdaja v1.0.12:</strong> Nativni GTK3/WebKit2GTK brskalnik z vrstico zaznamkov (Ctrl+Shift+B), DuckDuckGo privzeto, čarovnikom ob prvem zagonu in 0 oglasov na YouTube.'
     }
   }
 };
