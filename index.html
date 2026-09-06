@@ -61,6 +61,12 @@
         <div>
 
 
+          <div class="badge-active" style="display:inline-flex; align-items:center; gap:8px; padding:6px 14px; background:rgba(0, 210, 255, 0.1); border:1px solid rgba(0, 210, 255, 0.3); border-radius:100px; margin-bottom:14px; font-size:0.84rem;">
+            <span class="pulse-dot"></span>
+            <strong style="color:var(--accent-cyan);">NOVO v1.0.4:</strong>
+            <span style="color:#e2e8f0;">Preoblikovane Nastavitve, 6 jezikov (i18n), AdGuard ščit, šifriran DoH (Quad9 / AdGuard / Tor) &amp; stabilen tunel</span>
+          </div>
+
           <h1 class="hero-title">
             <span data-i18n="hero_t1">Varnejši na spletu.</span><br>
             <span class="highlight-cyan" data-i18n="hero_t2">Brez oglasov.</span><br>
@@ -387,6 +393,42 @@
           </div>
         </div>
 
+      </div>
+
+      <!-- Bento Row 3: AdGuard Advanced Protection, Encrypted DoH & Comfortable Downloads -->
+      <div class="bento-grid-2" style="margin-top: 24px;">
+        <!-- Card 3A: Vgrajena AdGuard Zaščita & Anti-Adblock Defuser -->
+        <div class="bento-card" style="border-color: rgba(16, 185, 129, 0.35); background: linear-gradient(145deg, rgba(16, 185, 129, 0.05), rgba(15, 23, 42, 0.8));">
+          <div class="bento-content">
+            <span class="bento-tag" style="color:#10b981;">🛡️ Vgrajena AdGuard Zaščita &amp; Defuser</span>
+            <h3 class="bento-title">AdGuard defuser &amp; 0 oglasov. Brez nadležnih opozoril.</h3>
+            <p class="bento-desc">
+              Spletna mesta, ki poskušajo zaznati blokator oglasov (anti-adblock walls, vsiljena pojavna okna, zaklepanje drsenja), so nemudoma nevtralizirana. Safeer z vgrajeno AdGuard tehnologijo ponaredi odzive oglasnih API-jev (<code>adsbygoogle</code>, <code>googletag</code>, <code>BlockAdBlock</code>), samodejno odstrani blokirne modale in odklene drsenje strani (<code>overflow: auto</code>). Vse deluje nativno brez nameščanja zunanjih razširitev.
+            </p>
+            <div class="tv-tab-highlights" style="margin-top: 14px;">
+              <span class="tv-pill-hl" style="background:rgba(16,185,129,0.15); border-color:rgba(16,185,129,0.4); color:#34d399;">🛡️ Anti-Adblock Defuser</span>
+              <span class="tv-pill-hl" style="background:rgba(16,185,129,0.15); border-color:rgba(16,185,129,0.4); color:#34d399;">🔓 Odklep drsenja (Scroll)</span>
+              <span class="tv-pill-hl" style="background:rgba(16,185,129,0.15); border-color:rgba(16,185,129,0.4); color:#34d399;">🧩 Vgrajena sistemska razširitev</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3B: Kriptografski DoH (Quad9 / AdGuard DNS), Proxy tunel & 6 jezikov -->
+        <div class="bento-card" style="border-color: rgba(0, 210, 255, 0.35); background: linear-gradient(145deg, rgba(0, 210, 255, 0.05), rgba(15, 23, 42, 0.8));">
+          <div class="bento-content">
+            <span class="bento-tag" style="color:var(--accent-cyan);">🔒 Šifriran DoH &amp; Večjezične Nastavitve</span>
+            <h3 class="bento-title">Kriptografski DoH, Tor tunel, 6 jezikov &amp; sodoben vmesnik.</h3>
+            <p class="bento-desc">
+              Privzeto šifriran DNS promet preko <strong>Quad9 (9.9.9.9)</strong>, <strong>AdGuard DNS</strong> (<code>dns.adguard-dns.com</code>), <strong>Cloudflare</strong> (1.1.1.1) ali lastnega DoH URL-ja. Podpora za šifriran proxy tunel (Tor Orbot). Popolnoma prenovljeno, estetsko okno za nastavitve z zavihki in dinamična podpora za <strong>6 jezikov</strong> (SL, EN, DE, ES, FR, IT) ter zanesljivo delovanje pri oddaljenem upravljanju in WebSocket povezavah.
+            </p>
+            <div class="tv-tab-highlights" style="margin-top: 14px;">
+              <span class="tv-pill-hl" style="background:rgba(0,210,255,0.15); border-color:rgba(0,210,255,0.4); color:#38bdf8;">🔒 Privzeto Quad9 (9.9.9.9)</span>
+              <span class="tv-pill-hl" style="background:rgba(0,210,255,0.15); border-color:rgba(0,210,255,0.4); color:#38bdf8;">🛡️ AdGuard Zaščita</span>
+              <span class="tv-pill-hl" style="background:rgba(0,210,255,0.15); border-color:rgba(0,210,255,0.4); color:#38bdf8;">🌐 6 jezikov (i18n)</span>
+              <span class="tv-pill-hl" style="background:rgba(0,210,255,0.15); border-color:rgba(0,210,255,0.4); color:#38bdf8;">⚙️ Novo okno nastavitev</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -749,6 +791,24 @@ setInterval(() => {
               <td data-i18n="tr5_chrome"><span style="color:#64748b;">✗</span> Nerodna miška</td>
               <td data-i18n="tr5_tv"><span style="color:#64748b;">✗</span> Počasno drsenje</td>
             </tr>
+            <tr>
+              <td>Vgrajena AdGuard zaščita &amp; Anti-Adblock defuser</td>
+              <td class="col-highlight"><span style="color:#10b981;">✓</span> Vgrajeno (brez dodatkov)</td>
+              <td><span style="color:#64748b;">✗</span> MV3 omejitve</td>
+              <td><span style="color:#64748b;">✗</span> Brez zaščite</td>
+            </tr>
+            <tr>
+              <td>Kriptografski DoH (Quad9 / AdGuard DNS)</td>
+              <td class="col-highlight"><span style="color:#10b981;">✓</span> Privzeto Quad9 + AdGuard</td>
+              <td><span style="color:#64748b;">✗</span> Odvisno od Googla</td>
+              <td><span style="color:#64748b;">✗</span> Nešifriran DNS operaterja</td>
+            </tr>
+            <tr>
+              <td>HTTPS-First &amp; Udobno prenašanje datotek</td>
+              <td class="col-highlight"><span style="color:#10b981;">✓</span> Samodejno &amp; varno v Prenosi</td>
+              <td><span style="color:#64748b;">✗</span> Opozorila in potrditve</td>
+              <td><span style="color:#64748b;">✗</span> Pogoste napake</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -783,10 +843,10 @@ setInterval(() => {
           <div class="dl-actions" style="flex-direction: column; gap: 8px;">
             <a href="assets/mobile/Safeer-Mobile.apk" download class="btn-pill-primary" style="flex:1; justify-content:center;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              <span data-i18n="dl_btn_mob">Prenesi mobilni brskalnik APK (1.7 MB)</span>
+              <span data-i18n="dl_btn_mob">Prenesi mobilni brskalnik APK (1.8 MB)</span>
             </a>
             <div style="font-size: 0.70rem; color: #64748b; font-family: monospace; text-align: center;">
-              SHA-256: 1cf19ece5aa6d82982fe16288aca60100f6ca25e0c13d016c702f7f0e1225e05
+              SHA-256: 6275ef5669ebb0e2d34ec53434a2c5d046115b83f8e68cda2bc0386317d998c5
             </div>
           </div>
         </div>
@@ -820,7 +880,7 @@ setInterval(() => {
           <div class="dl-header">
             <div class="dl-info">
               <h3 style="color:#87cf3e;" data-i18n="dl_desktop_h3">🍃 Linux Mint, Ubuntu &amp; Debian Desktop</h3>
-              <p data-i18n="dl_desktop_p">Popolnoma opremljen za Linux: enotna instanca z Unix socketom, Awesomebar (localhost/razvijalci), 1-klik uvoz zaznamkov, Customizer Studio (teme, lasten CSS, UserScripts), 6 svetovnih jezikov in ukaz safeer v terminalu. <strong>3x manj RAM-a, zagon v pol sekunde in glasba v ozadju.</strong></p>
+              <p data-i18n="dl_desktop_p">Popolnoma opremljen za Linux: enotna instanca z Unix socketom, vgrajena AdGuard zaščita &amp; defuser, šifriran DoH (Quad9 / AdGuard), HTTPS-First, udobni prenosi, Awesomebar, 1-klik uvoz zaznamkov, Customizer Studio in ukaz safeer v terminalu. <strong>3x manj RAM-a, zagon v pol sekunde in glasba v ozadju.</strong></p>
               <div class="dl-shortlink" style="margin-top:8px;">
                 <span><span data-i18n="dl_release_lbl">Izdaja:</span> <a href="https://github.com/memelandfaner/linux-mint-safeer-browser/releases/tag/v1.0.5" target="_blank" style="color:#87cf3e;">GitHub Release v1.0.5</a></span>
               </div>
