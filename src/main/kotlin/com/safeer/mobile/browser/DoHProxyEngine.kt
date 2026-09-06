@@ -14,7 +14,14 @@ import java.net.Socket
 import java.net.URL
 import java.net.URLEncoder
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * 🛡️ DoHProxyEngine
@@ -45,6 +52,10 @@ object DoHProxyEngine {
         fun resolve(hostname: String, timeoutMs: Int = 3500): String? {
             val h = hostname.lowercase().trim()
             if (h.isEmpty()) return null
+            if (h == "localhost" || h == "127.0.0.1") return "127.0.0.1"
+            if (h.endsWith(".local") || h.endsWith(".lan") || h.endsWith(".internal")) {
+                return try { InetAddress.getByName(h).hostAddress } catch (_: Throwable) { null }
+            }
 
             // Če gre že za IPv4 naslov
             val parts = h.split(".")
@@ -197,12 +208,27 @@ object DoHProxyEngine {
         }
     }
 
-    // --- 2. Lokalni CONNECT posredniški strežnik ---
+    // --- 2. Lokalni CONNECT posredniški strežnik z bazenom niti in zaščito pred puščanjem ---
     class LocalDoHServer(val resolver: DoHResolver) {
         private var serverSocket: ServerSocket? = null
         var actualPort: Int = 0
             private set
         val active = AtomicBoolean(false)
+
+        private val workerCount = AtomicInteger(0)
+        private val workerPool: ExecutorService = ThreadPoolExecutor(
+            4,
+            32,
+            30L,
+            TimeUnit.SECONDS,
+            SynchronousQueue<Runnable>(),
+            ThreadFactory { r ->
+                Thread(r, "SafeerDoHWorker-${workerCount.incrementAndGet()}").apply {
+                    isDaemon = true
+                }
+            },
+            ThreadPoolExecutor.CallerRunsPolicy()
+        )
 
         fun start(): Int {
             if (active.get()) return actualPort
@@ -214,9 +240,16 @@ object DoHProxyEngine {
                 while (active.get()) {
                     try {
                         val clientSock = serverSocket?.accept() ?: break
-                        Thread({ handleClient(clientSock) }, "SafeerDoHWorker").start()
-                    } catch (_: Exception) {
+                        try {
+                            workerPool.execute {
+                                handleClient(clientSock)
+                            }
+                        } catch (t: Throwable) {
+                            try { clientSock.close() } catch (_: Throwable) {}
+                        }
+                    } catch (t: Throwable) {
                         if (!active.get()) break
+                        try { Thread.sleep(50) } catch (_: Throwable) {}
                     }
                 }
             }, "SafeerDoHAcceptor").start()
@@ -229,14 +262,14 @@ object DoHProxyEngine {
             active.set(false)
             try {
                 serverSocket?.close()
-            } catch (_: Exception) {}
+            } catch (_: Throwable) {}
             serverSocket = null
         }
 
         private fun handleClient(clientSock: Socket) {
             var remoteSock: Socket? = null
             try {
-                clientSock.soTimeout = 10000
+                clientSock.soTimeout = 15000
                 val inStream = clientSock.getInputStream()
                 val outStream = clientSock.getOutputStream()
 
@@ -279,10 +312,16 @@ object DoHProxyEngine {
                         port = 443
                     }
 
+                    // Prepreči zanko nazaj na lokalni DoH strežnik
+                    if ((host == "127.0.0.1" || host == "localhost") && port == actualPort) {
+                        clientSock.close()
+                        return
+                    }
+
                     val resolvedIp = resolver.resolve(host) ?: host
                     remoteSock = Socket(resolvedIp, port)
-                    remoteSock.soTimeout = 0
-                    clientSock.soTimeout = 0
+                    remoteSock.soTimeout = 60000
+                    clientSock.soTimeout = 60000
 
                     outStream.write("HTTP/1.1 200 Connection Established\r\n\r\n".toByteArray(Charsets.ISO_8859_1))
                     outStream.flush()
@@ -290,42 +329,66 @@ object DoHProxyEngine {
                     pipeSockets(clientSock, remoteSock)
                 } else {
                     // Standardni HTTP zahtevek
-                    val host = if (target.startsWith("http://")) {
+                    val host = if (target.startsWith("http://", ignoreCase = true)) {
                         val withoutScheme = target.substring(7)
                         withoutScheme.substringBefore("/").substringBefore(":")
                     } else {
                         target.substringBefore("/").substringBefore(":")
                     }
-                    val port = 80
-                    val resolvedIp = resolver.resolve(host) ?: host
+                    val port = if (target.startsWith("http://", ignoreCase = true)) {
+                        val withoutScheme = target.substring(7)
+                        val hostAndPort = withoutScheme.substringBefore("/")
+                        if (hostAndPort.contains(":")) hostAndPort.substringAfter(":").toIntOrNull() ?: 80 else 80
+                    } else {
+                        80
+                    }
 
+                    if ((host == "127.0.0.1" || host == "localhost") && port == actualPort) {
+                        clientSock.close()
+                        return
+                    }
+
+                    val resolvedIp = resolver.resolve(host) ?: host
                     remoteSock = Socket(resolvedIp, port)
-                    remoteSock.soTimeout = 0
-                    clientSock.soTimeout = 0
+                    remoteSock.soTimeout = 60000
+                    clientSock.soTimeout = 60000
 
                     remoteSock.getOutputStream().write(reqStr.toByteArray(Charsets.ISO_8859_1))
                     remoteSock.getOutputStream().flush()
 
                     pipeSockets(clientSock, remoteSock)
                 }
-            } catch (_: Exception) {
+            } catch (_: Throwable) {
             } finally {
-                try { clientSock.close() } catch (_: Exception) {}
-                try { remoteSock?.close() } catch (_: Exception) {}
+                try { clientSock.close() } catch (_: Throwable) {}
+                try { remoteSock?.close() } catch (_: Throwable) {}
             }
         }
 
         private fun pipeSockets(s1: Socket, s2: Socket) {
-            val t1 = Thread({ copyStream(s1.getInputStream(), s2.getOutputStream()) }, "Pipe-1")
-            val t2 = Thread({ copyStream(s2.getInputStream(), s1.getOutputStream()) }, "Pipe-2")
-            t1.start()
-            t2.start()
-            try { t1.join() } catch (_: Exception) {}
-            try { t2.join() } catch (_: Exception) {}
+            val future = workerPool.submit {
+                try {
+                    copyStream(s1.getInputStream(), s2.getOutputStream())
+                } catch (_: Throwable) {
+                } finally {
+                    try { s2.shutdownOutput() } catch (_: Throwable) {}
+                    try { s1.close() } catch (_: Throwable) {}
+                    try { s2.close() } catch (_: Throwable) {}
+                }
+            }
+            try {
+                copyStream(s2.getInputStream(), s1.getOutputStream())
+            } catch (_: Throwable) {
+            } finally {
+                try { s1.shutdownOutput() } catch (_: Throwable) {}
+                try { s1.close() } catch (_: Throwable) {}
+                try { s2.close() } catch (_: Throwable) {}
+                try { future.cancel(true) } catch (_: Throwable) {}
+            }
         }
 
         private fun copyStream(inStream: InputStream, outStream: OutputStream) {
-            val buf = ByteArray(32768)
+            val buf = ByteArray(16384)
             try {
                 while (true) {
                     val r = inStream.read(buf)
@@ -333,7 +396,7 @@ object DoHProxyEngine {
                     outStream.write(buf, 0, r)
                     outStream.flush()
                 }
-            } catch (_: Exception) {}
+            } catch (_: Throwable) {}
         }
     }
 
@@ -345,9 +408,10 @@ object DoHProxyEngine {
             System.setProperty("https.proxyHost", host)
             System.setProperty("https.proxyPort", port.toString())
 
-            // Pošlji uradni Android sistemski intent za spremembo proxyja
+            // Pošlji uradni Android sistemski intent za spremembo proxyja z izključitvijo lokalnega prometa
             val intent = Intent(android.net.Proxy.PROXY_CHANGE_ACTION)
-            val proxyInfo = ProxyInfo.buildDirectProxy(host, port)
+            val exclusionList = listOf("localhost", "127.0.0.1", "10.*", "192.168.*", "172.16.*", "*.local", "*.lan")
+            val proxyInfo = ProxyInfo.buildDirectProxy(host, port, exclusionList)
             intent.putExtra("android.intent.extra.PROXY_INFO", proxyInfo)
             context.sendBroadcast(intent)
 

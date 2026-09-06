@@ -72,8 +72,26 @@ class MainActivity : android.app.Activity() {
     private var customVideoCallback: WebChromeClient.CustomViewCallback? = null
     private var isDarkModeActive: Boolean = true
 
+    override fun attachBaseContext(newBase: Context) {
+        val lang = PreferencesManager.getLanguage(newBase)
+        if (lang != "auto") {
+            val locale = java.util.Locale(lang)
+            java.util.Locale.setDefault(locale)
+            val config = newBase.resources.configuration
+            config.setLocale(locale)
+            super.attachBaseContext(newBase.createConfigurationContext(config))
+        } else {
+            super.attachBaseContext(newBase)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            android.util.Log.e("SafeerCrashHandler", "Uncaught exception in thread ${thread.name}: ${throwable.message}", throwable)
+            defaultHandler?.uncaughtException(thread, throwable)
+        }
         setContentView(R.layout.activity_main)
 
         window.statusBarColor = Color.parseColor("#06090F")
@@ -884,7 +902,7 @@ class MainActivity : android.app.Activity() {
             PreferencesManager.setAdBlockEnabled(this, AdBlockEngine.isEnabled)
             Toast.makeText(
                 this,
-                if (AdBlockEngine.isEnabled) "🛡️ AdBlock vklopljen" else "⚠️ AdBlock izklopljen",
+                if (AdBlockEngine.isEnabled) I18n.t(this, "toast_adblock_on") else I18n.t(this, "toast_adblock_off"),
                 Toast.LENGTH_SHORT
             ).show()
             wv?.reload()
@@ -902,7 +920,7 @@ class MainActivity : android.app.Activity() {
             }
             Toast.makeText(
                 this,
-                if (isDarkModeActive) "🌙 AMOLED Temni način vklopljen" else "☀️ Svetli način vklopljen",
+                if (isDarkModeActive) I18n.t(this, "toast_dark_on") else I18n.t(this, "toast_dark_off"),
                 Toast.LENGTH_SHORT
             ).show()
             dialog.dismiss()
@@ -931,9 +949,52 @@ class MainActivity : android.app.Activity() {
             setPadding(48, 36, 48, 24)
         }
 
+        // 0. Jezik vmesnika / Interface Language
+        val tvLangTitle = TextView(this).apply {
+            text = I18n.t(this@MainActivity, "settings_language")
+            textSize = 15f
+            setTextColor(Color.parseColor("#00d2ff"))
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(0, 0, 0, 12)
+        }
+        view.addView(tvLangTitle)
+
+        val langKeys = arrayOf("auto", "sl", "en", "de", "es", "fr", "it")
+        val langNames = arrayOf(
+            I18n.t(this, "lang_auto"),
+            "Slovenščina",
+            "English",
+            "Deutsch",
+            "Español",
+            "Français",
+            "Italiano"
+        )
+        val currentLang = PreferencesManager.getLanguage(this)
+        val selectedLangIdx = langKeys.indexOf(currentLang).let { if (it >= 0) it else 0 }
+
+        val rgLang = RadioGroup(this)
+        langKeys.forEachIndexed { idx, _ ->
+            val rb = RadioButton(this).apply {
+                id = View.generateViewId()
+                text = langNames[idx]
+                isChecked = (idx == selectedLangIdx)
+                setTextColor(Color.WHITE)
+            }
+            rgLang.addView(rb)
+        }
+        view.addView(rgLang)
+
+        // Ločilna črta
+        view.addView(View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2).apply {
+                setMargins(0, 24, 0, 24)
+            }
+            setBackgroundColor(Color.parseColor("#334155"))
+        })
+
         // 1. Iskalnik
         val tvSearchTitle = TextView(this).apply {
-            text = "🔍 Privzeti iskalnik:"
+            text = I18n.t(this@MainActivity, "settings_search_engine")
             textSize = 15f
             setTextColor(Color.parseColor("#00d2ff"))
             setTypeface(null, android.graphics.Typeface.BOLD)
@@ -963,7 +1024,7 @@ class MainActivity : android.app.Activity() {
 
         // 2. Preklopniki
         val tvShieldTitle = TextView(this).apply {
-            text = "🛡️ Zasebnost in varnost:"
+            text = I18n.t(this@MainActivity, "settings_privacy_security")
             textSize = 15f
             setTextColor(Color.parseColor("#00d2ff"))
             setTypeface(null, android.graphics.Typeface.BOLD)
@@ -972,35 +1033,35 @@ class MainActivity : android.app.Activity() {
         view.addView(tvShieldTitle)
 
         val cbAdBlock = CheckBox(this).apply {
-            text = "Vgrajeni AdBlock & Botnet ščit"
+            text = I18n.t(this@MainActivity, "adblock_shield")
             isChecked = PreferencesManager.isAdBlockEnabled(this@MainActivity)
             setTextColor(Color.WHITE)
         }
         view.addView(cbAdBlock)
 
         val cbDarkMode = CheckBox(this).apply {
-            text = "AMOLED Temni način"
+            text = I18n.t(this@MainActivity, "dark_mode")
             isChecked = PreferencesManager.isDarkModeEnabled(this@MainActivity)
             setTextColor(Color.WHITE)
         }
         view.addView(cbDarkMode)
 
         val cbThirdPartyCookies = CheckBox(this).apply {
-            text = "Dovoli piškotke tretjih oseb (priporočeno: izklopljeno)"
+            text = I18n.t(this@MainActivity, "third_party_cookies")
             isChecked = PreferencesManager.isThirdPartyCookiesEnabled(this@MainActivity)
             setTextColor(Color.WHITE)
         }
         view.addView(cbThirdPartyCookies)
 
         val cbJs = CheckBox(this).apply {
-            text = "Omogoči JavaScript"
+            text = I18n.t(this@MainActivity, "enable_javascript")
             isChecked = PreferencesManager.isJavaScriptEnabled(this@MainActivity)
             setTextColor(Color.WHITE)
         }
         view.addView(cbJs)
 
         val cbAdguard = CheckBox(this).apply {
-            text = "🛡️ AdGuard Zaščita (Vgrajena razširitev)"
+            text = I18n.t(this@MainActivity, "adguard_protection")
             isChecked = PreferencesManager.isAdguardProtectionEnabled(this@MainActivity)
             setTextColor(Color.WHITE)
             setTypeface(null, android.graphics.Typeface.BOLD)
@@ -1008,7 +1069,7 @@ class MainActivity : android.app.Activity() {
         view.addView(cbAdguard)
 
         val tvAdguardDesc = TextView(this).apply {
-            text = "Sprotno defusanje anti-adblock zidov, stubs za oglasne API-je in kozmetično čiščenje."
+            text = I18n.t(this@MainActivity, "adguard_desc")
             textSize = 12f
             setTextColor(Color.parseColor("#94A3B8"))
             setPadding(64, 0, 0, 8)
@@ -1025,7 +1086,7 @@ class MainActivity : android.app.Activity() {
 
         // 2.1. Šifriran DNS (DoH) za zaščito pred cenzuro
         val tvDohTitle = TextView(this).apply {
-            text = "🛡️ Šifriran DNS (DoH) proti cenzuri:"
+            text = I18n.t(this@MainActivity, "doh_title")
             textSize = 15f
             setTextColor(Color.parseColor("#00d2ff"))
             setTypeface(null, android.graphics.Typeface.BOLD)
@@ -1034,12 +1095,12 @@ class MainActivity : android.app.Activity() {
         view.addView(tvDohTitle)
 
         val dohNames = arrayOf(
-            "🛡️ Quad9 Secure DoH (9.9.9.9) [Privzeto / Zaščita pred grožnjami]",
-            "🛡️ AdGuard DNS (dns.adguard-dns.com) [Oglasi + Zlonamerna koda]",
-            "⚡ Cloudflare DoH (1.1.1.1)",
-            "🌐 Google Public DoH (8.8.8.8)",
-            "🔒 Zasebni DNS / Lasten DoH URL",
-            "🚫 Izklopljeno (Sistemski DNS operaterja)"
+            I18n.t(this, "doh_quad9"),
+            I18n.t(this, "doh_adguard"),
+            I18n.t(this, "doh_cloudflare"),
+            I18n.t(this, "doh_google"),
+            I18n.t(this, "doh_custom"),
+            I18n.t(this, "doh_disabled")
         )
         val dohKeys = arrayOf("quad9", "adguard", "cloudflare", "google", "custom", "disabled")
         var currentDoh = PreferencesManager.getDohProvider(this)
@@ -1047,7 +1108,7 @@ class MainActivity : android.app.Activity() {
         val selectedDohIdx = dohKeys.indexOf(currentDoh).let { if (it >= 0) it else 0 }
 
         val editCustomDoh = EditText(this).apply {
-            hint = "https://dns.primer.si/dns-query"
+            hint = I18n.t(this@MainActivity, "custom_doh_hint")
             setText(PreferencesManager.getCustomDohUrl(this@MainActivity))
             setTextColor(Color.WHITE)
             setHintTextColor(Color.GRAY)
@@ -1084,9 +1145,9 @@ class MainActivity : android.app.Activity() {
             setBackgroundColor(Color.parseColor("#334155"))
         })
 
-        // 2.2. Šifriran tunel / Proxy (Možnost C)
+        // 2.2. Šifriran tunel / Proxy
         val tvProxyTitle = TextView(this).apply {
-            text = "🧅 Šifriran tunel / Proxy (Možnost C):"
+            text = I18n.t(this@MainActivity, "proxy_title")
             textSize = 15f
             setTextColor(Color.parseColor("#00d2ff"))
             setTypeface(null, android.graphics.Typeface.BOLD)
@@ -1095,16 +1156,16 @@ class MainActivity : android.app.Activity() {
         view.addView(tvProxyTitle)
 
         val proxyNames = arrayOf(
-            "🚫 Izklopljeno (Neposredna povezava)",
-            "🧅 Tor Omrežje (Orbot na 127.0.0.1:8118)",
-            "⚙️ Lasten proxy (vnos naslova spodaj)"
+            I18n.t(this, "proxy_disabled"),
+            I18n.t(this, "proxy_tor"),
+            I18n.t(this, "proxy_custom")
         )
         val proxyKeys = arrayOf("disabled", "tor", "custom")
         val currentProxy = PreferencesManager.getSecureProxyMode(this)
         val selectedProxyIdx = proxyKeys.indexOf(currentProxy).let { if (it >= 0) it else 0 }
 
         val editCustomProxy = EditText(this).apply {
-            hint = "127.0.0.1:8080 ali proxy.primer.si:8080"
+            hint = I18n.t(this@MainActivity, "custom_proxy_hint")
             setText(PreferencesManager.getSecureProxyUrl(this@MainActivity))
             setTextColor(Color.WHITE)
             setHintTextColor(Color.GRAY)
@@ -1143,21 +1204,21 @@ class MainActivity : android.app.Activity() {
 
         // 3. Počisti podatke
         val btnClearData = Button(this).apply {
-            text = "🗑️ Počisti piškotke in predpomnilnik"
+            text = I18n.t(this@MainActivity, "btn_clear_data")
             setBackgroundResource(R.drawable.bg_mobile_icon_button)
             setTextColor(Color.parseColor("#ff5555"))
             setOnClickListener {
                 AlertDialog.Builder(this@MainActivity)
-                    .setTitle("Počisti podatke brskanja?")
-                    .setMessage("To bo izbrisalo vse piškotke, predpomnilnik strani, spletno shrambo in zgodovino.")
-                    .setPositiveButton("Počisti") { _, _ ->
+                    .setTitle(I18n.t(this@MainActivity, "clear_data_dialog_title"))
+                    .setMessage(I18n.t(this@MainActivity, "clear_data_dialog_msg"))
+                    .setPositiveButton(I18n.t(this@MainActivity, "btn_clear")) { _, _ ->
                         android.webkit.CookieManager.getInstance().removeAllCookies(null)
                         android.webkit.WebStorage.getInstance().deleteAllData()
                         tabManager.getAllTabs().forEach { it.webView.clearCache(true) }
                         repository.clearHistory()
-                        Toast.makeText(this@MainActivity, "🧹 Podatki brskanja uspešno počiščeni!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@MainActivity, I18n.t(this@MainActivity, "toast_data_cleared"), Toast.LENGTH_SHORT).show()
                     }
-                    .setNegativeButton("Prekliči", null)
+                    .setNegativeButton(I18n.t(this@MainActivity, "btn_cancel"), null)
                     .show()
             }
         }
@@ -1165,7 +1226,7 @@ class MainActivity : android.app.Activity() {
 
         // 4. Info
         val tvInfo = TextView(this).apply {
-            text = "\nSafeer Mobile Browser v1.0.3 (Build 4) • Target SDK 36\nSafeer is a security layer, not a guarantee against all online threats."
+            text = "\nSafeer Mobile Browser v1.0.4 • Target SDK 36\nSafeer is a security layer, not a guarantee against all online threats."
             textSize = 11f
             setTextColor(Color.parseColor("#64748b"))
             setPadding(0, 16, 0, 0)
@@ -1178,9 +1239,16 @@ class MainActivity : android.app.Activity() {
         }
 
         AlertDialog.Builder(this)
-            .setTitle("⚙️ Nastavitve")
+            .setTitle(I18n.t(this, "settings_title"))
             .setView(scroll)
-            .setPositiveButton("Shrani") { _, _ ->
+            .setPositiveButton(I18n.t(this, "btn_save")) { _, _ ->
+                val langCheckedId = rgLang.checkedRadioButtonId
+                val langCheckedRb = rgLang.findViewById<RadioButton>(langCheckedId)
+                val langIdx = rgLang.indexOfChild(langCheckedRb)
+                val selLang = if (langIdx in langKeys.indices) langKeys[langIdx] else "auto"
+                val oldLang = PreferencesManager.getLanguage(this)
+                PreferencesManager.setLanguage(this, selLang)
+
                 val checkedId = rgEngine.checkedRadioButtonId
                 val checkedRb = rgEngine.findViewById<RadioButton>(checkedId)
                 val radioIdx = rgEngine.indexOfChild(checkedRb)
@@ -1229,9 +1297,13 @@ class MainActivity : android.app.Activity() {
 
                 DoHProxyEngine.applySettings(this)
 
-                Toast.makeText(this, "✅ Nastavitve shranjene!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, I18n.t(this, "toast_settings_saved"), Toast.LENGTH_SHORT).show()
+
+                if (selLang != oldLang) {
+                    recreate()
+                }
             }
-            .setNegativeButton("Prekliči", null)
+            .setNegativeButton(I18n.t(this, "btn_cancel"), null)
             .show()
     }
 

@@ -12,6 +12,7 @@ object PreferencesManager {
     const val SEARCH_DUCKDUCKGO = "duckduckgo"
     const val SEARCH_BRAVE = "brave"
 
+    private const val KEY_LANGUAGE = "pref_language"
     private const val KEY_SEARCH_ENGINE = "pref_search_engine"
     private const val KEY_ADBLOCK_ENABLED = "pref_adblock_enabled"
     private const val KEY_DARK_MODE_ENABLED = "pref_dark_mode_enabled"
@@ -29,6 +30,15 @@ object PreferencesManager {
 
     private fun getPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    }
+
+    // --- 0. Jezik vmesnika ---
+    fun getLanguage(context: Context): String {
+        return getPrefs(context).getString(KEY_LANGUAGE, "auto") ?: "auto"
+    }
+
+    fun setLanguage(context: Context, lang: String) {
+        getPrefs(context).edit().putString(KEY_LANGUAGE, lang).apply()
     }
 
     // --- 1. Privzeti Iskalnik ---
