@@ -130,7 +130,7 @@ object ThreatFeedsUpdater {
                                 parts[0]
                             }
 
-                            if (isValidDomainName(domain) && !ThreatBlockEngine.isNeverBlockDomain(domain)) {
+                            if (isValidDomainName(domain) && (ThreatBlockEngine.isCriticalThreat(feed.category) || !ThreatBlockEngine.isNeverBlockDomain(domain))) {
                                 feedDomains.add(domain)
                             }
                         }

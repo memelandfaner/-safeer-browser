@@ -321,8 +321,12 @@ object UserScriptManager {
 
             function isYtHost() {
                 var h = (location.hostname || '').toLowerCase();
-                return h.indexOf('youtube.com') !== -1 || h.indexOf('youtu.be') !== -1 || h.indexOf('youtube-nocookie.com') !== -1;
+                return h === 'youtube.com' || h.endsWith('.youtube.com') || h === 'youtu.be' ||
+                    h === 'youtube-nocookie.com' || h.endsWith('.youtube-nocookie.com');
             }
+
+            // This agent is injected alongside general scripts; run it only on YouTube.
+            if (!isYtHost()) return;
 
             function isAdNode(item) {
                 if (!item || typeof item !== 'object') return false;
@@ -837,7 +841,8 @@ object UserScriptManager {
                 injectPerformanceHints: function() {
                     try {
                         var preconnects = [
-                            'https://googlevideo.com',
+                            // Streams use assigned CDN subdomains. The bare googlevideo.com
+                            // host has no matching TLS certificate and cannot warm those sockets.
                             'https://i.ytimg.com',
                             'https://yt3.ggpht.com',
                             'https://m.youtube.com',
@@ -1344,14 +1349,32 @@ object UserScriptManager {
                lower.contains("/recaptcha")
     }
 
+    /**
+     * Vrne true, če je URL stran podjetja AdGuard (ne smemo brisati njenih elementov s selektorjem .adguard-banner).
+     * Uporablja strogo ujemanje s host.endsWith, ne contains() — GEMINI.md Pravilo 1.
+     */
+    fun isAdguardDomain(url: String?): Boolean {
+        if (url.isNullOrEmpty()) return false
+        val host = try { Uri.parse(url).host?.lowercase()?.trim() ?: "" } catch (_: Exception) { "" }
+        return host == "adguard.com" || host.endsWith(".adguard.com") ||
+               host == "adguard.net" || host.endsWith(".adguard.net") ||
+               host == "adguard-vpn.com" || host.endsWith(".adguard-vpn.com")
+    }
+
     fun injectEarlyScript(webView: WebView, isDesktop: Boolean = false) {
         val currentUrl = try { webView.url } catch (_: Exception) { null }
         if (isLocalAsset(currentUrl)) return
         if (isGoogleDomain(currentUrl)) return
 
         webView.evaluateJavascript(GPC_AND_DNT_JS, null)
-        val cosmeticCss = CosmeticFilterEngine.buildCosmeticCss()
-        injectCss(webView, cosmeticCss, "safeer-cosmetic-filter")
+
+        // Na adguard.com preskočimo cosmetični filter in ADGUARD_PROTECTION_JS —
+        // oba bi pobrisala legitimne elemente (.adguard-banner, logotipe itd.)
+        val skipAdguardScripts = isAdguardDomain(currentUrl)
+        if (!skipAdguardScripts) {
+            val cosmeticCss = CosmeticFilterEngine.buildCosmeticCss()
+            injectCss(webView, cosmeticCss, "safeer-cosmetic-filter")
+        }
         if (isDesktop) {
             webView.evaluateJavascript(WINDOWS_CHROME_ENVIRONMENT_JS, null)
         }
@@ -1359,7 +1382,7 @@ object UserScriptManager {
         webView.evaluateJavascript(BACKGROUND_PLAYBACK_JS, null)
         webView.evaluateJavascript(YOUTUBE_FREEDOM_MOBILE_JS, null)
         webView.evaluateJavascript(STREAMING_INSTANT_START_JS, null)
-        if (PreferencesManager.isAdguardProtectionEnabled(webView.context)) {
+        if (!skipAdguardScripts && PreferencesManager.isAdguardProtectionEnabled(webView.context)) {
             webView.evaluateJavascript(ADGUARD_PROTECTION_JS, null)
         }
     }
@@ -1370,8 +1393,12 @@ object UserScriptManager {
         if (isGoogleDomain(currentUrl)) return
 
         webView.evaluateJavascript(GPC_AND_DNT_JS, null)
-        val cosmeticCss = CosmeticFilterEngine.buildCosmeticCss()
-        injectCss(webView, cosmeticCss, "safeer-cosmetic-filter")
+
+        val skipAdguardScripts = isAdguardDomain(currentUrl)
+        if (!skipAdguardScripts) {
+            val cosmeticCss = CosmeticFilterEngine.buildCosmeticCss()
+            injectCss(webView, cosmeticCss, "safeer-cosmetic-filter")
+        }
         if (isDesktop) {
             webView.evaluateJavascript(WINDOWS_CHROME_ENVIRONMENT_JS, null)
         }
@@ -1379,22 +1406,18 @@ object UserScriptManager {
         webView.evaluateJavascript(BACKGROUND_PLAYBACK_JS, null)
         webView.evaluateJavascript(YOUTUBE_FREEDOM_MOBILE_JS, null)
         webView.evaluateJavascript(STREAMING_INSTANT_START_JS, null)
-        if (PreferencesManager.isAdguardProtectionEnabled(webView.context)) {
+        if (!skipAdguardScripts && PreferencesManager.isAdguardProtectionEnabled(webView.context)) {
             webView.evaluateJavascript(ADGUARD_PROTECTION_JS, null)
         }
 
-        if (isDarkMode) {
-            injectCss(webView, DARK_MODE_AMOLED_CSS, "safeer-dark-mode-style")
-        } else {
-            removeCss(webView, "safeer-dark-mode-style")
-        }
+        injectDarkModeToggle(webView, isDarkMode)
     }
 
     fun injectDarkModeToggle(webView: WebView, enable: Boolean) {
-        if (enable) {
-            injectCss(webView, DARK_MODE_AMOLED_CSS, "safeer-dark-mode-style")
-        } else {
-            removeCss(webView, "safeer-dark-mode-style")
+        // Do not force color-scheme on arbitrary pages: it can leave dark text on black.
+        removeCss(webView, "safeer-dark-mode-style")
+        if (androidx.webkit.WebViewFeature.isFeatureSupported(androidx.webkit.WebViewFeature.ALGORITHMIC_DARKENING)) {
+            androidx.webkit.WebSettingsCompat.setAlgorithmicDarkeningAllowed(webView.settings, enable)
         }
     }
 

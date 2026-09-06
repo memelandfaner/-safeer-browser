@@ -1,0 +1,50 @@
+[
+  {
+    "url": "https://www.rtvslo.si/",
+    "exit": 0,
+    "result": "200 0.399814",
+    "error": ""
+  },
+  {
+    "url": "https://www.wikipedia.org/",
+    "exit": 0,
+    "result": "200 0.457126",
+    "error": ""
+  },
+  {
+    "url": "https://www.google.com/",
+    "exit": 0,
+    "result": "200 0.741102",
+    "error": ""
+  },
+  {
+    "url": "https://github.com/",
+    "exit": 0,
+    "result": "200 0.555858",
+    "error": ""
+  },
+  {
+    "url": "https://www.24ur.com/",
+    "exit": 0,
+    "result": "200 0.457888",
+    "error": ""
+  },
+  {
+    "url": "https://www.mozilla.org/",
+    "exit": 0,
+    "result": "200 0.277357",
+    "error": ""
+  },
+  {
+    "url": "https://duckduckgo.com/",
+    "exit": 0,
+    "result": "200 0.510346",
+    "error": ""
+  },
+  {
+    "url": "https://memelandfaner.github.io/-safeer-browser/",
+    "exit": 0,
+    "result": "200 0.513578",
+    "error": ""
+  }
+]

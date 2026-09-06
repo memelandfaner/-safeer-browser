@@ -14,6 +14,14 @@ object CosmeticFilterEngine {
         // Google Ads & DFP
         ".adsbygoogle", "ins.adsbygoogle", "[id^='google_ads']", "[id^='div-gpt-ad']", "[class*='google-ad']",
         "[data-ad-client]", "[data-ad-slot]", "[data-ad-format]",
+        // Collapse the reserved slot, not only its blocked iframe. Exact ad markers
+        // avoid removing unrelated empty layout containers, menus or media players.
+        "[data-component='ad-slot']", "[data-testid='ad-unit']",
+        ".ad-placeholder", ".advertisement-placeholder", ".ad-slot-container",
+        ".advertisement-container", ".advertisement-wrapper", ".advert-container",
+        ".advert-wrapper", ".ad-unit", ".ad-unit-container", ".ad-placement",
+        ".ad-slot-wrapper", ".ads-container", ".ads-wrapper",
+        "ins.adsbygoogle[data-ad-status='unfilled']",
         "iframe[id*='google_ads_iframe']", "iframe[src*='doubleclick']", "iframe[src*='googlesyndication']",
         "iframe[src*='adservice']", "iframe[src*='adnxs']", "iframe[src*='monetag']",
         "iframe[src*='propellerads']", "iframe[src*='exoclick']", "iframe[src*='trafficjunky']",
@@ -84,6 +92,9 @@ object CosmeticFilterEngine {
                 height: 0 !important;
                 min-height: 0 !important;
                 max-height: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: 0 !important;
                 opacity: 0 !important;
                 pointer-events: none !important;
                 position: absolute !important;

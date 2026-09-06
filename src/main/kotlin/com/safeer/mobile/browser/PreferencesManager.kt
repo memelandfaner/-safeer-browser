@@ -129,7 +129,7 @@ object PreferencesManager {
 
     // --- 8. Šifriran DNS (DoH) & Šifriran tunel (Tor / Proxy) ---
     fun isDohEnabled(context: Context): Boolean {
-        return getPrefs(context).getBoolean(KEY_DOH_ENABLED, true)
+        return getPrefs(context).getBoolean(KEY_DOH_ENABLED, false)
     }
 
     fun setDohEnabled(context: Context, enabled: Boolean) {
@@ -161,7 +161,7 @@ object PreferencesManager {
     }
 
     fun getSecureProxyUrl(context: Context): String {
-        return getPrefs(context).getString(KEY_SECURE_PROXY_URL, "socks5://127.0.0.1:9050") ?: "socks5://127.0.0.1:9050"
+        return getPrefs(context).getString(KEY_SECURE_PROXY_URL, "http://127.0.0.1:8080") ?: "http://127.0.0.1:8080"
     }
 
     fun setSecureProxyUrl(context: Context, url: String) {

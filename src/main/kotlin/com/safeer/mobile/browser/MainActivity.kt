@@ -122,7 +122,7 @@ class MainActivity : android.app.Activity() {
         ThreatFeedsUpdater.updateFeedsAsync(this)
 
         // 🛡️ Inicializiraj šifriran DNS (DoH) ali šifriran tunel (Tor / Proxy)
-        DoHProxyEngine.applySettings(this)
+        DoHProxyEngine.applySettings(this) { handleIncomingIntent(intent, isInitial = true) }
 
         if (android.os.Build.VERSION.SDK_INT >= 33) {
             val postNotif = "android.permission.POST_NOTIFICATIONS"
@@ -131,7 +131,6 @@ class MainActivity : android.app.Activity() {
             }
         }
 
-        handleIncomingIntent(intent, isInitial = true)
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -175,8 +174,11 @@ class MainActivity : android.app.Activity() {
             if (isInitial) {
                 tabManager.createTab(this, finalUrl, true)
             } else {
+                // Zunanji URL (am start / share sheet / link iz druge aplikacije):
+                // Vedno naloži v aktivnem zavihku — NE odpiramo novega zavihka.
+                // Nov zavihek za vsak intent bi v 5 klikih povzročil 5+ WebView instanc v RAM-u → črni zasloni.
                 val activeTab = tabManager.getActiveTab()
-                if (activeTab != null && (activeTab.url.isEmpty() || activeTab.url.startsWith("file:///android_asset/"))) {
+                if (activeTab != null) {
                     activeTab.webView.loadUrl(finalUrl)
                 } else {
                     tabManager.createTab(this, finalUrl, true)
@@ -1226,7 +1228,7 @@ class MainActivity : android.app.Activity() {
 
         // 4. Info
         val tvInfo = TextView(this).apply {
-            text = "\nSafeer Mobile Browser v1.0.4 • Target SDK 36\nSafeer is a security layer, not a guarantee against all online threats."
+            text = "\nSafeer Mobile Browser v1.0.5 • Target SDK 36\nSafeer is a security layer, not a guarantee against all online threats."
             textSize = 11f
             setTextColor(Color.parseColor("#64748b"))
             setPadding(0, 16, 0, 0)

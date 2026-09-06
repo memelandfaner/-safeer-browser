@@ -1,0 +1,6 @@
+Safeer Mobile includes AndroidX WebKit 1.12.1, AndroidX Core 1.1.0,
+AndroidX Annotation 1.8.1 and Annotation Experimental 1.4.1,
+Copyright The Android Open Source Project; OkHttp 4.12.0 and Okio 3.6.0,
+Copyright Square, Inc. These components are licensed under Apache License 2.0.
+See Apache-2.0.txt. The Kotlin standard library is supplied by JetBrains
+under Apache License 2.0.

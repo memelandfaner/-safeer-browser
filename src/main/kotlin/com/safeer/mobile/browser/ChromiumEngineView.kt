@@ -50,6 +50,16 @@ class ChromiumEngineView @JvmOverloads constructor(
             settings.loadWithOverviewMode = value
         }
 
+    private var failedNavigationUrl: String? = null
+
+    override fun reload() {
+        val failed = failedNavigationUrl
+        if (failed != null) loadUrl(failed) else super.reload()
+    }
+
+    private fun visibleUrl(url: String): String =
+        if (url == "safeer://offline") failedNavigationUrl ?: url else url
+
     var isDarkMode: Boolean = true
 
     var onProgressUpdate: ((Int) -> Unit)? = null
@@ -106,7 +116,7 @@ class ChromiumEngineView @JvmOverloads constructor(
             allowFileAccess = false
             allowContentAccess = false
             mediaPlaybackRequiresUserGesture = false
-            mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+            mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
             setSupportMultipleWindows(true)
             javaScriptCanOpenWindowsAutomatically = false
             
@@ -195,6 +205,7 @@ class ChromiumEngineView @JvmOverloads constructor(
     }
 
     override fun loadUrl(url: String) {
+        failedNavigationUrl = null
         val sanitized = UrlSanitizer.sanitize(url)
         if (sanitized.startsWith("http://", ignoreCase = true) || sanitized.startsWith("https://", ignoreCase = true)) {
             super.loadUrl(sanitized, PRIVACY_HEADERS)
@@ -204,6 +215,7 @@ class ChromiumEngineView @JvmOverloads constructor(
     }
 
     override fun loadUrl(url: String, additionalHttpHeaders: Map<String, String>) {
+        failedNavigationUrl = null
         val sanitized = UrlSanitizer.sanitize(url)
         val combined = additionalHttpHeaders.toMutableMap()
         if (!combined.containsKey("Sec-GPC")) combined["Sec-GPC"] = "1"
@@ -216,6 +228,7 @@ class ChromiumEngineView @JvmOverloads constructor(
      * SPA sicer obdrži stari predvajalnik in predvaja napačen video.
      */
     fun navigateDocument(url: String) {
+        failedNavigationUrl = null
         val sanitized = UrlSanitizer.sanitize(url)
         val target = normalizeExternalUrl(sanitized)
         stopLoading()
@@ -475,7 +488,7 @@ class ChromiumEngineView @JvmOverloads constructor(
 
                 // 2. Blokiraj le resnične botnet/malware grožnje
                 if (ThreatBlockEngine.isThreat(urlStr)) {
-                    view?.let { wv ->
+                    if (isMainFrame) view?.let { wv ->
                         val match = ThreatBlockEngine.checkThreat(urlStr)
                         if (match != null) {
                             val html = ThreatBlockEngine.createSecurityInterstitialHtml(urlStr, match)
@@ -564,36 +577,49 @@ class ChromiumEngineView @JvmOverloads constructor(
                 return null
             }
 
+            override fun onReceivedHttpError(view: WebView?, request: WebResourceRequest?, response: WebResourceResponse?) {
+                super.onReceivedHttpError(view, request, response)
+                if (request?.isForMainFrame == true && response?.statusCode == 502) {
+                    failedNavigationUrl = request.url.toString()
+                    view?.loadDataWithBaseURL("safeer://offline", getOfflineErrorHtml(request.url.toString()), "text/html", "UTF-8", null)
+                }
+            }
+
             override fun onReceivedError(
                 view: WebView?,
                 request: WebResourceRequest?,
                 error: WebResourceError?
             ) {
                 super.onReceivedError(view, request, error)
-                val isMain = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                // Offline stran prikazuj SAMO pri resnični mrežni napaki na GLAVNI strani.
+                // Sub-resource napake (oglasen pixel, analytics, CDN font) se tihoma ignorirajo —
+                // AdBlock jih namerno blokira in ne smejo sprožiti offline zaslona.
+                val isMain = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
                     request?.isForMainFrame == true
-                } else {
-                    true
-                }
 
-                if (isMain) {
-                    val failingUrl = request?.url?.toString() ?: ""
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        when (error?.errorCode) {
-                            ERROR_CONNECT, ERROR_HOST_LOOKUP, ERROR_TIMEOUT, ERROR_UNKNOWN -> {
-                                val html = getOfflineErrorHtml(failingUrl)
-                                view?.loadDataWithBaseURL("safeer://offline", html, "text/html", "UTF-8", null)
-                            }
-                        }
+                if (!isMain) return
+
+                val code = error?.errorCode ?: return
+                val isTunnelFailure = error.description?.toString()?.contains("ERR_TUNNEL_CONNECTION_FAILED") == true
+                if (code == ERROR_FAILED_SSL_HANDSHAKE && !isTunnelFailure) return
+                val failingUrl = request?.url?.toString() ?: return
+                if (!failingUrl.startsWith("http://") && !failingUrl.startsWith("https://")) return
+                failedNavigationUrl = failingUrl
+                onSecurityChanged?.invoke(false)
+                // Defer until WebView has finished installing its built-in error document.
+                view?.post {
+                    if (failedNavigationUrl == failingUrl) {
+                        view.loadDataWithBaseURL("safeer://offline", getOfflineErrorHtml(failingUrl), "text/html", "UTF-8", null)
                     }
                 }
             }
+
 
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 url?.let {
                     android.util.Log.d("SafeerNav", "start $it")
-                    onUrlChanged?.invoke(it)
+                    onUrlChanged?.invoke(visibleUrl(it))
                     onSecurityChanged?.invoke(it.startsWith("https://", ignoreCase = true))
                     view?.let { wv ->
                         UserScriptManager.injectEarlyScript(wv, isDesktopMode)
@@ -605,10 +631,10 @@ class ChromiumEngineView @JvmOverloads constructor(
                 super.onPageFinished(view, url)
                 url?.let {
                     android.util.Log.d("SafeerNav", "finish $it")
-                    onUrlChanged?.invoke(it)
+                    onUrlChanged?.invoke(visibleUrl(it))
                     onSecurityChanged?.invoke(it.startsWith("https://", ignoreCase = true))
                     val pageTitle = title ?: ""
-                    onPageLoaded?.invoke(it, pageTitle)
+                    if (it != "safeer://offline") onPageLoaded?.invoke(it, pageTitle)
                     view?.let { wv ->
                         UserScriptManager.injectOnPageFinished(wv, isDarkMode, isDesktopMode)
                     }
@@ -619,7 +645,7 @@ class ChromiumEngineView @JvmOverloads constructor(
                 super.doUpdateVisitedHistory(view, url, isReload)
                 url?.let {
                     android.util.Log.d("SafeerNav", "hist $it")
-                    onUrlChanged?.invoke(it)
+                    onUrlChanged?.invoke(visibleUrl(it))
                     onSecurityChanged?.invoke(it.startsWith("https://", ignoreCase = true))
                 }
             }
@@ -650,7 +676,7 @@ class ChromiumEngineView @JvmOverloads constructor(
         return try {
             val uri = Uri.parse(url)
             val host = uri.host?.lowercase() ?: return false
-            if (!host.contains("youtube.com") && !host.contains("youtu.be")) return false
+            if (host != "youtube.com" && !host.endsWith(".youtube.com") && host != "youtu.be") return false
             val path = uri.path?.lowercase() ?: "/"
             !path.startsWith("/api/") && !path.startsWith("/youtubei/") && !path.startsWith("/videoplayback") &&
                 !path.endsWith(".js") && !path.endsWith(".css") && !path.endsWith(".png") &&
@@ -803,9 +829,9 @@ class ChromiumEngineView @JvmOverloads constructor(
             <div class="card">
                 <div class="icon">🌐</div>
                 <h1>Spletne strani ni mogoče naložiti</h1>
-                <p>Preverite internetno povezavo ali pravilnost spletnega naslova.</p>
+                <p>Preverite naslov in internetno povezavo ter poskusite znova. Če se težava ponavlja na vseh straneh, preverite ponudnika varnega DNS v nastavitvah.</p>
                 <span class="url-badge">$safeUrl</span>
-                <button class="btn" onclick="location.reload()">Poskusi znova</button>
+                <a class="btn" href="$safeUrl" style="display:block;text-decoration:none">Poskusi znova</a>
             </div>
         </body>
         </html>

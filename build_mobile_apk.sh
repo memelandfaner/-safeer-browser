@@ -28,6 +28,8 @@ fi
 
 KOTLINC="$TOOLS_DIR/kotlinc/bin/kotlinc"
 KOTLIN_LIB="$TOOLS_DIR/kotlinc/lib/kotlin-stdlib.jar"
+LIB_CLASSPATH=""
+for lib in "$DIR"/libs/*.jar; do LIB_CLASSPATH="$LIB_CLASSPATH:$lib"; done
 BUILD_DIR="$DIR/build"
 RELEASE_DIR="$DIR/Release/Artifacts"
 
@@ -54,7 +56,7 @@ echo "⚙️ 1/5: Prevajam Android XML vire (AAPT2)..."
     "$BUILD_DIR/compiled_res.zip"
 
 echo "☕ 2/5: Prevajam Kotlin izvorno kodo (kotlinc)..."
-"$KOTLINC" -cp "$TOOLS_DIR/android.jar:$BUILD_DIR/gen" \
+"$KOTLINC" -cp "$TOOLS_DIR/android.jar:$BUILD_DIR/gen$LIB_CLASSPATH" \
     -d "$BUILD_DIR/classes" \
     -jvm-target 1.8 \
     "$DIR/src/main/kotlin/com/safeer/mobile/browser/"*.kt \
@@ -66,12 +68,12 @@ java -cp "$TOOLS_DIR/r8.jar" com.android.tools.r8.D8 \
     --output "$BUILD_DIR/dex" \
     --lib "$TOOLS_DIR/android.jar" \
     "$BUILD_DIR/classes/com/safeer/mobile/browser/"*.class \
-    "$KOTLIN_LIB"
+    "$KOTLIN_LIB" "$DIR"/libs/*.jar
 
 echo "📦 4/5: Sestavljam APK paket..."
 cp "$BUILD_DIR/resources.apk" "$BUILD_DIR/unaligned.apk"
 cd "$BUILD_DIR/dex"
-jar -uf "$BUILD_DIR/unaligned.apk" classes.dex
+jar -uf "$BUILD_DIR/unaligned.apk" ./*.dex
 cd "$DIR"
 
 echo "✍️ 5/5: Podpisujem APK paket z namenskim produkcijskim ključem..."

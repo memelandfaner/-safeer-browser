@@ -49,13 +49,32 @@ object ThreatBlockEngine {
     private val NEVER_BLOCK_ROOT_DOMAINS = hashSetOf(
         "google.com", "youtube.com", "googlevideo.com", "ytimg.com",
         "duckduckgo.com", "wikipedia.org", "wikimedia.org", "mozilla.org", "android.com",
+        // AdGuard – legitimna varnostna programska oprema
+        "adguard.com", "adguard.net", "adguard-vpn.com",
+        // Hitrostni testi (speedtest.net, fast.com, nperf.com)
+        "speedtest.net", "ooklaserver.net", "fast.com", "nperf.com", "nperf.net",
+        // Splošne vestičke, iskalniki, novice
+        "reddit.com", "redd.it", "bbc.com", "bbc.co.uk", "cnn.com", "reuters.com",
+        "finance.si", "bolha.com", "ceneje.si", "mimovrste.com", "enaa.com",
+        "24ur.com", "siol.net", "zurnal24.si", "delo.si", "rtvslo.si",
+        "weather.com", "accuweather.com", "wetteronline.de",
+        // Socialna omrežja in sporočanje
+        "facebook.com", "fb.com", "instagram.com", "twitter.com", "x.com",
+        "linkedin.com", "tiktok.com", "telegram.org", "whatsapp.com",
+        // E-trgovina
+        "amazon.com", "amazon.de", "ebay.com", "aliexpress.com", "etsy.com",
+        // CDN in infrastruktura (nalaganje pisav, slik, JS knjižnic)
+        "cloudflare.com", "cloudflareinsights.com", "fastly.net", "akamaized.net",
+        "akamai.net", "jsdelivr.net", "unpkg.com", "cdnjs.cloudflare.com",
+        "fonts.googleapis.com", "fonts.gstatic.com", "ajax.googleapis.com",
         // Slovenske bančne, javne in novičarske storitve
         "gov.si", "nlb.si", "nkbm.si", "skb.si", "intesasanpaolobank.si", "dh.si",
         "delavska-hranilnica.si", "sparkasse.si", "bks-bank.si", "unicreditbank.si",
-        "posta.si", "rtvslo.si", "24ur.com", "siol.net", "zvezapotrosnikov.si",
+        "posta.si", "zvezapotrosnikov.si",
         // Gostitelji varnostnih feedov
         "abuse.ch", "phishing.army"
     )
+
 
     fun isNeverBlockDomain(host: String): Boolean {
         val h = host.lowercase().trim()
@@ -168,17 +187,15 @@ object ThreatBlockEngine {
             val host = uri.host?.lowercase()?.trim() ?: return null
             if (host.isEmpty()) return null
 
-            // 🛡️ NIKOLI ne blokiraj zaupanja vrednih domen
-            if (isNeverBlockDomain(host)) {
-                return null
-            }
-
             val match = threatTrie.findMatch(host) ?: return null
 
             // 🔒 ZERO-BYPASS PRAVILO: Kritične C2 in Malware grožnje NIKOLI nimajo izjeme!
             if (isCriticalThreat(match.category)) {
                 return match
             }
+
+            // Compatibility exceptions never override a confirmed malware/C2 match.
+            if (isNeverBlockDomain(host)) return null
 
             // Manj nevarne kategorije (phishing/ad opozorila) lahko imajo sejne izjeme
             if (sessionBypassedDomains.contains(host)) {
