@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Safeer Browser | Suveren, varen spletni brskalnik za Linux, Android in TV</title>
-  <meta name="description" content="Safeer Browser v1.0.4: Odprtokodni spletni brskalnik z lokalnim varnostnim slojem pred znanimi botneti (abuse.ch), Instant YouTube Music motorjem, 0 oglasi in predvajanjem v ozadju. Safeer is a security layer, not a guarantee against all online threats.">
+  <meta name="description" content="Safeer Browser v1.0.7: Nativni GTK3 .deb brskalnik za Linux Mint & Ubuntu ter mobilna izdaja z lokalnim varnostnim ščitom (abuse.ch), DuckDuckGo privzeto in 0 oglasi na YouTubu. Safeer is a security layer, not a guarantee against all online threats.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -63,8 +63,8 @@
 
           <div class="badge-active" style="display:inline-flex; align-items:center; gap:8px; padding:6px 14px; background:rgba(0, 210, 255, 0.1); border:1px solid rgba(0, 210, 255, 0.3); border-radius:100px; margin-bottom:14px; font-size:0.84rem;">
             <span class="pulse-dot"></span>
-            <strong style="color:var(--accent-cyan);">NOVO v1.0.4:</strong>
-            <span style="color:#e2e8f0;">Preoblikovane Nastavitve, 6 jezikov (i18n), AdGuard ščit, šifriran DoH (Quad9 / AdGuard / Tor) &amp; stabilen tunel</span>
+            <strong style="color:var(--accent-cyan);">NOVO v1.0.7:</strong>
+            <span style="color:#e2e8f0;">Linux Mint &amp; Ubuntu Izdaja (.deb) z vrstico zaznamkov, čarovnikom ob prvem zagonu in DuckDuckGo</span>
           </div>
 
           <h1 class="hero-title">
@@ -894,13 +894,18 @@ setInterval(() => {
           </div>
 
           <div class="dl-actions" style="flex-direction: column; gap: 8px;">
-            <a href="assets/desktop/safeer-browser_1.0.7_all.deb" download class="btn-pill-green" style="flex:1; justify-content:center;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              <span data-i18n="dl_btn_desktop">Prenesi .deb paket (1.1 MB)</span>
-            </a>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <a href="linux/" class="btn-pill-green" style="flex:1; justify-content:center; padding:10px 16px;">
+                <span>🍃 Namenska Linux stran &amp; Navodila →</span>
+              </a>
+              <a href="assets/desktop/safeer-browser_1.0.7_all.deb" download class="btn-pill-secondary" style="justify-content:center; padding:10px 16px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span data-i18n="dl_btn_desktop">Prenesi .deb (1.1 MB)</span>
+              </a>
+            </div>
             <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; padding:2px 4px; flex-wrap:wrap; gap:6px;">
-              <span style="color:#64748b; font-family:monospace;">SHA-256: 89829f09a5c2...73d36ede</span>
-              <a href="assets/desktop/safeer-browser-linux.tar.gz" download style="color:#87cf3e; text-decoration:underline;" data-i18n="dl_alt_targz">Ali prenesi .tar.gz (506 KB)</a>
+              <span style="color:#64748b; font-family:monospace;">SHA-256: f15c92aa8c4540fb3893b8ddcd7cd25dfbba19a8b9f57763bdc03ca63339c8ae</span>
+              <a href="assets/desktop/safeer-browser-linux.tar.gz" download style="color:#87cf3e; text-decoration:underline;" data-i18n="dl_alt_targz">Ali prenesi .tar.gz (520 KB)</a>
             </div>
           </div>
         </div>
@@ -913,11 +918,11 @@ setInterval(() => {
     <div class="container">
       <ul class="footer-nav">
         <li><a href="https://github.com/memelandfaner/-safeer-browser" target="_blank">GitHub Safeer Mobile</a></li>
-        <li><a href="https://github.com/memelandfaner/-safeer-browser/releases/tag/v1.0.7" target="_blank" style="color:var(--accent-cyan); font-weight:600;">Mobile Release v1.0.4</a></li>
+        <li><a href="https://github.com/memelandfaner/-safeer-browser/releases/tag/v1.0.4" target="_blank" style="color:var(--accent-cyan); font-weight:600;">Mobile Release v1.0.4</a></li>
         <li><a href="https://github.com/memelandfaner/tv-browser-2" target="_blank">GitHub TV Browser 2</a></li>
         <li><a href="https://github.com/memelandfaner/tv-browser-2/releases/tag/v2.1.80" target="_blank" style="color:#c084fc; font-weight:600;">TV Release v2.1.80</a></li>
         <li><a href="https://github.com/memelandfaner/linux-mint-safeer-browser" target="_blank">GitHub Linux Mint</a></li>
-        <li><a href="https://github.com/memelandfaner/linux-mint-safeer-browser/releases/tag/v1.0.7" target="_blank" style="color:#87cf3e; font-weight:600;">Linux Mint Release v1.0.4</a></li>
+        <li><a href="https://github.com/memelandfaner/linux-mint-safeer-browser/releases/tag/v1.0.7" target="_blank" style="color:#87cf3e; font-weight:600;">Linux Mint Release v1.0.7</a></li>
         <li><a href="https://tinyurl.com/298zn386" target="_blank">Mobile APK Mirror</a></li>
         <li><a href="https://tinyurl.com/29y9bg9k" target="_blank">TV APK Mirror</a></li>
       </ul>

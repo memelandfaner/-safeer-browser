@@ -2116,10 +2116,10 @@ const screenshotData = {
   desktop: {
     main: {
       img: 'assets/desktop/desktop_mint_showcase.png',
-      url: 'mint://awesomebar',
-      status: 'Unix Socket Aktiven',
+      url: 'safeer://home',
+      status: 'Linux Mint v1.0.7',
       icon: '🍃',
-      caption: '<strong>Linux Mint Suverena Izdaja:</strong> Awesomebar terminalna orodna vrstica, vgrajen Tampermonkey za skripte ter prilagoditev tem in CSS-ja.'
+      caption: '<strong>Linux Mint &amp; Ubuntu Izdaja v1.0.7:</strong> Nativni GTK3/WebKit2GTK brskalnik z vrstico zaznamkov (Ctrl+Shift+B), DuckDuckGo privzeto, čarovnikom ob prvem zagonu in 0 oglasov na YouTube.'
     }
   }
 };
@@ -2212,7 +2212,14 @@ window.switchPlatformShowcase = switchPlatformShowcase;
 window.switchScreenshot = switchScreenshot;
 
 function setupShowcaseSwitcher() {
-  switchPlatformShowcase('mobile');
+  const ua = (navigator.userAgent || '').toLowerCase();
+  if (ua.includes('linux') && !ua.includes('android')) {
+    switchPlatformShowcase('desktop');
+  } else if (ua.includes('android') && (ua.includes('tv') || ua.includes('smart') || ua.includes('aft') || ua.includes('bravia'))) {
+    switchPlatformShowcase('tv');
+  } else {
+    switchPlatformShowcase('desktop');
+  }
 }
 
 // --- 5. Generate Inline SVG QR Codes on Load ---
