@@ -4,6 +4,7 @@ fun main() {
     check(!ThreatBlockEngine.isThreat("https://www.rtvslo.si/"))
     ThreatBlockEngine.addThreat("compromised.fastly.net", "Malware", "test fixture")
     check(ThreatBlockEngine.isThreat("https://compromised.fastly.net/embed/video.m3u8"))
+    check(ThreatBlockEngine.isThreat("https://compromised.fastly.net/login?state=fixture"))
     ThreatBlockEngine.allowForSession("compromised.fastly.net")
     check(ThreatBlockEngine.isThreat("https://compromised.fastly.net/file"))
     check(!ThreatBlockEngine.isThreat("https://unrelated.fastly.net/file"))

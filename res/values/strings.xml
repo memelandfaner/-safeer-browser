@@ -28,4 +28,9 @@
     <string name="toast_bookmark_removed">🗑️ Removed from bookmarks</string>
     <string name="toast_link_copied">📋 Link copied to clipboard</string>
     <string name="toast_download_started">📥 Download started</string>
+    <string name="btn_go">Go or search</string>
+    <string name="menu_default_browser">Set as default browser</string>
+    <string name="default_browser_active">Safeer is your default browser</string>
+    <string name="default_browser_unchanged">Default browser was not changed</string>
+    <string name="default_browser_unavailable">Choose your browser in Android default app settings</string>
 </resources>

@@ -87,7 +87,7 @@ class TabManager(
         tabs.removeAt(idx)
 
         if (tabs.isEmpty()) {
-            createTab(context, "https://www.google.com", true)
+            createTab(context, "file:///android_asset/brave_home.html", true)
         } else if (activeTabId == tabId) {
             val nextIdx = if (idx < tabs.size) idx else tabs.size - 1
             switchTab(tabs[nextIdx].id)
@@ -102,7 +102,7 @@ class TabManager(
         }
         tabs.clear()
         container.removeAllViews()
-        createTab(context, "https://www.google.com", true)
+        createTab(context, "file:///android_asset/brave_home.html", true)
     }
 
     fun getActiveTab(): TabModel? {

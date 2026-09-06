@@ -9,7 +9,7 @@
     <!-- Top Quick Action Icons (Back, Forward, Reload, Star Bookmark, Share) -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="44dp"
+        android:layout_height="52dp"
         android:background="@drawable/bg_mobile_omnibox"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -18,7 +18,7 @@
         <Button
             android:id="@+id/menuBtnBack"
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:background="@drawable/bg_mobile_icon_button"
             android:text="◀"
@@ -28,7 +28,7 @@
         <Button
             android:id="@+id/menuBtnForward"
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:background="@drawable/bg_mobile_icon_button"
             android:text="▶"
@@ -38,7 +38,7 @@
         <Button
             android:id="@+id/menuBtnReload"
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:background="@drawable/bg_mobile_icon_button"
             android:text="🔄"
@@ -48,7 +48,7 @@
         <Button
             android:id="@+id/menuBtnStar"
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:background="@drawable/bg_mobile_icon_button"
             android:text="⭐"
@@ -58,7 +58,7 @@
         <Button
             android:id="@+id/menuBtnShare"
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:background="@drawable/bg_mobile_icon_button"
             android:text="📤"
@@ -74,20 +74,38 @@
 
     <!-- Scrollable Options List -->
     <ScrollView
+        android:id="@+id/menuOptionsScroll"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:maxHeight="380dp">
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <LinearLayout android:id="@+id/rowMenuHome" android:layout_width="match_parent" android:layout_height="52dp"
+                android:background="@drawable/bg_mobile_icon_button" android:gravity="center_vertical"
+                android:orientation="horizontal" android:paddingHorizontal="10dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⌂" android:textSize="20sp" android:textColor="@color/accent_cyan" />
+                <TextView android:id="@+id/labelMenuHome" android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginStart="12dp" android:text="@string/btn_home"
+                    android:textColor="@color/text_primary" android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/rowMenuDefaultBrowser" android:layout_width="match_parent" android:layout_height="52dp"
+                android:background="@drawable/bg_mobile_icon_button" android:gravity="center_vertical"
+                android:orientation="horizontal" android:paddingHorizontal="10dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="◎" android:textSize="20sp" android:textColor="@color/accent_cyan" />
+                <TextView android:id="@+id/labelMenuDefaultBrowser" android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginStart="12dp" android:text="@string/menu_default_browser"
+                    android:textColor="@color/text_primary" android:textSize="14sp" />
+            </LinearLayout>
+
             <!-- Nov zavihek -->
             <LinearLayout
                 android:id="@+id/rowMenuNewTab"
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
+                android:layout_height="52dp"
                 android:background="@drawable/bg_mobile_icon_button"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
@@ -100,7 +118,7 @@
             <LinearLayout
                 android:id="@+id/rowMenuBookmarks"
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
+                android:layout_height="52dp"
                 android:background="@drawable/bg_mobile_icon_button"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
@@ -113,7 +131,7 @@
             <LinearLayout
                 android:id="@+id/rowMenuDownloads"
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
+                android:layout_height="52dp"
                 android:background="@drawable/bg_mobile_icon_button"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
@@ -126,7 +144,7 @@
             <LinearLayout
                 android:id="@+id/rowMenuHistory"
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
+                android:layout_height="52dp"
                 android:background="@drawable/bg_mobile_icon_button"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
@@ -139,7 +157,7 @@
             <LinearLayout
                 android:id="@+id/rowMenuFindInPage"
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
+                android:layout_height="52dp"
                 android:background="@drawable/bg_mobile_icon_button"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
@@ -152,7 +170,7 @@
             <LinearLayout
                 android:id="@+id/rowMenuDesktopSite"
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
+                android:layout_height="52dp"
                 android:background="@drawable/bg_mobile_icon_button"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
@@ -166,7 +184,7 @@
             <LinearLayout
                 android:id="@+id/rowMenuThreatStats"
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
+                android:layout_height="52dp"
                 android:background="@drawable/bg_mobile_icon_button"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
@@ -180,7 +198,7 @@
             <LinearLayout
                 android:id="@+id/rowMenuAdBlock"
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
+                android:layout_height="52dp"
                 android:background="@drawable/bg_mobile_icon_button"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
@@ -194,7 +212,7 @@
             <LinearLayout
                 android:id="@+id/rowMenuDarkMode"
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
+                android:layout_height="52dp"
                 android:background="@drawable/bg_mobile_icon_button"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
@@ -208,7 +226,7 @@
             <LinearLayout
                 android:id="@+id/rowMenuSettings"
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
+                android:layout_height="52dp"
                 android:background="@drawable/bg_mobile_icon_button"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"

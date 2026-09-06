@@ -27,7 +27,10 @@ class MainActivity : android.app.Activity() {
         private const val REQ_CODE_PERMISSIONS = 1001
         private const val REQ_CODE_GEO_PERMISSIONS = 1002
         private const val REQ_CODE_NOTIFICATION = 1003
+        private const val REQ_CODE_DEFAULT_BROWSER = 1004
     }
+
+    private var keyboardWasVisible = false
 
     private var pendingPermissionRequest: PermissionRequest? = null
     private var pendingGeoOrigin: String? = null
@@ -174,16 +177,48 @@ class MainActivity : android.app.Activity() {
             if (isInitial) {
                 tabManager.createTab(this, finalUrl, true)
             } else {
-                // Zunanji URL (am start / share sheet / link iz druge aplikacije):
-                // Vedno naloži v aktivnem zavihku — NE odpiramo novega zavihka.
-                // Nov zavihek za vsak intent bi v 5 klikih povzročil 5+ WebView instanc v RAM-u → črni zasloni.
-                val activeTab = tabManager.getActiveTab()
-                if (activeTab != null) {
-                    activeTab.webView.loadUrl(finalUrl)
-                } else {
-                    tabManager.createTab(this, finalUrl, true)
+                // Keep the page the user was reading when another app opens a link.
+                val existing = tabManager.getAllTabs().find { it.url == finalUrl }
+                if (existing != null) tabManager.switchTab(existing.id)
+                else tabManager.createTab(this, finalUrl, true)
+            }
+        }
+    }
+
+    private fun isDefaultBrowser(): Boolean {
+        return if (android.os.Build.VERSION.SDK_INT >= 29) {
+            val roles = getSystemService(android.app.role.RoleManager::class.java)
+            roles?.isRoleAvailable(android.app.role.RoleManager.ROLE_BROWSER) == true &&
+                roles.isRoleHeld(android.app.role.RoleManager.ROLE_BROWSER)
+        } else {
+            val probe = Intent(Intent.ACTION_VIEW, Uri.parse("https://example.org/"))
+            packageManager.resolveActivity(probe, PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo?.packageName == packageName
+        }
+    }
+
+    private fun requestDefaultBrowser() {
+        if (isDefaultBrowser()) {
+            Toast.makeText(this, R.string.default_browser_active, Toast.LENGTH_SHORT).show()
+            return
+        }
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= 29) {
+                val roles = getSystemService(android.app.role.RoleManager::class.java)
+                if (roles?.isRoleAvailable(android.app.role.RoleManager.ROLE_BROWSER) == true) {
+                    startActivityForResult(roles.createRequestRoleIntent(android.app.role.RoleManager.ROLE_BROWSER), REQ_CODE_DEFAULT_BROWSER)
+                    return
                 }
             }
+            startActivityForResult(Intent(android.provider.Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS), REQ_CODE_DEFAULT_BROWSER)
+        } catch (_: android.content.ActivityNotFoundException) {
+            Toast.makeText(this, R.string.default_browser_unavailable, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQ_CODE_DEFAULT_BROWSER) {
+            Toast.makeText(this, if (isDefaultBrowser()) R.string.default_browser_active else R.string.default_browser_unchanged, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -298,7 +333,7 @@ class MainActivity : android.app.Activity() {
     }
 
     private fun applySystemBarInsets(statusBarHeight: Int, navBarHeight: Int) {
-        val baseToolbarHeight = (56 * resources.displayMetrics.density).toInt()
+        val baseToolbarHeight = (64 * resources.displayMetrics.density).toInt()
         val totalToolbarHeight = baseToolbarHeight + statusBarHeight
         val lp = mobileTopBar.layoutParams
         if (lp != null && lp.height != totalToolbarHeight) {
@@ -344,6 +379,14 @@ class MainActivity : android.app.Activity() {
                 if (nb > 0) nb else getNavigationBarHeight()
             }
             applySystemBarInsets(statusBarHeight, navBarHeight)
+            if (android.os.Build.VERSION.SDK_INT >= 30) {
+                val keyboardVisible = insets.isVisible(android.view.WindowInsets.Type.ime())
+                if (keyboardWasVisible && !keyboardVisible && editUrl.hasFocus()) {
+                    editUrl.clearFocus()
+                    mainRoot.requestFocus()
+                }
+                keyboardWasVisible = keyboardVisible
+            }
             insets
         }
         mainRoot.requestApplyInsets()
@@ -434,12 +477,15 @@ class MainActivity : android.app.Activity() {
             }
         }
 
-        wv.onCreateWindowRequested = { isDialog, isUserGesture, resultMsg ->
-            val newTab = tabManager.createTab(this, "about:blank", true)
+        wv.onCreateWindowRequested = { _, isUserGesture, resultMsg ->
             val transport = resultMsg.obj as? android.webkit.WebView.WebViewTransport
-            transport?.webView = newTab.webView
-            resultMsg.sendToTarget()
-            true
+            if (!isUserGesture || transport == null) false
+            else {
+                val newTab = tabManager.createTab(this, "about:blank", true)
+                transport.webView = newTab.webView
+                resultMsg.sendToTarget()
+                true
+            }
         }
 
         wv.onCloseWindowRequested = {
@@ -532,6 +578,10 @@ class MainActivity : android.app.Activity() {
 
     private fun setupOmnibox() {
         editUrl.setOnFocusChangeListener { _, hasFocus ->
+            btnTabCount.visibility = if (hasFocus) View.GONE else View.VISIBLE
+            btnMenu.visibility = if (hasFocus) View.GONE else View.VISIBLE
+            tvSecurityLock.visibility = if (hasFocus) View.GONE else View.VISIBLE
+            btnSearchTrigger.visibility = if (hasFocus) View.VISIBLE else View.GONE
             if (hasFocus) {
                 val currentUrl = tabManager.getActiveTab()?.url ?: ""
                 val isLocal = currentUrl.isEmpty() || currentUrl.startsWith("file:///android_asset/") || currentUrl == "about:blank"
@@ -683,6 +733,12 @@ class MainActivity : android.app.Activity() {
         btnTabCount.setOnClickListener {
             toggleTabSwitcher()
         }
+        btnTabCount.setOnLongClickListener {
+            tabManager.createTab(this, "file:///android_asset/brave_home.html", true)
+            editUrl.requestFocus()
+            showKeyboard()
+            true
+        }
 
         btnMenu.setOnClickListener {
             showMobileMenu()
@@ -793,6 +849,9 @@ class MainActivity : android.app.Activity() {
         val dialog = Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setContentView(R.layout.dialog_mobile_menu)
+        // Keep the quick actions visible and the complete options list scrollable on small screens.
+        dialog.findViewById<View>(R.id.menuOptionsScroll).layoutParams.height =
+            minOf((resources.displayMetrics.heightPixels * 0.60f).toInt(), (520 * resources.displayMetrics.density).toInt())
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(
             ViewGroup.LayoutParams.MATCH_PARENT,
@@ -819,8 +878,11 @@ class MainActivity : android.app.Activity() {
             dialog.dismiss()
         }
 
+        menuBtnBack.isEnabled = wv?.canGoBack() == true
+        menuBtnForward.isEnabled = wv?.canGoForward() == true
+        menuBtnReload.text = if (wv != null && wv.progress < 100) "✕" else "↻"
         menuBtnReload.setOnClickListener {
-            wv?.reload()
+            if (wv != null && wv.progress < 100) wv.stopLoading() else wv?.reload()
             dialog.dismiss()
         }
 
@@ -848,8 +910,20 @@ class MainActivity : android.app.Activity() {
             dialog.dismiss()
         }
 
+        dialog.findViewById<LinearLayout>(R.id.rowMenuHome).setOnClickListener {
+            openUrlInBrowser("file:///android_asset/brave_home.html")
+            dialog.dismiss()
+        }
+        val defaultRow = dialog.findViewById<LinearLayout>(R.id.rowMenuDefaultBrowser)
+        if (isDefaultBrowser()) {
+            dialog.findViewById<TextView>(R.id.labelMenuDefaultBrowser).setText(R.string.default_browser_active)
+            defaultRow.isEnabled = false
+        } else defaultRow.setOnClickListener {
+            dialog.dismiss()
+            requestDefaultBrowser()
+        }
         dialog.findViewById<LinearLayout>(R.id.rowMenuNewTab).setOnClickListener {
-            tabManager.createTab(this, "https://www.google.com", true)
+            tabManager.createTab(this, "file:///android_asset/brave_home.html", true)
             dialog.dismiss()
             editUrl.requestFocus()
             showKeyboard()
@@ -1054,6 +1128,10 @@ class MainActivity : android.app.Activity() {
             setTextColor(Color.WHITE)
         }
         view.addView(cbThirdPartyCookies)
+        view.addView(Button(this).apply {
+            setText(if (isDefaultBrowser()) R.string.default_browser_active else R.string.menu_default_browser)
+            setOnClickListener { requestDefaultBrowser() }
+        })
 
         val cbJs = CheckBox(this).apply {
             text = I18n.t(this@MainActivity, "enable_javascript")
@@ -1228,7 +1306,7 @@ class MainActivity : android.app.Activity() {
 
         // 4. Info
         val tvInfo = TextView(this).apply {
-            text = "\nSafeer Mobile Browser v1.0.5 • Target SDK 36\nSafeer is a security layer, not a guarantee against all online threats."
+            text = "\nSafeer Mobile Browser v1.0.6 • Target SDK 36\nSafeer is a security layer, not a guarantee against all online threats."
             textSize = 11f
             setTextColor(Color.parseColor("#64748b"))
             setPadding(0, 16, 0, 0)
@@ -1464,6 +1542,12 @@ class MainActivity : android.app.Activity() {
     }
 
     override fun onBackPressed() {
+        if (editUrl.hasFocus()) {
+            hideKeyboard()
+            editUrl.clearFocus()
+            mainRoot.requestFocus()
+            return
+        }
         if (customVideoView != null) {
             tabManager.getActiveTab()?.webView?.exitFullscreenVideo()
             return

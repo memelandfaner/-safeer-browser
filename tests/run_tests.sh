@@ -6,6 +6,8 @@ SOURCE_DIR="$PROJECT_DIR/src/main/kotlin/com/safeer/mobile/browser"
 KOTLINC="${KOTLINC:-$PROJECT_DIR/../streamN-TV2/android_tv/.tools/kotlinc/bin/kotlinc}"
 TEST_OUTPUT="$(mktemp -d /tmp/safeer-tests.XXXXXX)"
 trap 'rm -rf "$TEST_OUTPUT"' EXIT
+"$KOTLINC" "$SOURCE_DIR/UrlSanitizer.kt" "$SOURCE_DIR/AuthenticationPages.kt" "$TEST_DIR/LoginPolicyTest.kt" -include-runtime -d "$TEST_OUTPUT/login.jar"
+java -jar "$TEST_OUTPUT/login.jar"
 "$KOTLINC" "$SOURCE_DIR/LocalDnsProxy.kt" "$TEST_DIR/LocalDnsProxyTest.kt" -include-runtime -d "$TEST_OUTPUT/proxy.jar"
 java -jar "$TEST_OUTPUT/proxy.jar"
 "$KOTLINC" "$TEST_DIR"/stubs/*.kt "$SOURCE_DIR/DomainSuffixTrie.kt" "$SOURCE_DIR/ThreatBlockEngine.kt" "$TEST_DIR/ThreatPolicyTest.kt" -include-runtime -d "$TEST_OUTPUT/threat.jar"

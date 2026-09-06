@@ -533,7 +533,7 @@ class ChromiumEngineView @JvmOverloads constructor(
                 } else {
                     "GET"
                 }
-                if (isMainFrame && !method.equals("POST", ignoreCase = true) && (scheme == "http" || scheme == "https")) {
+                if (isMainFrame && method.equals("GET", ignoreCase = true) && request.hasGesture() && !request.isRedirect && (scheme == "http" || scheme == "https")) {
                     val sanitized = UrlSanitizer.sanitize(urlStr)
                     if (sanitized != urlStr) {
                         view?.loadUrl(sanitized)

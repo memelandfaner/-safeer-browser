@@ -93,6 +93,16 @@ object UrlSanitizer {
             if (queryString.isEmpty()) return "$base$fragment"
 
             val pairs = queryString.split('&')
+            // Authentication and signed links are indivisible, not a set of removable fields.
+            val keys = pairs.map { java.net.URLDecoder.decode(it.substringBefore('='), "UTF-8").lowercase() }
+            val protectedKeys = setOf("state", "nonce", "code", "token", "secret", "signature", "sig",
+                "session", "session_id", "session_token", "ticket", "client_id", "redirect_uri", "redirect_url",
+                "return_url", "returnto", "code_challenge", "samlrequest", "samlresponse", "relaystate",
+                "access_token", "id_token")
+            val pathParts = java.net.URI(base).path.orEmpty().lowercase().split('/')
+            if (keys.any { it in protectedKeys || it.startsWith("oauth_") || it.startsWith("x-amz-") || it.startsWith("x-goog-") } ||
+                pathParts.any { it in setOf("auth", "oauth", "oauth2", "authorize", "callback", "login", "signin", "sign-in", "verify", "reset-password") }) return url
+
             val retainedPairs = mutableListOf<String>()
             var anyStripped = false
 
@@ -100,7 +110,7 @@ object UrlSanitizer {
                 if (pair.isEmpty()) continue
                 val eqIdx = pair.indexOf('=')
                 val key = if (eqIdx != -1) pair.substring(0, eqIdx) else pair
-                val lowerKey = key.lowercase().trim()
+                val lowerKey = java.net.URLDecoder.decode(key, "UTF-8").lowercase()
 
                 if (isEssential(lowerKey)) {
                     retainedPairs.add(pair)

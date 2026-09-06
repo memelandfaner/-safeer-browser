@@ -1,157 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/mainRoot"
+    android:focusable="true" android:focusableInTouchMode="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_primary">
 
-    <!-- Mobile Top Navigation Toolbar (Chrome / Opera Hybrid) -->
+    <!-- Large address field; secondary actions remain available in the menu. -->
     <LinearLayout
         android:id="@+id/mobileTopBar"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_alignParentTop="true"
-        android:background="@color/bg_primary"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="6dp"
-        android:elevation="6dp">
+        android:layout_width="match_parent" android:layout_height="64dp"
+        android:layout_alignParentTop="true" android:background="@color/bg_primary"
+        android:gravity="center_vertical" android:orientation="horizontal"
+        android:paddingHorizontal="8dp" android:elevation="6dp">
 
-        <!-- 1. Home Button -->
-        <Button
-            android:id="@+id/btnHome"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
-            android:background="@drawable/bg_mobile_icon_button"
-            android:text="🏠"
-            android:textColor="@color/text_primary"
-            android:textSize="16sp"
-            android:contentDescription="@string/btn_home" />
-
-        <!-- 2. Modern Wide Omnibox URL Bar -->
+        <Button android:id="@+id/btnHome" android:layout_width="48dp" android:layout_height="48dp" android:visibility="gone" android:text="⌂" />
         <LinearLayout
             android:id="@+id/omniboxContainer"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            android:background="@drawable/bg_mobile_omnibox"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="10dp">
-
-            <!-- Security SSL Indicator -->
-            <TextView
-                android:id="@+id/tvSecurityLock"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
-                android:text="🔒"
-                android:textColor="@color/security_green"
-                android:textSize="12sp" />
-
-            <!-- Omnibox Text Input -->
-            <EditText
-                android:id="@+id/editUrl"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:ellipsize="end"
-                android:hint="@string/url_hint"
-                android:imeOptions="actionGo"
-                android:inputType="textUri|textWebEditText"
-                android:paddingVertical="0dp"
-                android:singleLine="true"
-                android:textColor="@color/text_primary"
-                android:textColorHint="@color/text_dim"
-                android:textSize="14sp" />
-
-            <!-- Clear Text Button -->
-            <TextView
-                android:id="@+id/btnClearUrl"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:gravity="center"
-                android:text="✕"
-                android:textColor="@color/text_secondary"
-                android:textSize="13sp"
-                android:visibility="gone"
+            android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1"
+            android:background="@drawable/bg_mobile_omnibox" android:gravity="center_vertical"
+            android:orientation="horizontal" android:paddingStart="12dp" android:paddingEnd="4dp">
+            <TextView android:id="@+id/tvSecurityLock"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp" android:text="🔒"
+                android:textColor="@color/security_green" android:textSize="14sp" />
+            <EditText android:id="@+id/editUrl"
+                android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+                android:background="@android:color/transparent" android:hint="@string/url_hint"
+                android:imeOptions="actionGo|flagNoExtractUi" android:inputType="textUri"
+                android:selectAllOnFocus="true"
+                android:paddingVertical="0dp" android:singleLine="true"
+                android:textColor="@color/text_primary" android:textColorHint="@color/text_dim"
+                android:textSize="16sp" android:contentDescription="@string/url_hint" />
+            <TextView android:id="@+id/btnClearUrl"
+                android:layout_width="48dp" android:layout_height="48dp" android:gravity="center"
+                android:text="✕" android:textColor="@color/text_secondary" android:textSize="18sp"
+                android:visibility="gone" android:contentDescription="@string/btn_clear"
                 android:background="@drawable/bg_mobile_icon_button" />
-
-            <!-- Search / Voice Trigger -->
-            <TextView
-                android:id="@+id/btnSearchTrigger"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:layout_marginStart="2dp"
-                android:gravity="center"
-                android:text="🔍"
-                android:textColor="@color/accent_cyan"
-                android:textSize="13sp"
+            <TextView android:id="@+id/btnSearchTrigger"
+                android:layout_width="48dp" android:layout_height="48dp" android:gravity="center"
+                android:text="→" android:textColor="@color/accent_cyan" android:textSize="24sp"
+                android:visibility="gone" android:contentDescription="@string/btn_go"
                 android:background="@drawable/bg_mobile_icon_button" />
         </LinearLayout>
-
-        <!-- Reload (🔄) Button -->
-        <Button
-            android:id="@+id/btnReload"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="4dp"
-            android:background="@drawable/bg_mobile_icon_button"
-            android:text="🔄"
-            android:textColor="@color/text_primary"
-            android:textSize="15sp"
-            android:contentDescription="Osveži stran" />
-
-        <!-- Bookmark Star (⭐) Button -->
-        <Button
-            android:id="@+id/btnStar"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="4dp"
-            android:background="@drawable/bg_mobile_icon_button"
-            android:text="☆"
-            android:textColor="@color/accent_cyan"
-            android:textSize="16sp"
-            android:contentDescription="Dodaj med priljubljene" />
-
-        <!-- 3. Add Tab (+) Button -->
-        <Button
-            android:id="@+id/btnAddTab"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@drawable/bg_mobile_icon_button"
-            android:text="➕"
-            android:textColor="@color/text_primary"
-            android:textSize="15sp"
-            android:contentDescription="@string/btn_add_tab" />
-
-        <!-- 4. Tab Switcher Badge [ 1 ] -->
-        <Button
-            android:id="@+id/btnTabCount"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_marginStart="4dp"
-            android:background="@drawable/bg_mobile_tab_badge"
-            android:text="1"
-            android:textColor="@color/accent_cyan"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            android:padding="0dp" />
-
-        <!-- 5. 3-Dots Menu (⋮) Button -->
-        <Button
-            android:id="@+id/btnMenu"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="4dp"
-            android:background="@drawable/bg_mobile_icon_button"
-            android:text="⋮"
-            android:textColor="@color/text_primary"
-            android:textSize="20sp"
-            android:textStyle="bold"
+        <Button android:id="@+id/btnReload" android:layout_width="48dp" android:layout_height="48dp" android:visibility="gone" android:text="↻" />
+        <Button android:id="@+id/btnStar" android:layout_width="48dp" android:layout_height="48dp" android:visibility="gone" android:text="☆" />
+        <Button android:id="@+id/btnAddTab" android:layout_width="48dp" android:layout_height="48dp" android:visibility="gone" android:text="+" />
+        <Button android:id="@+id/btnTabCount"
+            android:layout_width="48dp" android:layout_height="48dp" android:layout_marginStart="4dp"
+            android:background="@drawable/bg_mobile_tab_badge" android:text="1"
+            android:textColor="@color/accent_cyan" android:textSize="16sp" android:textStyle="bold"
+            android:padding="0dp" android:contentDescription="@string/tabs_title" />
+        <Button android:id="@+id/btnMenu"
+            android:layout_width="48dp" android:layout_height="48dp"
+            android:background="@drawable/bg_mobile_icon_button" android:text="⋮"
+            android:textColor="@color/text_primary" android:textSize="24sp" android:padding="0dp"
             android:contentDescription="@string/btn_menu" />
     </LinearLayout>
 

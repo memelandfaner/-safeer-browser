@@ -28,4 +28,9 @@
     <string name="toast_bookmark_removed">🗑️ Odstranjeno iz zaznamkov</string>
     <string name="toast_link_copied">📋 Povezava kopirana v odložišče</string>
     <string name="toast_download_started">📥 Prenos se je začel</string>
+    <string name="btn_go">Odpri ali poišči</string>
+    <string name="menu_default_browser">Nastavi kot privzeti brskalnik</string>
+    <string name="default_browser_active">Safeer je vaš privzeti brskalnik</string>
+    <string name="default_browser_unchanged">Privzeti brskalnik ni bil spremenjen</string>
+    <string name="default_browser_unavailable">Izberite brskalnik v Androidovih nastavitvah privzetih aplikacij</string>
 </resources>

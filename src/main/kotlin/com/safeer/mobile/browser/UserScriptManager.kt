@@ -102,22 +102,20 @@ object UserScriptManager {
                         '#adblock-notice',
                         '#adblocker-detected',
                         'div[id*="adblock-dialog"]',
-                        'div[class*="adblock-dialog"]',
-                        '.tp-backdrop',
-                        '.tp-modal'
+                        'div[class*="adblock-dialog"]'
                     ];
                     var walls = document.querySelectorAll(wallSelectors.join(', '));
                     for (var i = 0; i < walls.length; i++) {
                         try { walls[i].remove(); } catch(_) {}
                     }
 
-                    if (document.body) {
+                    if (walls.length > 0 && document.body) {
                         var bStyle = window.getComputedStyle(document.body);
                         if (bStyle.overflow === 'hidden' && !document.querySelector('.nav-open, .menu-open, .modal-open')) {
                             document.body.style.setProperty('overflow', 'auto', 'important');
                         }
                     }
-                    if (document.documentElement) {
+                    if (walls.length > 0 && document.documentElement) {
                         var dStyle = window.getComputedStyle(document.documentElement);
                         if (dStyle.overflow === 'hidden') {
                             document.documentElement.style.setProperty('overflow', 'auto', 'important');
@@ -259,6 +257,8 @@ object UserScriptManager {
                     for (var k = 0; k < allDivs.length; k++) {
                         var node = allDivs[k];
                         if (isPlayerElement(node)) continue;
+                        if (node.matches('[role="dialog"], [aria-modal="true"]') ||
+                            node.querySelector('iframe, form, input, button, select, textarea, [role="dialog"], [role="button"], [role="checkbox"], [contenteditable]')) continue;
                         var style = window.getComputedStyle(node);
                         if (style.position === 'fixed' || style.position === 'absolute') {
                             var z = parseInt(style.zIndex, 10);
@@ -1364,7 +1364,7 @@ object UserScriptManager {
     fun injectEarlyScript(webView: WebView, isDesktop: Boolean = false) {
         val currentUrl = try { webView.url } catch (_: Exception) { null }
         if (isLocalAsset(currentUrl)) return
-        if (isGoogleDomain(currentUrl)) return
+        if (isGoogleDomain(currentUrl) || AuthenticationPages.isAuthenticationPage(currentUrl)) return
 
         webView.evaluateJavascript(GPC_AND_DNT_JS, null)
 
@@ -1390,7 +1390,7 @@ object UserScriptManager {
     fun injectOnPageFinished(webView: WebView, isDarkMode: Boolean, isDesktop: Boolean = false) {
         val currentUrl = try { webView.url } catch (_: Exception) { null }
         if (isLocalAsset(currentUrl)) return
-        if (isGoogleDomain(currentUrl)) return
+        if (isGoogleDomain(currentUrl) || AuthenticationPages.isAuthenticationPage(currentUrl)) return
 
         webView.evaluateJavascript(GPC_AND_DNT_JS, null)
 
