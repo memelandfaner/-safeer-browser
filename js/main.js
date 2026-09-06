@@ -59,6 +59,84 @@ const QRCodeMini = (function() {
 // --- 2. Multi-Language Dictionary (SL / EN) ---
 const i18n = {
   sl: {
+    nav_scripts: "✨ Skripte",
+    trust_ads: "0 Oglasov",
+    trust_yt: "YouTube v ozadju",
+    trust_c2: "abuse.ch C2 Ščit",
+    trust_free: "100% Brezplačno",
+    tab_showcase_mob: "📱 Telefon (Android)",
+    tab_showcase_tv: "📺 4K Android TV",
+    tab_showcase_desktop: "🍃 Linux Mint Namizje",
+    subtab_mob_shield: "🛡️ C2 Ščit",
+    subtab_mob_stats: "📊 Števec",
+    subtab_mob_portals: "🔍 Portali",
+    subtab_mob_yt: "🎵 YouTube",
+    subtab_tv_portals: "📺 Portali",
+    subtab_tv_dpad: "🎮 60 FPS",
+    subtab_tv_stations: "📑 Postaje",
+    subtab_desktop_main: "🍃 Namizje",
+    metric_ads: "Oglasov",
+    metric_latency: "Zakasnitev",
+    card1_eq_text: "Predvajanje v ozadju • Zaslon zaklenjen",
+    radar_status_line: "abuse.ch Radar: <strong style=\"color:var(--accent-emerald);\">0.18 ms</strong> • Status: <strong style=\"color:var(--accent-cyan);\">Neutralizirano</strong>",
+    threat_phishing_btn: "Lažna banka",
+    threat_safe_btn: "Varna stran",
+    card3_tag_header: "📺 Android TV &amp; Daljinski Upravljalnik",
+    tv_pill_nomouse: "🎯 Brez navidezne miške",
+    tv_pill_red: "🔴 Rdeči gumb: Xplore TV",
+    tv_pill_yellow: "🟡 Rumeni gumb: YouTube",
+    tv_pill_blue: "🔵 Modri gumb: 24ur / Novice",
+    dl_alt_targz: "Ali prenesi .tar.gz (506 KB)",
+    userscripts_badge: "✨ VGRAJEN TAMPERMONKEY • 100% DIGITALNA SUVERENOST",
+    userscripts_title: "Tvoj brskalnik. Tvoja pravila.<br class=\"hide-mobile\"><span class=\"highlight-cyan\">Dodaj svojo skripto v 10 sekundah.</span>",
+    userscripts_lead: "Zakaj bi se prilagajali spletnim stranem, če se spletne strani lahko prilagodijo vam? Safeer prinaša vgrajen <strong>Tampermonkey / Greasemonkey mehanizem</strong> za samodejno izvajanje lastnih JavaScript uporabniških skript brez nameščanja zunanjih vtičnikov.",
+    script_status_active: "● AKTIVNA",
+    script_pill_skip: "1. Preskok oglasov",
+    script_pill_night: "2. Nočni način",
+    script_pill_clean: "3. Čisti splet",
+    script_code_hint: "💡 Kliknite zgornje profile za takojšnjo menjavo kode in simulacije.",
+    sim_tab_title: "⚡ Rezultat izvajanja v živo",
+    sim_status_running: "▶ V TEKU",
+    sim_stat_ads_skipped: "Oglasov preskočeno",
+    sim_stat_time_saved: "Prihranjen čas",
+    sim_stat_click_delay: "Zakasnitev klika",
+    sim_console_title: "TERMINALNI DNEVNIK SKRIPTE (CONSOLE)",
+    sim_console_live: "● V ŽIVO",
+    sim_footer_hint: "🚀 Izvajanje je 100% lokalno znotraj procesa brskalnika Safeer.",
+    script_feat1_title: "Enostavno dodajanje in urejanje",
+    script_feat1_desc: "Kliknite ikono 🧩, poimenujte skripto, vnesite spletno stran in prilepite kodo. Brskalnik poskrbi za vse ostalo.",
+    script_feat2_title: "Oblikovanje po meri &amp; Lasten CSS",
+    script_feat2_desc: "Izbirajte med 4 vgrajenimi temami (Midnight, Mint Emerald, Cyberpunk, AMOLED) ali z lastnim CSS-jem preuredite videz katerega koli elementa.",
+    script_feat3_title: "100% zasebno &amp; lokalno izvajanje",
+    script_feat3_desc: "Vse vaše skripte se izvajajo lokalno v vaši napravi, brez sledenja, brez oblačnih strežnikov in brez ogrožanja zasebnosti.",
+    btn_linux_short: "Prenesi Safeer Linux (.deb namestitveni paket)",
+    btn_all_downloads: "Vsi prenosi (Telefon, TV, Linux)",
+    manifesto_badge: "🌍 MANIFEST ODPRTE KODE • MOČ V TVOJIH ROKAH",
+    th_feature: "Funkcionalnost",
+    th_std_tv: "Običajni TV brskalniki",
+    tr1_feat: "C2 Botnet &amp; Malware zaščita (abuse.ch)",
+    tr1_safeer: "<span style=\"color:#10b981;\">✓</span> Vgrajeno (O(k) Trie)",
+    tr1_chrome: "<span style=\"color:#64748b;\">✗</span> Osnovni filter",
+    tr1_tv: "<span style=\"color:#64748b;\">✗</span> Brez zaščite",
+    tr2_feat: "YouTube v ozadju z ugasnjenim zaslonom",
+    tr2_safeer: "<span style=\"color:#10b981;\">✓</span> Da (brezplačno)",
+    tr2_chrome: "<span style=\"color:#64748b;\">✗</span> Plačljiva naročnina",
+    tr2_tv: "<span style=\"color:#64748b;\">✗</span> Se zaustavi",
+    tr3_feat: "Blokada video oglasov &amp; praznih okvirjev",
+    tr3_safeer: "<span style=\"color:#10b981;\">✓</span> 0 oglasov",
+    tr3_chrome: "<span style=\"color:#64748b;\">✗</span> Vsi oglasi",
+    tr3_tv: "<span style=\"color:#64748b;\">✗</span> Brez blokiranja",
+    tr4_feat: "Nativni Media3 ExoPlayer predvajalnik",
+    tr4_safeer: "<span style=\"color:#10b981;\">✓</span> 4K SurfaceView",
+    tr4_chrome: "<span style=\"color:#64748b;\">✗</span> Standardni web view",
+    tr4_tv: "<span style=\"color:#64748b;\">✗</span> Zatikanje",
+    tr5_feat: "D-Pad fokusni obroč za daljinec",
+    tr5_safeer: "<span style=\"color:#10b981;\">✓</span> 60 FPS navigacija",
+    tr5_chrome: "<span style=\"color:#64748b;\">✗</span> Nerodna miška",
+    tr5_tv: "<span style=\"color:#64748b;\">✗</span> Počasno drsenje",
+    dl_shortlink_lbl: "Kratka povezava:",
+    dl_release_lbl: "Izdaja:",
+
     nav_features: "Zmožnosti",
     nav_linux: "🍃 Linux",
     nav_security: "Varnost",
@@ -138,6 +216,84 @@ const i18n = {
     footer_disclaimer: "⚖️ Safeer is a security layer, not a guarantee against all online threats. Zmanjšuje tveganje in blokira znana tveganja; ne zagotavlja zaščite pred neznanimi Zero-Day grožnjami. 100% odprta koda pod licenco Apache 2.0 – spodbujamo fork kode in lastno prilagoditev."
   },
   en: {
+    nav_scripts: "✨ Scripts",
+    trust_ads: "0 Ads",
+    trust_yt: "Background YouTube",
+    trust_c2: "abuse.ch C2 Shield",
+    trust_free: "100% Free",
+    tab_showcase_mob: "📱 Phone (Android)",
+    tab_showcase_tv: "📺 4K Android TV",
+    tab_showcase_desktop: "🍃 Linux Mint Desktop",
+    subtab_mob_shield: "🛡️ C2 Shield",
+    subtab_mob_stats: "📊 Stats",
+    subtab_mob_portals: "🔍 Portals",
+    subtab_mob_yt: "🎵 YouTube",
+    subtab_tv_portals: "📺 Portals",
+    subtab_tv_dpad: "🎮 60 FPS",
+    subtab_tv_stations: "📑 Channels",
+    subtab_desktop_main: "🍃 Desktop",
+    metric_ads: "Ads",
+    metric_latency: "Latency",
+    card1_eq_text: "Background Playback • Screen Locked",
+    radar_status_line: "abuse.ch Radar: <strong style=\"color:var(--accent-emerald);\">0.18 ms</strong> • Status: <strong style=\"color:var(--accent-cyan);\">Neutralized</strong>",
+    threat_phishing_btn: "Fake Bank",
+    threat_safe_btn: "Safe Site",
+    card3_tag_header: "📺 Android TV &amp; Remote Control",
+    tv_pill_nomouse: "🎯 No virtual mouse",
+    tv_pill_red: "🔴 Red button: Xplore TV",
+    tv_pill_yellow: "🟡 Yellow button: YouTube",
+    tv_pill_blue: "🔵 Blue button: 24ur / News",
+    dl_alt_targz: "Or download .tar.gz (506 KB)",
+    userscripts_badge: "✨ BUILT-IN TAMPERMONKEY • 100% DIGITAL SOVEREIGNTY",
+    userscripts_title: "Your browser. Your rules.<br class=\"hide-mobile\"><span class=\"highlight-cyan\">Add your script in 10 seconds.</span>",
+    userscripts_lead: "Why adapt to websites when websites can adapt to you? Safeer includes a built-in <strong>Tampermonkey / Greasemonkey engine</strong> to automatically run your custom JavaScript user scripts without installing third-party extensions.",
+    script_status_active: "● ACTIVE",
+    script_pill_skip: "1. Skip Ads",
+    script_pill_night: "2. Dark Mode",
+    script_pill_clean: "3. Clean Web",
+    script_code_hint: "💡 Click profiles above to switch code and live preview.",
+    sim_tab_title: "⚡ Live Execution Result",
+    sim_status_running: "▶ RUNNING",
+    sim_stat_ads_skipped: "Ads skipped",
+    sim_stat_time_saved: "Time saved",
+    sim_stat_click_delay: "Click delay",
+    sim_console_title: "TERMINAL SCRIPT CONSOLE",
+    sim_console_live: "● LIVE",
+    sim_footer_hint: "🚀 Execution is 100% local within the Safeer browser process.",
+    script_feat1_title: "Easy to Add and Edit",
+    script_feat1_desc: "Click the 🧩 icon, name the script, set target website and paste your code. The browser takes care of the rest.",
+    script_feat2_title: "Custom Themes &amp; Custom CSS",
+    script_feat2_desc: "Choose from 4 built-in themes (Midnight, Mint Emerald, Cyberpunk, AMOLED) or style any web element with your own custom CSS.",
+    script_feat3_title: "100% Private &amp; Local Execution",
+    script_feat3_desc: "All scripts run locally on your device—zero tracking, zero cloud telemetry, and zero privacy compromise.",
+    btn_linux_short: "Download Safeer Linux (.deb installer)",
+    btn_all_downloads: "All Downloads (Phone, TV, Linux)",
+    manifesto_badge: "🌍 OPEN SOURCE MANIFESTO • POWER IN YOUR HANDS",
+    th_feature: "Feature",
+    th_std_tv: "Standard TV Browsers",
+    tr1_feat: "C2 Botnet &amp; Malware Defense (abuse.ch)",
+    tr1_safeer: "<span style=\"color:#10b981;\">✓</span> Built-in (O(k) Trie)",
+    tr1_chrome: "<span style=\"color:#64748b;\">✗</span> Basic filter",
+    tr1_tv: "<span style=\"color:#64748b;\">✗</span> No defense",
+    tr2_feat: "Background YouTube with Screen Off",
+    tr2_safeer: "<span style=\"color:#10b981;\">✓</span> Yes (Free)",
+    tr2_chrome: "<span style=\"color:#64748b;\">✗</span> Paid subscription",
+    tr2_tv: "<span style=\"color:#64748b;\">✗</span> Stops playback",
+    tr3_feat: "Video Ad &amp; Blank Frame Blocking",
+    tr3_safeer: "<span style=\"color:#10b981;\">✓</span> 0 Ads",
+    tr3_chrome: "<span style=\"color:#64748b;\">✗</span> All ads",
+    tr3_tv: "<span style=\"color:#64748b;\">✗</span> No adblocking",
+    tr4_feat: "Native Media3 ExoPlayer Engine",
+    tr4_safeer: "<span style=\"color:#10b981;\">✓</span> 4K SurfaceView",
+    tr4_chrome: "<span style=\"color:#64748b;\">✗</span> Standard web view",
+    tr4_tv: "<span style=\"color:#64748b;\">✗</span> Stuttering",
+    tr5_feat: "D-Pad Focus Ring for Remote Control",
+    tr5_safeer: "<span style=\"color:#10b981;\">✓</span> 60 FPS navigation",
+    tr5_chrome: "<span style=\"color:#64748b;\">✗</span> Clumsy mouse pointer",
+    tr5_tv: "<span style=\"color:#64748b;\">✗</span> Slow scrolling",
+    dl_shortlink_lbl: "Short link:",
+    dl_release_lbl: "Release:",
+
     nav_features: "Features",
     nav_linux: "🍃 Linux",
     nav_security: "Security",
@@ -217,6 +373,86 @@ const i18n = {
     footer_disclaimer: "⚖️ Safeer is a security layer, not a guarantee against all online threats. It reduces risk and blocks known threats; it does not guarantee protection against all unknown Zero-Day attacks. 100% open source under Apache 2.0—fork and customize!"
   },
   de: {
+    security_disclaimer: "<strong>Safeer ist eine Sicherheitsschicht, keine Garantie gegen alle Online-Bedrohungen.</strong> Es reduziert Risiken und blockiert bekannte Bedrohungen.",
+    footer_disclaimer: "⚖️ Safeer ist eine Sicherheitsschicht, keine Garantie gegen alle Online-Bedrohungen. Reduziert Risiken und blockiert bekannte Gefahren; garantiert keinen Schutz vor unbekannten Zero-Day-Bedrohungen. 100% Open Source unter Apache 2.0 Lizenz.",
+    nav_scripts: "✨ Skripte",
+    trust_ads: "0 Werbung",
+    trust_yt: "YouTube im Hintergrund",
+    trust_c2: "abuse.ch C2 Schild",
+    trust_free: "100% Kostenlos",
+    tab_showcase_mob: "📱 Smartphone (Android)",
+    tab_showcase_tv: "📺 4K Android TV",
+    tab_showcase_desktop: "🍃 Linux Mint Desktop",
+    subtab_mob_shield: "🛡️ C2 Schild",
+    subtab_mob_stats: "📊 Statistiken",
+    subtab_mob_portals: "🔍 Portale",
+    subtab_mob_yt: "🎵 YouTube",
+    subtab_tv_portals: "📺 Portale",
+    subtab_tv_dpad: "🎮 60 FPS",
+    subtab_tv_stations: "📑 Sender",
+    subtab_desktop_main: "🍃 Desktop",
+    metric_ads: "Werbung",
+    metric_latency: "Latenz",
+    card1_eq_text: "Hintergrundwiedergabe • Bildschirm gesperrt",
+    radar_status_line: "abuse.ch Radar: <strong style=\"color:var(--accent-emerald);\">0.18 ms</strong> • Status: <strong style=\"color:var(--accent-cyan);\">Neutralisiert</strong>",
+    threat_phishing_btn: "Gefälschte Bank",
+    threat_safe_btn: "Sichere Seite",
+    card3_tag_header: "📺 Android TV &amp; Fernbedienung",
+    tv_pill_nomouse: "🎯 Keine virtuelle Maus",
+    tv_pill_red: "🔴 Rote Taste: Xplore TV",
+    tv_pill_yellow: "🟡 Gelbe Taste: YouTube",
+    tv_pill_blue: "🔵 Blaue Taste: 24ur / Nachrichten",
+    dl_alt_targz: "Oder .tar.gz herunterladen (506 KB)",
+    userscripts_badge: "✨ INTEGRIERTER TAMPERMONKEY • 100% DIGITALE SOUVERÄNITÄT",
+    userscripts_title: "Dein Browser. Deine Regeln.<br class=\"hide-mobile\"><span class=\"highlight-cyan\">Füge dein Skript in 10 Sekunden hinzu.</span>",
+    userscripts_lead: "Warum sich an Webseiten anpassen, wenn sich Webseiten an dich anpassen können? Safeer bietet eine integrierte <strong>Tampermonkey / Greasemonkey Engine</strong> zur automatischen Ausführung benutzerdefinierter JavaScript-Skripte ohne externe Add-ons.",
+    script_status_active: "● AKTIV",
+    script_pill_skip: "1. Werbung überspringen",
+    script_pill_night: "2. Dunkelmodus",
+    script_pill_clean: "3. Sauberes Web",
+    script_code_hint: "💡 Klicke oben auf die Profile, um Code und Live-Simulation sofort zu wechseln.",
+    sim_tab_title: "⚡ Live-Ausführungsergebnis",
+    sim_status_running: "▶ LÄUFT",
+    sim_stat_ads_skipped: "Werbung übersprungen",
+    sim_stat_time_saved: "Gesparte Zeit",
+    sim_stat_click_delay: "Klick-Verzögerung",
+    sim_console_title: "TERMINAL-SKRIPT-PROTOKOLL (CONSOLE)",
+    sim_console_live: "● LIVE",
+    sim_footer_hint: "🚀 Die Ausführung erfolgt zu 100% lokal im Safeer-Browserprozess.",
+    script_feat1_title: "Einfaches Hinzufügen und Bearbeiten",
+    script_feat1_desc: "Klicke auf das 🧩 Symbol, benenne das Skript, gib die Webseite ein und füge den Code ein. Der Browser erledigt den Rest.",
+    script_feat2_title: "Individuelles Design &amp; Eigenes CSS",
+    script_feat2_desc: "Wähle aus 4 integrierten Themes (Midnight, Mint Emerald, Cyberpunk, AMOLED) oder passe jedes Element mit eigenem CSS an.",
+    script_feat3_title: "100% privat &amp; lokale Ausführung",
+    script_feat3_desc: "Alle Skripte laufen lokal auf deinem Gerät – ohne Tracking, ohne Cloud-Server und ohne Gefährdung der Privatsphäre.",
+    btn_linux_short: "Safeer Linux herunterladen (.deb Paket)",
+    btn_all_downloads: "Alle Downloads (Smartphone, TV, Linux)",
+    manifesto_badge: "🌍 OPEN-SOURCE-MANIFEST • MACHT IN DEINEN HÄNDEN",
+    th_feature: "Funktion",
+    th_std_tv: "Standard TV-Browser",
+    tr1_feat: "C2 Botnet- &amp; Malware-Schutz (abuse.ch)",
+    tr1_safeer: "<span style=\"color:#10b981;\">✓</span> Integriert (O(k) Trie)",
+    tr1_chrome: "<span style=\"color:#64748b;\">✗</span> Basisfilter",
+    tr1_tv: "<span style=\"color:#64748b;\">✗</span> Kein Schutz",
+    tr2_feat: "YouTube im Hintergrund bei gesperrtem Bildschirm",
+    tr2_safeer: "<span style=\"color:#10b981;\">✓</span> Ja (Kostenlos)",
+    tr2_chrome: "<span style=\"color:#64748b;\">✗</span> Bezahl-Abo nötig",
+    tr2_tv: "<span style=\"color:#64748b;\">✗</span> Stoppt",
+    tr3_feat: "Blockierung von Video-Werbung &amp; Bannern",
+    tr3_safeer: "<span style=\"color:#10b981;\">✓</span> 0 Werbung",
+    tr3_chrome: "<span style=\"color:#64748b;\">✗</span> Alle Anzeigen",
+    tr3_tv: "<span style=\"color:#64748b;\">✗</span> Keine Blockierung",
+    tr4_feat: "Nativer Media3 ExoPlayer",
+    tr4_safeer: "<span style=\"color:#10b981;\">✓</span> 4K SurfaceView",
+    tr4_chrome: "<span style=\"color:#64748b;\">✗</span> Standard Webview",
+    tr4_tv: "<span style=\"color:#64748b;\">✗</span> Ruckeln",
+    tr5_feat: "D-Pad Fokusring für Fernbedienung",
+    tr5_safeer: "<span style=\"color:#10b981;\">✓</span> 60 FPS Navigation",
+    tr5_chrome: "<span style=\"color:#64748b;\">✗</span> Ungeschickter Mauszeiger",
+    tr5_tv: "<span style=\"color:#64748b;\">✗</span> Langsames Scrollen",
+    dl_shortlink_lbl: "Kurzlink:",
+    dl_release_lbl: "Release:",
+
     nav_features: "Funktionen",
     nav_linux: "🍃 Linux",
     nav_security: "Sicherheit",
@@ -294,6 +530,86 @@ const i18n = {
     footer_copy: "© 2026 Safeer Browser Project. Datenschutz, Sicherheit und Unterhaltung."
   },
   es: {
+    security_disclaimer: "<strong>Safeer es una capa de seguridad, no una garantía contra todas las amenazas en línea.</strong> Reduce el riesgo y bloquea las amenazas conocidas.",
+    footer_disclaimer: "⚖️ Safeer es una capa de seguridad, no una garantía contra todas las amenazas en línea. Reduce el riesgo y bloquea los peligros conocidos; no garantiza protección contra amenazas de Día Cero desconocidas. 100% de código abierto bajo la licencia Apache 2.0.",
+    nav_scripts: "✨ Scripts",
+    trust_ads: "0 Anuncios",
+    trust_yt: "YouTube en segundo plano",
+    trust_c2: "abuse.ch Escudo C2",
+    trust_free: "100% Gratis",
+    tab_showcase_mob: "📱 Teléfono (Android)",
+    tab_showcase_tv: "📺 4K Android TV",
+    tab_showcase_desktop: "🍃 Linux Mint Escritorio",
+    subtab_mob_shield: "🛡️ Escudo C2",
+    subtab_mob_stats: "📊 Estadísticas",
+    subtab_mob_portals: "🔍 Portales",
+    subtab_mob_yt: "🎵 YouTube",
+    subtab_tv_portals: "📺 Portales",
+    subtab_tv_dpad: "🎮 60 FPS",
+    subtab_tv_stations: "📑 Canales",
+    subtab_desktop_main: "🍃 Escritorio",
+    metric_ads: "Anuncios",
+    metric_latency: "Latencia",
+    card1_eq_text: "Reproducción en segundo plano • Pantalla bloqueada",
+    radar_status_line: "abuse.ch Radar: <strong style=\"color:var(--accent-emerald);\">0.18 ms</strong> • Estado: <strong style=\"color:var(--accent-cyan);\">Neutralizado</strong>",
+    threat_phishing_btn: "Banco Falso",
+    threat_safe_btn: "Sitio Seguro",
+    card3_tag_header: "📺 Android TV &amp; Mando a Distancia",
+    tv_pill_nomouse: "🎯 Sin ratón virtual",
+    tv_pill_red: "🔴 Botón rojo: Xplore TV",
+    tv_pill_yellow: "🟡 Botón amarillo: YouTube",
+    tv_pill_blue: "🔵 Botón azul: 24ur / Noticias",
+    dl_alt_targz: "O descargar .tar.gz (506 KB)",
+    userscripts_badge: "✨ TAMPERMONKEY INTEGRADO • 100% SOBERANÍA DIGITAL",
+    userscripts_title: "Tu navegador. Tus reglas.<br class=\"hide-mobile\"><span class=\"highlight-cyan\">Añade tu script en 10 segundos.</span>",
+    userscripts_lead: "¿Por qué adaptarse a los sitios web cuando los sitios web pueden adaptarse a ti? Safeer incluye un <strong>motor Tampermonkey / Greasemonkey integrado</strong> para ejecutar tus propios scripts JavaScript automáticamente sin instalar extensiones externas.",
+    script_status_active: "● ACTIVO",
+    script_pill_skip: "1. Saltar anuncios",
+    script_pill_night: "2. Modo oscuro",
+    script_pill_clean: "3. Web limpia",
+    script_code_hint: "💡 Haz clic en los perfiles anteriores para cambiar el código y la vista en vivo al instante.",
+    sim_tab_title: "⚡ Resultado de ejecución en vivo",
+    sim_status_running: "▶ EN EJECUCIÓN",
+    sim_stat_ads_skipped: "Anuncios saltados",
+    sim_stat_time_saved: "Tiempo ahorrado",
+    sim_stat_click_delay: "Retardo de clic",
+    sim_console_title: "CONSOLA DE TERMINAL DEL SCRIPT",
+    sim_console_live: "● EN VIVO",
+    sim_footer_hint: "🚀 La ejecución es 100% local dentro del proceso del navegador Safeer.",
+    script_feat1_title: "Fácil de agregar y editar",
+    script_feat1_desc: "Haz clic en el icono 🧩, nombra el script, introduce el sitio web y pega tu código. El navegador se encarga del resto.",
+    script_feat2_title: "Diseño personalizado &amp; CSS propio",
+    script_feat2_desc: "Elige entre 4 temas integrados (Midnight, Mint Emerald, Cyberpunk, AMOLED) o personaliza cualquier elemento con tu propio CSS.",
+    script_feat3_title: "100% privado &amp; ejecución local",
+    script_feat3_desc: "Todos tus scripts se ejecutan localmente en tu dispositivo, sin rastreo, sin servidores en la nube y sin comprometer tu privacidad.",
+    btn_linux_short: "Descargar Safeer Linux (paquete .deb)",
+    btn_all_downloads: "Todas las descargas (Teléfono, TV, Linux)",
+    manifesto_badge: "🌍 MANIFIESTO DE CÓDIGO ABIERTO • EL PODER EN TUS MANOS",
+    th_feature: "Característica",
+    th_std_tv: "Navegadores TV estándar",
+    tr1_feat: "Protección contra botnets C2 y malware (abuse.ch)",
+    tr1_safeer: "<span style=\"color:#10b981;\">✓</span> Integrado (O(k) Trie)",
+    tr1_chrome: "<span style=\"color:#64748b;\">✗</span> Filtro básico",
+    tr1_tv: "<span style=\"color:#64748b;\">✗</span> Sin protección",
+    tr2_feat: "YouTube en segundo plano con pantalla apagada",
+    tr2_safeer: "<span style=\"color:#10b981;\">✓</span> Sí (Gratis)",
+    tr2_chrome: "<span style=\"color:#64748b;\">✗</span> Suscripción de pago",
+    tr2_tv: "<span style=\"color:#64748b;\">✗</span> Se detiene",
+    tr3_feat: "Bloqueo de anuncios en vídeo y marcos vacíos",
+    tr3_safeer: "<span style=\"color:#10b981;\">✓</span> 0 anuncios",
+    tr3_chrome: "<span style=\"color:#64748b;\">✗</span> Todos los anuncios",
+    tr3_tv: "<span style=\"color:#64748b;\">✗</span> Sin bloqueo",
+    tr4_feat: "Reproductor nativo Media3 ExoPlayer",
+    tr4_safeer: "<span style=\"color:#10b981;\">✓</span> 4K SurfaceView",
+    tr4_chrome: "<span style=\"color:#64748b;\">✗</span> Webview estándar",
+    tr4_tv: "<span style=\"color:#64748b;\">✗</span> Tirones y cortes",
+    tr5_feat: "Anillo de enfoque D-Pad para mando",
+    tr5_safeer: "<span style=\"color:#10b981;\">✓</span> Navegación 60 FPS",
+    tr5_chrome: "<span style=\"color:#64748b;\">✗</span> Puntero torpe",
+    tr5_tv: "<span style=\"color:#64748b;\">✗</span> Desplazamiento lento",
+    dl_shortlink_lbl: "Enlace corto:",
+    dl_release_lbl: "Lanzamiento:",
+
     nav_features: "Funciones",
     nav_linux: "🍃 Linux",
     nav_security: "Seguridad",
@@ -371,6 +687,86 @@ const i18n = {
     footer_copy: "© 2026 Safeer Browser Project. Máxima privacidad, seguridad y entretenimiento."
   },
   fr: {
+    security_disclaimer: "<strong>Safeer est une couche de sécurité, pas une garantie contre toutes les menaces en ligne.</strong> Il réduit les risques et bloque les menaces connues.",
+    footer_disclaimer: "⚖️ Safeer est une couche de sécurité, pas une garantie contre toutes les menaces en ligne. Réduit les risques et bloque les dangers connus ; ne garantit pas de protection contre les menaces Zero-Day inconnues. 100% open source sous licence Apache 2.0.",
+    nav_scripts: "✨ Scripts",
+    trust_ads: "0 Publicité",
+    trust_yt: "YouTube en arrière-plan",
+    trust_c2: "abuse.ch Bouclier C2",
+    trust_free: "100% Gratuit",
+    tab_showcase_mob: "📱 Téléphone (Android)",
+    tab_showcase_tv: "📺 4K Android TV",
+    tab_showcase_desktop: "🍃 Linux Mint Bureau",
+    subtab_mob_shield: "🛡️ Bouclier C2",
+    subtab_mob_stats: "📊 Statistiques",
+    subtab_mob_portals: "🔍 Portails",
+    subtab_mob_yt: "🎵 YouTube",
+    subtab_tv_portals: "📺 Portails",
+    subtab_tv_dpad: "🎮 60 FPS",
+    subtab_tv_stations: "📑 Chaînes",
+    subtab_desktop_main: "🍃 Bureau",
+    metric_ads: "Publicités",
+    metric_latency: "Latence",
+    card1_eq_text: "Lecture en arrière-plan • Écran verrouillé",
+    radar_status_line: "abuse.ch Radar: <strong style=\"color:var(--accent-emerald);\">0.18 ms</strong> • État: <strong style=\"color:var(--accent-cyan);\">Neutralisé</strong>",
+    threat_phishing_btn: "Fausse Banque",
+    threat_safe_btn: "Site Sécurisé",
+    card3_tag_header: "📺 Android TV &amp; Télécommande",
+    tv_pill_nomouse: "🎯 Sans souris virtuelle",
+    tv_pill_red: "🔴 Bouton rouge: Xplore TV",
+    tv_pill_yellow: "🟡 Bouton jaune: YouTube",
+    tv_pill_blue: "🔵 Bouton bleu: 24ur / Actualités",
+    dl_alt_targz: "Ou télécharger .tar.gz (506 Ko)",
+    userscripts_badge: "✨ TAMPERMONKEY INTÉGRÉ • 100% SOUVERAINETÉ NUMÉRIQUE",
+    userscripts_title: "Votre navigateur. Vos règles.<br class=\"hide-mobile\"><span class=\"highlight-cyan\">Ajoutez votre script en 10 secondes.</span>",
+    userscripts_lead: "Pourquoi s'adapter aux sites web alors que les sites web peuvent s'adapter à vous ? Safeer intègre un <strong>moteur Tampermonkey / Greasemonkey</strong> pour exécuter vos propres scripts JavaScript automatiquement sans extensions tierces.",
+    script_status_active: "● ACTIF",
+    script_pill_skip: "1. Ignorer les pubs",
+    script_pill_night: "2. Mode sombre",
+    script_pill_clean: "3. Web épuré",
+    script_code_hint: "💡 Cliquez sur les profils ci-dessus pour changer immédiatement le code et la simulation.",
+    sim_tab_title: "⚡ Résultat d'exécution en direct",
+    sim_status_running: "▶ EN COURS",
+    sim_stat_ads_skipped: "Publicités ignorées",
+    sim_stat_time_saved: "Temps économisé",
+    sim_stat_click_delay: "Délai de clic",
+    sim_console_title: "JOURNAL DU SCRIPT TERMINAL",
+    sim_console_live: "● EN DIRECT",
+    sim_footer_hint: "🚀 L'exécution est 100% locale au sein du processus du navigateur Safeer.",
+    script_feat1_title: "Facile à ajouter et à modifier",
+    script_feat1_desc: "Cliquez sur l'icône 🧩, nommez le script, entrez le site web et collez le code. Le navigateur s'occupe de tout le reste.",
+    script_feat2_title: "Design sur mesure &amp; CSS personnalisé",
+    script_feat2_desc: "Choisissez parmi 4 thèmes intégrés (Midnight, Mint Emerald, Cyberpunk, AMOLED) ou personnalisez n'importe quel élément avec votre CSS.",
+    script_feat3_title: "100% privé &amp; exécution locale",
+    script_feat3_desc: "Tous vos scripts s'exécutent localement sur votre appareil, sans suivi, sans serveurs cloud et sans risque pour la vie privée.",
+    btn_linux_short: "Télécharger Safeer Linux (paquet .deb)",
+    btn_all_downloads: "Tous les téléchargements (Mobile, TV, Linux)",
+    manifesto_badge: "🌍 MANIFESTE OPEN SOURCE • LE POUVOIR ENTRE VOS MAINS",
+    th_feature: "Fonctionnalité",
+    th_std_tv: "Navigateurs TV standard",
+    tr1_feat: "Protection contre les botnets C2 et malwares (abuse.ch)",
+    tr1_safeer: "<span style=\"color:#10b981;\">✓</span> Intégré (O(k) Trie)",
+    tr1_chrome: "<span style=\"color:#64748b;\">✗</span> Filtre basique",
+    tr1_tv: "<span style=\"color:#64748b;\">✗</span> Aucune protection",
+    tr2_feat: "YouTube en arrière-plan avec écran éteint",
+    tr2_safeer: "<span style=\"color:#10b981;\">✓</span> Oui (Gratuit)",
+    tr2_chrome: "<span style=\"color:#64748b;\">✗</span> Abonnement payant",
+    tr2_tv: "<span style=\"color:#64748b;\">✗</span> S'interrompt",
+    tr3_feat: "Blocage des publicités vidéo et des cadres vides",
+    tr3_safeer: "<span style=\"color:#10b981;\">✓</span> 0 publicité",
+    tr3_chrome: "<span style=\"color:#64748b;\">✗</span> Toutes les annonces",
+    tr3_tv: "<span style=\"color:#64748b;\">✗</span> Aucun blocage",
+    tr4_feat: "Lecteur natif Media3 ExoPlayer",
+    tr4_safeer: "<span style=\"color:#10b981;\">✓</span> 4K SurfaceView",
+    tr4_chrome: "<span style=\"color:#64748b;\">✗</span> Vue web classique",
+    tr4_tv: "<span style=\"color:#64748b;\">✗</span> Saccades",
+    tr5_feat: "Anneau de focus D-Pad pour télécommande",
+    tr5_safeer: "<span style=\"color:#10b981;\">✓</span> Navigation 60 FPS",
+    tr5_chrome: "<span style=\"color:#64748b;\">✗</span> Curseur peu pratique",
+    tr5_tv: "<span style=\"color:#64748b;\">✗</span> Défilement lent",
+    dl_shortlink_lbl: "Lien court:",
+    dl_release_lbl: "Version:",
+
     nav_features: "Fonctionnalités",
     nav_linux: "🍃 Linux",
     nav_security: "Sécurité",
@@ -448,6 +844,86 @@ const i18n = {
     footer_copy: "© 2026 Safeer Browser Project. Vie privée, cybersécurité et divertissement."
   },
   it: {
+    security_disclaimer: "<strong>Safeer è uno strato di sicurezza, non una garanzia contro tutte le minacce online.</strong> Riduce il rischio e blocca le minacce note.",
+    footer_disclaimer: "⚖️ Safeer è uno strato di sicurezza, non una garanzia contro tutte le minacce online. Riduce il rischio e blocca i pericoli noti; non garantisce protezione contro minacce Zero-Day sconosciute. 100% open source sotto licenza Apache 2.0.",
+    nav_scripts: "✨ Script",
+    trust_ads: "0 Pubblicità",
+    trust_yt: "YouTube in background",
+    trust_c2: "abuse.ch Scudo C2",
+    trust_free: "100% Gratuito",
+    tab_showcase_mob: "📱 Smartphone (Android)",
+    tab_showcase_tv: "📺 4K Android TV",
+    tab_showcase_desktop: "🍃 Linux Mint Desktop",
+    subtab_mob_shield: "🛡️ Scudo C2",
+    subtab_mob_stats: "📊 Statistiche",
+    subtab_mob_portals: "🔍 Portali",
+    subtab_mob_yt: "🎵 YouTube",
+    subtab_tv_portals: "📺 Portali",
+    subtab_tv_dpad: "🎮 60 FPS",
+    subtab_tv_stations: "📑 Canali",
+    subtab_desktop_main: "🍃 Desktop",
+    metric_ads: "Pubblicità",
+    metric_latency: "Latenza",
+    card1_eq_text: "Riproduzione in background • Schermo bloccato",
+    radar_status_line: "abuse.ch Radar: <strong style=\"color:var(--accent-emerald);\">0.18 ms</strong> • Stato: <strong style=\"color:var(--accent-cyan);\">Neutralizzato</strong>",
+    threat_phishing_btn: "Falsa Banca",
+    threat_safe_btn: "Sito Sicuro",
+    card3_tag_header: "📺 Android TV &amp; Telecomando",
+    tv_pill_nomouse: "🎯 Nessun mouse virtuale",
+    tv_pill_red: "🔴 Tasto rosso: Xplore TV",
+    tv_pill_yellow: "🟡 Tasto giallo: YouTube",
+    tv_pill_blue: "🔵 Tasto blu: 24ur / Notizie",
+    dl_alt_targz: "Oppure scarica .tar.gz (506 KB)",
+    userscripts_badge: "✨ TAMPERMONKEY INTEGRATO • 100% SOVRANITÀ DIGITALE",
+    userscripts_title: "Il tuo browser. Le tue regole.<br class=\"hide-mobile\"><span class=\"highlight-cyan\">Aggiungi il tuo script in 10 secondi.</span>",
+    userscripts_lead: "Perché adattarsi ai siti web quando i siti web possono adattarsi a te? Safeer include un <strong>motore Tampermonkey / Greasemonkey integrato</strong> per eseguire automaticamente i tuoi script utente JavaScript senza installare estensioni esterne.",
+    script_status_active: "● ATTIVO",
+    script_pill_skip: "1. Salta annunci",
+    script_pill_night: "2. Modalità scura",
+    script_pill_clean: "3. Web pulito",
+    script_code_hint: "💡 Fai clic sui profili sopra per cambiare istantaneamente codice e simulazione.",
+    sim_tab_title: "⚡ Risultato di esecuzione live",
+    sim_status_running: "▶ IN CORSO",
+    sim_stat_ads_skipped: "Annunci saltati",
+    sim_stat_time_saved: "Tempo risparmiato",
+    sim_stat_click_delay: "Ritardo del clic",
+    sim_console_title: "CONSOLE TERMINALE DELLO SCRIPT",
+    sim_console_live: "● LIVE",
+    sim_footer_hint: "🚀 L'esecuzione è al 100% locale all'interno del processo del browser Safeer.",
+    script_feat1_title: "Facile da aggiungere e modificare",
+    script_feat1_desc: "Fai clic sull'icona 🧩, assegna un nome allo script, inserisci il sito web e incolla il codice. Il browser fa tutto il resto.",
+    script_feat2_title: "Design personalizzato &amp; CSS proprio",
+    script_feat2_desc: "Scegli tra 4 temi integrati (Midnight, Mint Emerald, Cyberpunk, AMOLED) o personalizza qualsiasi elemento con il tuo CSS.",
+    script_feat3_title: "100% privato ed esecuzione locale",
+    script_feat3_desc: "Tutti i tuoi script vengono eseguiti localmente sul tuo dispositivo: nessun tracciamento, nessun server cloud e nessuna violazione della privacy.",
+    btn_linux_short: "Scarica Safeer Linux (pacchetto .deb)",
+    btn_all_downloads: "Tutti i download (Smartphone, TV, Linux)",
+    manifesto_badge: "🌍 MANIFESTO OPEN SOURCE • IL POTERE NELLE TUE MANI",
+    th_feature: "Funzionalità",
+    th_std_tv: "Browser TV standard",
+    tr1_feat: "Protezione contro botnet C2 e malware (abuse.ch)",
+    tr1_safeer: "<span style=\"color:#10b981;\">✓</span> Integrato (O(k) Trie)",
+    tr1_chrome: "<span style=\"color:#64748b;\">✗</span> Filtro di base",
+    tr1_tv: "<span style=\"color:#64748b;\">✗</span> Nessuna protezione",
+    tr2_feat: "YouTube in background con schermo spento",
+    tr2_safeer: "<span style=\"color:#10b981;\">✓</span> Sì (Gratuito)",
+    tr2_chrome: "<span style=\"color:#64748b;\">✗</span> Abbonamento a pagamento",
+    tr2_tv: "<span style=\"color:#64748b;\">✗</span> Si interrompe",
+    tr3_feat: "Blocco di annunci video e riquadri vuoti",
+    tr3_safeer: "<span style=\"color:#10b981;\">✓</span> 0 annunci",
+    tr3_chrome: "<span style=\"color:#64748b;\">✗</span> Tutte le inserzioni",
+    tr3_tv: "<span style=\"color:#64748b;\">✗</span> Nessun blocco",
+    tr4_feat: "Player nativo Media3 ExoPlayer",
+    tr4_safeer: "<span style=\"color:#10b981;\">✓</span> 4K SurfaceView",
+    tr4_chrome: "<span style=\"color:#64748b;\">✗</span> Standard web view",
+    tr4_tv: "<span style=\"color:#64748b;\">✗</span> Scatti e blocchi",
+    tr5_feat: "Anello di focus D-Pad per telecomando",
+    tr5_safeer: "<span style=\"color:#10b981;\">✓</span> Navigazione a 60 FPS",
+    tr5_chrome: "<span style=\"color:#64748b;\">✗</span> Puntatore scomodo",
+    tr5_tv: "<span style=\"color:#64748b;\">✗</span> Scorrimento lento",
+    dl_shortlink_lbl: "Link breve:",
+    dl_release_lbl: "Release:",
+
     nav_features: "Funzionalità",
     nav_linux: "🍃 Linux",
     nav_security: "Sicurezza",
@@ -528,6 +1004,920 @@ const i18n = {
 
 let currentLang = 'sl';
 
+
+// --- Language-Aware Dynamic Content Matrices ---
+const threatI18n = {
+  "sl": {
+    "feodo": {
+      "title": "⚠️ ZAZNANA IN BLOKIRANA GROŽNJA (C2 BOTNET)",
+      "desc": "Dridex/Emotet C2 strežnik takoj prestrežen (abuse.ch Feodo). Povezava je bila prekinjena pred izvajanjem."
+    },
+    "urlhaus": {
+      "title": "⚠️ ZAZNANA ZLONAMERNA KODA (PAYLOAD DROPPER)",
+      "desc": "Poskus prenosa nevarne datoteke .apk z znane malware domene je bil ustavljen."
+    },
+    "phishing": {
+      "title": "⚠️ OPOZORILO: LAŽNA BANČNA STRAN (PHISHING)",
+      "desc": "Lažna spletna stran za krajo osebnih podatkov in gesel (Phishing Army feed) je blokirana."
+    },
+    "safe": {
+      "title": "✅ PREVERJENO VARNO SPLETNO MESTO",
+      "desc": "Domena je varna. Sledilci in oglasne pasice so bili kozmetično odstranjeni za maksimalno hitrost."
+    }
+  },
+  "en": {
+    "feodo": {
+      "title": "⚠️ THREAT DETECTED & BLOCKED (C2 BOTNET)",
+      "desc": "Dridex/Emotet C2 server instantly intercepted (abuse.ch Feodo). Connection aborted before execution."
+    },
+    "urlhaus": {
+      "title": "⚠️ MALICIOUS PAYLOAD DETECTED (PAYLOAD DROPPER)",
+      "desc": "Attempted download of hazardous .apk file from known malware domain has been halted."
+    },
+    "phishing": {
+      "title": "⚠️ WARNING: FAKE BANKING PAGE (PHISHING)",
+      "desc": "Fraudulent website designed to steal credentials and passwords (Phishing Army feed) is blocked."
+    },
+    "safe": {
+      "title": "✅ VERIFIED SAFE WEBSITE",
+      "desc": "Domain is secure. Trackers and ad banners have been cosmetically stripped for maximum speed."
+    }
+  },
+  "de": {
+    "feodo": {
+      "title": "⚠️ BEDROHUNG ERKANNT & BLOCKIERT (C2 BOTNET)",
+      "desc": "Dridex/Emotet C2-Server sofort abgefangen (abuse.ch Feodo). Verbindung vor Ausführung beendet."
+    },
+    "urlhaus": {
+      "title": "⚠️ SCHADCODE ERKANNT (PAYLOAD DROPPER)",
+      "desc": "Versuchter Download einer gefährlichen .apk-Datei von bekannter Malware-Domain gestoppt."
+    },
+    "phishing": {
+      "title": "⚠️ WARNUNG: GEFÄLSCHTE BANKSEITE (PHISHING)",
+      "desc": "Gefälschte Website zum Diebstahl von Daten und Passwörtern (Phishing Army Feed) blockiert."
+    },
+    "safe": {
+      "title": "✅ VERIFIZIERTE SICHERE WEBSEITE",
+      "desc": "Domain ist sicher. Tracker und Banner wurden für maximale Geschwindigkeit entfernt."
+    }
+  },
+  "es": {
+    "feodo": {
+      "title": "⚠️ AMENAZA DETECTADA Y BLOQUEADA (C2 BOTNET)",
+      "desc": "Servidor C2 Dridex/Emotet interceptado al instante (abuse.ch Feodo). Conexión abortada antes de ejecutarse."
+    },
+    "urlhaus": {
+      "title": "⚠️ CÓDIGO MALICIOSO DETECTADO (PAYLOAD DROPPER)",
+      "desc": "Intento de descarga de archivo .apk peligroso desde dominio malware detenido."
+    },
+    "phishing": {
+      "title": "⚠️ ADVERTENCIA: SITIO BANCARIO FALSO (PHISHING)",
+      "desc": "Sitio web falso para robo de credenciales y contraseñas (Phishing Army) bloqueado."
+    },
+    "safe": {
+      "title": "✅ SITIO WEB SEGURO VERIFICADO",
+      "desc": "El dominio es seguro. Rastreadores y anuncios eliminados para máxima velocidad."
+    }
+  },
+  "fr": {
+    "feodo": {
+      "title": "⚠️ MENACE DÉTECTÉE ET BLOQUÉE (C2 BOTNET)",
+      "desc": "Serveur C2 Dridex/Emotet intercepté instantanément (abuse.ch Feodo). Connexion interrompue."
+    },
+    "urlhaus": {
+      "title": "⚠️ CODE MALVEILLANT DÉTECTÉ (PAYLOAD DROPPER)",
+      "desc": "Tentative de téléchargement d'un fichier .apk dangereux arrêtée."
+    },
+    "phishing": {
+      "title": "⚠️ AVERTISSEMENT : FAUX SITE BANCAIRE (PHISHING)",
+      "desc": "Faux site web de vol d'identifiants et de mots de passe (flux Phishing Army) bloqué."
+    },
+    "safe": {
+      "title": "✅ SITE WEB VÉRIFIÉ ET SÛR",
+      "desc": "Le domaine est sécurisé. Traqueurs et bannières supprimés pour une vitesse maximale."
+    }
+  },
+  "it": {
+    "feodo": {
+      "title": "⚠️ MINACCIA RILEVATA E BLOCCATA (C2 BOTNET)",
+      "desc": "Server C2 Dridex/Emotet intercettato all'istante (abuse.ch Feodo). Connessione interrotta prima dell'esecuzione."
+    },
+    "urlhaus": {
+      "title": "⚠️ CODICE DANNOSO RILEVATO (PAYLOAD DROPPER)",
+      "desc": "Tentativo di download di file .apk pericoloso da dominio malware bloccato."
+    },
+    "phishing": {
+      "title": "⚠️ AVVISO: FALSA PAGINA BANCARIA (PHISHING)",
+      "desc": "Sito fraudolento per il furto di credenziali e password (feed Phishing Army) bloccato."
+    },
+    "safe": {
+      "title": "✅ SITO WEB VERIFICATO E SICURO",
+      "desc": "Il dominio è sicuro. Tracker e banner rimossi per la massima velocità."
+    }
+  }
+};
+const showcaseCaptionsI18n = {
+  "sl": {
+    "mobile": {
+      "shield": {
+        "status": "Aktivna Zaščita",
+        "caption": "<strong>Lokalni Varnostni Ščit:</strong> Prestreže zlonamerna spletna mesta, botnete (Dridex, Emotet) in trojance pred nalaganjem v pomnilnik (abuse.ch O(k) Trie)."
+      },
+      "stats": {
+        "status": "48 Blokiranih",
+        "caption": "<strong>Nadzorna plošča in statistika:</strong> Pregled v realnem času nad blokiranimi C2 strežniki, sledilci in preprečenimi nevarnimi prenosi."
+      },
+      "search": {
+        "status": "Čisto Brskanje",
+        "caption": "<strong>Čisto in hitro brskanje:</strong> Nemoteno iskanje in branje novic brez oglasnih pasic, pojavnih oken in invazivnih sledilnih skript."
+      },
+      "youtube": {
+        "status": "0 Oglasov • Ozadje",
+        "caption": "<strong>YouTube z ugasnjenim zaslonom:</strong> Nemoteno poslušanje glasbe in podcastov v ozadju z zaklenjenim telefonom brez oglasnih prekinitev."
+      }
+    },
+    "tv": {
+      "home": {
+        "status": "4K TV Portali",
+        "caption": "<strong>4K Android TV Domači Portal:</strong> Velike pregledne ploščice za hiter dostop do novic, videa in TV kanalov z daljinskim upravljalnikom."
+      },
+      "dpad": {
+        "status": "60 FPS D-Pad",
+        "caption": "<strong>60 FPS D-Pad Fokus:</strong> Cianov fokusni obroč natančno skače med elementi brez zakasnitve – brez nerodnih navideznih mišk."
+      },
+      "portals": {
+        "status": "Upravitelj Postaj",
+        "caption": "<strong>Upravitelj TV Portalov:</strong> Preprosto urejanje, razvrščanje in dodajanje lastnih televizijskih postaj in spletnih mest z daljincem."
+      }
+    },
+    "desktop": {
+      "main": {
+        "status": "Unix Socket Aktiven",
+        "caption": "<strong>Linux Mint Suverena Izdaja:</strong> Awesomebar terminalna orodna vrstica, vgrajen Tampermonkey za skripte ter prilagoditev tem in CSS-ja."
+      }
+    }
+  },
+  "en": {
+    "mobile": {
+      "shield": {
+        "status": "Active Defense",
+        "caption": "<strong>Local Security Shield:</strong> Intercepts malicious sites, C2 botnets (Dridex, Emotet) and trojans before execution (abuse.ch O(k) Trie)."
+      },
+      "stats": {
+        "status": "48 Blocked",
+        "caption": "<strong>Dashboard & Analytics:</strong> Real-time overview of blocked C2 botnet servers, trackers, and aborted malware downloads."
+      },
+      "search": {
+        "status": "Clean Browsing",
+        "caption": "<strong>Fast & Clean Browsing:</strong> Smooth search and news reading with zero intrusive banners, popups, or tracking scripts."
+      },
+      "youtube": {
+        "status": "0 Ads • Background",
+        "caption": "<strong>Screen-Off YouTube:</strong> Uninterrupted music and podcasts in the background with locked screen and zero ad interruptions."
+      }
+    },
+    "tv": {
+      "home": {
+        "status": "4K TV Portals",
+        "caption": "<strong>4K Android TV Home Portal:</strong> Large high-contrast tiles for fast remote-friendly access to news, media, and TV streams."
+      },
+      "dpad": {
+        "status": "60 FPS D-Pad",
+        "caption": "<strong>60 FPS D-Pad Focus:</strong> Precision cyan focus ring snaps between interactive cards with zero lag—no clumsy virtual pointer."
+      },
+      "portals": {
+        "status": "Channel Manager",
+        "caption": "<strong>TV Portal Manager:</strong> Easily organize, customize, and add your favorite TV stations and web bookmarks with the remote."
+      }
+    },
+    "desktop": {
+      "main": {
+        "status": "Unix Socket Active",
+        "caption": "<strong>Linux Mint Sovereign Edition:</strong> Awesomebar terminal omnibox, built-in Tampermonkey userscript engine, themes and custom CSS."
+      }
+    }
+  },
+  "de": {
+    "mobile": {
+      "shield": {
+        "status": "Aktiver Schutz",
+        "caption": "<strong>Lokaler Sicherheitsschild:</strong> Fängt bösartige Webseiten, C2-Botnets und Trojaner vor dem Laden ab (abuse.ch O(k) Trie)."
+      },
+      "stats": {
+        "status": "48 Blockiert",
+        "caption": "<strong>Dashboard & Statistiken:</strong> Echtzeit-Übersicht über blockierte C2-Server, Tracker und verhinderte Downloads."
+      },
+      "search": {
+        "status": "Sauberes Surfen",
+        "caption": "<strong>Schnelles und sauberes Surfen:</strong> Reibungslose Suche ohne Werbebanner, Popups oder Tracker."
+      },
+      "youtube": {
+        "status": "0 Werbung • Hintergrund",
+        "caption": "<strong>YouTube bei gesperrtem Bildschirm:</strong> Unterbrechungsfreie Musik und Podcasts im Hintergrund ohne Werbung."
+      }
+    },
+    "tv": {
+      "home": {
+        "status": "4K TV-Portale",
+        "caption": "<strong>4K Android TV Startportal:</strong> Große Kacheln für schnellen Zugriff auf Nachrichten, Videos und TV-Sender per Fernbedienung."
+      },
+      "dpad": {
+        "status": "60 FPS D-Pad",
+        "caption": "<strong>60 FPS D-Pad Fokus:</strong> Präziser cyanfarbener Fokusring springt verzögerungsfrei zwischen Elementen."
+      },
+      "portals": {
+        "status": "Kanalmanager",
+        "caption": "<strong>TV-Portal-Manager:</strong> Einfaches Verwalten und Hinzufügen eigener TV-Sender per Fernbedienung."
+      }
+    },
+    "desktop": {
+      "main": {
+        "status": "Unix Socket Aktiv",
+        "caption": "<strong>Linux Mint Sovereign Edition:</strong> Awesomebar Terminal-Omnibox, integrierter Tampermonkey für Skripte und Themes."
+      }
+    }
+  },
+  "es": {
+    "mobile": {
+      "shield": {
+        "status": "Defensa Activa",
+        "caption": "<strong>Escudo de Seguridad Local:</strong> Intercepta sitios maliciosos, botnets C2 y troyanos antes de cargarse (abuse.ch O(k) Trie)."
+      },
+      "stats": {
+        "status": "48 Bloqueados",
+        "caption": "<strong>Panel y Estadísticas:</strong> Vista en tiempo real de servidores C2 bloqueados, rastreadores y descargas abortadas."
+      },
+      "search": {
+        "status": "Navegación Limpia",
+        "caption": "<strong>Navegación Rápida y Limpia:</strong> Búsqueda fluida y noticias sin banners molestos ni ventanas emergentes."
+      },
+      "youtube": {
+        "status": "0 Anuncios • Fondo",
+        "caption": "<strong>YouTube con pantalla apagada:</strong> Música y podcasts ininterrumpidos en segundo plano sin anuncios."
+      }
+    },
+    "tv": {
+      "home": {
+        "status": "Portales 4K TV",
+        "caption": "<strong>Portal de Inicio 4K Android TV:</strong> Grandes iconos para acceso rápido a noticias, vídeos y canales con el mando."
+      },
+      "dpad": {
+        "status": "60 FPS D-Pad",
+        "caption": "<strong>Enfoque D-Pad a 60 FPS:</strong> Anillo de enfoque cian preciso sin retardo ni ratones virtuales torpes."
+      },
+      "portals": {
+        "status": "Gestor de Canales",
+        "caption": "<strong>Gestor de Portales TV:</strong> Organiza y añade fácilmente tus canales favoritos con el mando a distancia."
+      }
+    },
+    "desktop": {
+      "main": {
+        "status": "Unix Socket Activo",
+        "caption": "<strong>Linux Mint Sovereign Edition:</strong> Barra Awesomebar, motor Tampermonkey integrado y personalización de temas."
+      }
+    }
+  },
+  "fr": {
+    "mobile": {
+      "shield": {
+        "status": "Défense Active",
+        "caption": "<strong>Bouclier de Sécurité Local :</strong> Intercepte les sites malveillants, botnets C2 et chevaux de Troie avant le chargement."
+      },
+      "stats": {
+        "status": "48 Bloqués",
+        "caption": "<strong>Tableau de bord et stats :</strong> Vue en temps réel des serveurs C2 bloqués, des traqueurs et des téléchargements arrêtés."
+      },
+      "search": {
+        "status": "Navigation Épurée",
+        "caption": "<strong>Navigation Rapide :</strong> Recherche fluide et lecture sans bannières publicitaires ni fenêtres intrusives."
+      },
+      "youtube": {
+        "status": "0 Pub • Arrière-plan",
+        "caption": "<strong>YouTube écran éteint :</strong> Musique et podcasts ininterrompus en arrière-plan avec écran verrouillé."
+      }
+    },
+    "tv": {
+      "home": {
+        "status": "Portails 4K TV",
+        "caption": "<strong>Portail d'accueil 4K Android TV :</strong> Grandes tuiles pour un accès rapide aux actualités et chaînes TV."
+      },
+      "dpad": {
+        "status": "60 FPS D-Pad",
+        "caption": "<strong>Focus D-Pad 60 FPS :</strong> Anneau de focus cyan ultra-précis sautant d'un élément à l'autre sans latence."
+      },
+      "portals": {
+        "status": "Gestionnaire Chaînes",
+        "caption": "<strong>Gestionnaire de Portails TV :</strong> Organisez et ajoutez facilement vos chaînes favorites à la télécommande."
+      }
+    },
+    "desktop": {
+      "main": {
+        "status": "Socket Unix Actif",
+        "caption": "<strong>Édition Linux Mint :</strong> Awesomebar terminal, Tampermonkey intégré pour scripts et thèmes personnalisés."
+      }
+    }
+  },
+  "it": {
+    "mobile": {
+      "shield": {
+        "status": "Difesa Attiva",
+        "caption": "<strong>Scudo di Sicurezza Locale:</strong> Intercetta siti dannosi, botnet C2 e trojan prima del caricamento (abuse.ch O(k) Trie)."
+      },
+      "stats": {
+        "status": "48 Bloccati",
+        "caption": "<strong>Dashboard e statistiche:</strong> Panoramica in tempo reale dei server C2 bloccati, tracker e download fermati."
+      },
+      "search": {
+        "status": "Navigazione Pulita",
+        "caption": "<strong>Navigazione Veloce:</strong> Ricerca fluida e notizie senza banner pubblicitari invasivi o pop-up."
+      },
+      "youtube": {
+        "status": "0 Pubblicità • Sfondo",
+        "caption": "<strong>YouTube a schermo spento:</strong> Musica e podcast senza interruzioni in background a telefono bloccato."
+      }
+    },
+    "tv": {
+      "home": {
+        "status": "Portali 4K TV",
+        "caption": "<strong>Portale Home 4K Android TV:</strong> Grandi riquadri per un accesso rapido a notizie, video e canali TV col telecomando."
+      },
+      "dpad": {
+        "status": "60 FPS D-Pad",
+        "caption": "<strong>Focus D-Pad a 60 FPS:</strong> Anello di messa a fuoco ciano preciso e scattante senza mouse virtuali."
+      },
+      "portals": {
+        "status": "Gestore Canali",
+        "caption": "<strong>Gestore Portali TV:</strong> Organizza e aggiungi facilmente i tuoi canali preferiti con il telecomando."
+      }
+    },
+    "desktop": {
+      "main": {
+        "status": "Socket Unix Attivo",
+        "caption": "<strong>Edizione Linux Mint:</strong> Awesomebar terminale, Tampermonkey integrato per script e temi CSS personalizzati."
+      }
+    }
+  }
+};
+const demoScriptsI18n = {
+  "sl": [
+    {
+      "headline": "YouTube Samodejni Preskok",
+      "meta": "Cilj: *.youtube.com/* • Čas proženja: document-end",
+      "badge": "Aktivno",
+      "stat1Lbl": "Oglasov preskočeno",
+      "stat2Lbl": "Prihranjen čas",
+      "stat3Lbl": "Zakasnitev klika",
+      "logs": [
+        {
+          "time": "[10:14:02]",
+          "text": "🛡️ Safeer Userscript Engine inicializiran",
+          "type": "info"
+        },
+        {
+          "time": "[10:14:03]",
+          "text": "🔍 Zaznan video element & oglasni predvajalnik",
+          "type": "info"
+        },
+        {
+          "time": "[10:14:03]",
+          "text": "⚡ Najden '.ytp-skip-ad-button' -> Samodejni klik!",
+          "type": "success"
+        },
+        {
+          "time": "[10:14:04]",
+          "text": "✅ Oglas uspešno preskočen brez zamika",
+          "type": "success"
+        }
+      ]
+    },
+    {
+      "headline": "Pametni Nočni Način",
+      "meta": "Cilj: Vse spletne strani (*) • Brez popačenja slik",
+      "badge": "Aktivno",
+      "stat1Lbl": "Manj modre svetlobe",
+      "stat2Lbl": "Ohranjene barve slik",
+      "stat3Lbl": "Prihranek baterije",
+      "logs": [
+        {
+          "time": "[21:40:11]",
+          "text": "🌙 Pametni nočni način vklopljen",
+          "type": "info"
+        },
+        {
+          "time": "[21:40:11]",
+          "text": "🎨 Uporabljen CSS invert(90%) hue-rotate(180deg)",
+          "type": "info"
+        },
+        {
+          "time": "[21:40:12]",
+          "text": "🖼️ Zaznanih 18 slik in 2 videa -> Obnovljene naravne barve",
+          "type": "success"
+        },
+        {
+          "time": "[21:40:12]",
+          "text": "✨ Stran pretvorjena v čist AMOLED kontrast",
+          "type": "success"
+        }
+      ]
+    },
+    {
+      "headline": "Čisti Splet Brez Ovir",
+      "meta": "Cilj: Vse spletne strani (*) • Odstranitev vsiljivih pasic",
+      "badge": "Aktivno",
+      "stat1Lbl": "Odstranjenih pasic",
+      "stat2Lbl": "Klikov na 'Sprejmi vse'",
+      "stat3Lbl": "Več vidne vsebine",
+      "logs": [
+        {
+          "time": "[14:22:05]",
+          "text": "🧹 Skeniranje DOM elementov za nadležne pasice",
+          "type": "info"
+        },
+        {
+          "time": "[14:22:05]",
+          "text": "🚫 Odstranjeno: '.cookie-banner' in '[id*=\"gdpr\"]'",
+          "type": "success"
+        },
+        {
+          "time": "[14:22:06]",
+          "text": "🚫 Odstranjeno: '.newsletter-modal' in '.fixed-bottom-bar'",
+          "type": "success"
+        },
+        {
+          "time": "[14:22:06]",
+          "text": "🎉 Čisto branje omogočeno brez motenj!",
+          "type": "success"
+        }
+      ]
+    }
+  ],
+  "en": [
+    {
+      "headline": "YouTube Auto Skip",
+      "meta": "Target: *.youtube.com/* • Trigger: document-end",
+      "badge": "Active",
+      "stat1Lbl": "Ads skipped",
+      "stat2Lbl": "Time saved",
+      "stat3Lbl": "Click delay",
+      "logs": [
+        {
+          "time": "[10:14:02]",
+          "text": "🛡️ Safeer Userscript Engine initialized",
+          "type": "info"
+        },
+        {
+          "time": "[10:14:03]",
+          "text": "🔍 Video element & ad container detected",
+          "type": "info"
+        },
+        {
+          "time": "[10:14:03]",
+          "text": "⚡ Found '.ytp-skip-ad-button' -> Auto click dispatched!",
+          "type": "success"
+        },
+        {
+          "time": "[10:14:04]",
+          "text": "✅ Ad successfully skipped without delay",
+          "type": "success"
+        }
+      ]
+    },
+    {
+      "headline": "Smart Dark Mode",
+      "meta": "Target: All websites (*) • Preserves media colors",
+      "badge": "Active",
+      "stat1Lbl": "Less blue light",
+      "stat2Lbl": "Natural image colors",
+      "stat3Lbl": "Battery efficiency",
+      "logs": [
+        {
+          "time": "[21:40:11]",
+          "text": "🌙 Smart Dark Mode activated",
+          "type": "info"
+        },
+        {
+          "time": "[21:40:11]",
+          "text": "🎨 Applied CSS invert(90%) hue-rotate(180deg)",
+          "type": "info"
+        },
+        {
+          "time": "[21:40:12]",
+          "text": "🖼️ 18 images & 2 videos detected -> Original hues restored",
+          "type": "success"
+        },
+        {
+          "time": "[21:40:12]",
+          "text": "✨ Webpage rendered in high AMOLED contrast",
+          "type": "success"
+        }
+      ]
+    },
+    {
+      "headline": "Clean Web Ad-Strip",
+      "meta": "Target: All websites (*) • Removes intrusive overlays",
+      "badge": "Active",
+      "stat1Lbl": "Overlays removed",
+      "stat2Lbl": "Consent clicks required",
+      "stat3Lbl": "More visible screen",
+      "logs": [
+        {
+          "time": "[14:22:05]",
+          "text": "🧹 Scanning DOM elements for obstructive overlays",
+          "type": "info"
+        },
+        {
+          "time": "[14:22:05]",
+          "text": "🚫 Removed: '.cookie-banner' and '[id*=\"gdpr\"]'",
+          "type": "success"
+        },
+        {
+          "time": "[14:22:06]",
+          "text": "🚫 Removed: '.newsletter-modal' and '.fixed-bottom-bar'",
+          "type": "success"
+        },
+        {
+          "time": "[14:22:06]",
+          "text": "🎉 Clutter-free reading enabled without interruptions!",
+          "type": "success"
+        }
+      ]
+    }
+  ],
+  "de": [
+    {
+      "headline": "YouTube Automatisches Überspringen",
+      "meta": "Ziel: *.youtube.com/* • Auslöser: document-end",
+      "badge": "Aktiv",
+      "stat1Lbl": "Werbung übersprungen",
+      "stat2Lbl": "Gesparte Zeit",
+      "stat3Lbl": "Klick-Verzögerung",
+      "logs": [
+        {
+          "time": "[10:14:02]",
+          "text": "🛡️ Safeer Userscript Engine initialisiert",
+          "type": "info"
+        },
+        {
+          "time": "[10:14:03]",
+          "text": "🔍 Videoelement & Werbecontainer erkannt",
+          "type": "info"
+        },
+        {
+          "time": "[10:14:03]",
+          "text": "⚡ '.ytp-skip-ad-button' gefunden -> Automatisch geklickt!",
+          "type": "success"
+        },
+        {
+          "time": "[10:14:04]",
+          "text": "✅ Werbung verzögerungsfrei übersprungen",
+          "type": "success"
+        }
+      ]
+    },
+    {
+      "headline": "Intelligenter Dunkelmodus",
+      "meta": "Ziel: Alle Webseiten (*) • Bildfarben geschützt",
+      "badge": "Aktiv",
+      "stat1Lbl": "Weniger Blaulicht",
+      "stat2Lbl": "Natürliche Bildfarben",
+      "stat3Lbl": "Batterieersparnis",
+      "logs": [
+        {
+          "time": "[21:40:11]",
+          "text": "🌙 Intelligenter Dunkelmodus aktiviert",
+          "type": "info"
+        },
+        {
+          "time": "[21:40:11]",
+          "text": "🎨 CSS invert(90%) hue-rotate(180deg) angewendet",
+          "type": "info"
+        },
+        {
+          "time": "[21:40:12]",
+          "text": "🖼️ 18 Bilder & 2 Videos erkannt -> Natürliche Farben wiederhergestellt",
+          "type": "success"
+        },
+        {
+          "time": "[21:40:12]",
+          "text": "✨ Seite in scharfen AMOLED-Kontrast umgewandelt",
+          "type": "success"
+        }
+      ]
+    },
+    {
+      "headline": "Sauberes Web ohne Banner",
+      "meta": "Ziel: Alle Webseiten (*) • Entfernt lästige Banner",
+      "badge": "Aktiv",
+      "stat1Lbl": "Banner entfernt",
+      "stat2Lbl": "Klicks auf 'Akzeptieren'",
+      "stat3Lbl": "Mehr sichtbarer Inhalt",
+      "logs": [
+        {
+          "time": "[14:22:05]",
+          "text": "🧹 Scanne DOM-Elemente nach störenden Bannern",
+          "type": "info"
+        },
+        {
+          "time": "[14:22:05]",
+          "text": "🚫 Entfernt: '.cookie-banner' und '[id*=\"gdpr\"]'",
+          "type": "success"
+        },
+        {
+          "time": "[14:22:06]",
+          "text": "🚫 Entfernt: '.newsletter-modal' und '.fixed-bottom-bar'",
+          "type": "success"
+        },
+        {
+          "time": "[14:22:06]",
+          "text": "🎉 Unterbrechungsfreies Lesen aktiviert!",
+          "type": "success"
+        }
+      ]
+    }
+  ],
+  "es": [
+    {
+      "headline": "Salto Automático de YouTube",
+      "meta": "Objetivo: *.youtube.com/* • Momento: document-end",
+      "badge": "Activo",
+      "stat1Lbl": "Anuncios saltados",
+      "stat2Lbl": "Tiempo ahorrado",
+      "stat3Lbl": "Retardo de clic",
+      "logs": [
+        {
+          "time": "[10:14:02]",
+          "text": "🛡️ Motor de Userscripts de Safeer inicializado",
+          "type": "info"
+        },
+        {
+          "time": "[10:14:03]",
+          "text": "🔍 Elemento de vídeo y reproductor detectados",
+          "type": "info"
+        },
+        {
+          "time": "[10:14:03]",
+          "text": "⚡ Encontrado '.ytp-skip-ad-button' -> ¡Clic automático!",
+          "type": "success"
+        },
+        {
+          "time": "[10:14:04]",
+          "text": "✅ Anuncio saltado con éxito sin demora",
+          "type": "success"
+        }
+      ]
+    },
+    {
+      "headline": "Modo Oscuro Inteligente",
+      "meta": "Objetivo: Todos los sitios web (*) • Sin distorsión",
+      "badge": "Activo",
+      "stat1Lbl": "Menos luz azul",
+      "stat2Lbl": "Colores preservados",
+      "stat3Lbl": "Ahorro de batería",
+      "logs": [
+        {
+          "time": "[21:40:11]",
+          "text": "🌙 Modo oscuro inteligente activado",
+          "type": "info"
+        },
+        {
+          "time": "[21:40:11]",
+          "text": "🎨 Aplicado CSS invert(90%) hue-rotate(180deg)",
+          "type": "info"
+        },
+        {
+          "time": "[21:40:12]",
+          "text": "🖼️ 18 imágenes y 2 vídeos detectados -> Colores restaurados",
+          "type": "success"
+        },
+        {
+          "time": "[21:40:12]",
+          "text": "✨ Página convertida a contraste AMOLED puro",
+          "type": "success"
+        }
+      ]
+    },
+    {
+      "headline": "Web Limpia Sin Molestias",
+      "meta": "Objetivo: Todos los sitios web (*) • Elimina ventanas",
+      "badge": "Activo",
+      "stat1Lbl": "Banners eliminados",
+      "stat2Lbl": "Clics en 'Aceptar'",
+      "stat3Lbl": "Más contenido visible",
+      "logs": [
+        {
+          "time": "[14:22:05]",
+          "text": "🧹 Escaneando elementos DOM en busca de banners",
+          "type": "info"
+        },
+        {
+          "time": "[14:22:05]",
+          "text": "🚫 Eliminado: '.cookie-banner' y '[id*=\"gdpr\"]'",
+          "type": "success"
+        },
+        {
+          "time": "[14:22:06]",
+          "text": "🚫 Eliminado: '.newsletter-modal' y '.fixed-bottom-bar'",
+          "type": "success"
+        },
+        {
+          "time": "[14:22:06]",
+          "text": "🎉 ¡Lectura limpia activada sin interrupciones!",
+          "type": "success"
+        }
+      ]
+    }
+  ],
+  "fr": [
+    {
+      "headline": "Saut Automatique YouTube",
+      "meta": "Cible: *.youtube.com/* • Déclencheur: document-end",
+      "badge": "Actif",
+      "stat1Lbl": "Publicités ignorées",
+      "stat2Lbl": "Temps économisé",
+      "stat3Lbl": "Délai de clic",
+      "logs": [
+        {
+          "time": "[10:14:02]",
+          "text": "🛡️ Moteur Safeer Userscript initialisé",
+          "type": "info"
+        },
+        {
+          "time": "[10:14:03]",
+          "text": "🔍 Élément vidéo et lecteur publicitaire détectés",
+          "type": "info"
+        },
+        {
+          "time": "[10:14:03]",
+          "text": "⚡ '.ytp-skip-ad-button' trouvé -> Clic automatique !",
+          "type": "success"
+        },
+        {
+          "time": "[10:14:04]",
+          "text": "✅ Publicité ignorée sans délai",
+          "type": "success"
+        }
+      ]
+    },
+    {
+      "headline": "Mode Sombre Intelligent",
+      "meta": "Cible: Tous les sites web (*) • Préserve les médias",
+      "badge": "Actif",
+      "stat1Lbl": "Moins de lumière bleue",
+      "stat2Lbl": "Couleurs préservées",
+      "stat3Lbl": "Économie de batterie",
+      "logs": [
+        {
+          "time": "[21:40:11]",
+          "text": "🌙 Mode sombre intelligent activé",
+          "type": "info"
+        },
+        {
+          "time": "[21:40:11]",
+          "text": "🎨 CSS invert(90%) hue-rotate(180deg) appliqué",
+          "type": "info"
+        },
+        {
+          "time": "[21:40:12]",
+          "text": "🖼️ 18 images et 2 vidéos détectées -> Couleurs restaurées",
+          "type": "success"
+        },
+        {
+          "time": "[21:40:12]",
+          "text": "✨ Contraste AMOLED appliqué avec succès",
+          "type": "success"
+        }
+      ]
+    },
+    {
+      "headline": "Web Pur Sans Bannières",
+      "meta": "Cible: Tous les sites web (*) • Supprime les overlays",
+      "badge": "Actif",
+      "stat1Lbl": "Bannières supprimées",
+      "stat2Lbl": "Clics 'Tout accepter'",
+      "stat3Lbl": "Plus d'espace visible",
+      "logs": [
+        {
+          "time": "[14:22:05]",
+          "text": "🧹 Analyse du DOM à la recherche de bannières",
+          "type": "info"
+        },
+        {
+          "time": "[14:22:05]",
+          "text": "🚫 Supprimé : '.cookie-banner' et '[id*=\"gdpr\"]'",
+          "type": "success"
+        },
+        {
+          "time": "[14:22:06]",
+          "text": "🚫 Supprimé : '.newsletter-modal' et '.fixed-bottom-bar'",
+          "type": "success"
+        },
+        {
+          "time": "[14:22:06]",
+          "text": "🎉 Lecture agréable et épurée sans interruptions !",
+          "type": "success"
+        }
+      ]
+    }
+  ],
+  "it": [
+    {
+      "headline": "Salto Automatico YouTube",
+      "meta": "Obiettivo: *.youtube.com/* • Trigger: document-end",
+      "badge": "Attivo",
+      "stat1Lbl": "Annunci saltati",
+      "stat2Lbl": "Tempo risparmiato",
+      "stat3Lbl": "Ritardo del clic",
+      "logs": [
+        {
+          "time": "[10:14:02]",
+          "text": "🛡️ Motore Safeer Userscript inizializzato",
+          "type": "info"
+        },
+        {
+          "time": "[10:14:03]",
+          "text": "🔍 Rilevato elemento video & player pubblicitario",
+          "type": "info"
+        },
+        {
+          "time": "[10:14:03]",
+          "text": "⚡ Trovato '.ytp-skip-ad-button' -> Clic automatico!",
+          "type": "success"
+        },
+        {
+          "time": "[10:14:04]",
+          "text": "✅ Annuncio saltato con successo senza ritardi",
+          "type": "success"
+        }
+      ]
+    },
+    {
+      "headline": "Modalità Scura Intelligente",
+      "meta": "Obiettivo: Tutti i siti (*) • Senza distorsioni",
+      "badge": "Attivo",
+      "stat1Lbl": "Meno luce blu",
+      "stat2Lbl": "Colori naturali intatti",
+      "stat3Lbl": "Risparmio batteria",
+      "logs": [
+        {
+          "time": "[21:40:11]",
+          "text": "🌙 Modalità scura intelligente attivata",
+          "type": "info"
+        },
+        {
+          "time": "[21:40:11]",
+          "text": "🎨 Applicato CSS invert(90%) hue-rotate(180deg)",
+          "type": "info"
+        },
+        {
+          "time": "[21:40:12]",
+          "text": "🖼️ 18 immagini e 2 video rilevati -> Colori ripristinati",
+          "type": "success"
+        },
+        {
+          "time": "[21:40:12]",
+          "text": "✨ Contrasto AMOLED puro applicato",
+          "type": "success"
+        }
+      ]
+    },
+    {
+      "headline": "Web Pulito Senza Banner",
+      "meta": "Obiettivo: Tutti i siti (*) • Rimuove finestre fastidiose",
+      "badge": "Attivo",
+      "stat1Lbl": "Banner rimossi",
+      "stat2Lbl": "Clic su 'Accetta tutto'",
+      "stat3Lbl": "Più contenuto visibile",
+      "logs": [
+        {
+          "time": "[14:22:05]",
+          "text": "🧹 Scansione degli elementi DOM per banner invasivi",
+          "type": "info"
+        },
+        {
+          "time": "[14:22:05]",
+          "text": "🚫 Rimosso: '.cookie-banner' e '[id*=\"gdpr\"]'",
+          "type": "success"
+        },
+        {
+          "time": "[14:22:06]",
+          "text": "🚫 Rimosso: '.newsletter-modal' e '.fixed-bottom-bar'",
+          "type": "success"
+        },
+        {
+          "time": "[14:22:06]",
+          "text": "🎉 Lettura pulita attivata senza disturbi!",
+          "type": "success"
+        }
+      ]
+    }
+  ]
+};
+
+
+let currentActiveScriptIndex = 0;
+let currentThreatKey = 'feodo';
+let currentScreenshotKey = 'shield';
+
 function applyLanguage(lang) {
   currentLang = lang;
   document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -541,8 +1931,74 @@ function applyLanguage(lang) {
     btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
   });
 
+  // Update dynamic showcase caption & status
+  updateShowcaseLanguage();
+
+  // Update dynamic threat simulator console
+  updateThreatLanguage();
+
+  // Update dynamic script demo simulator
+  updateScriptDemoLanguage();
+
   if (typeof DisplayEngine !== 'undefined' && DisplayEngine.refresh) {
     DisplayEngine.refresh();
+  }
+}
+
+function updateShowcaseLanguage() {
+  const langData = showcaseCaptionsI18n[currentLang] || showcaseCaptionsI18n['sl'];
+  const platData = langData[currentPlatform];
+  if (!platData) return;
+  const item = platData[currentScreenshotKey] || Object.values(platData)[0];
+  if (!item) return;
+
+  const statusEl = document.getElementById('showcaseStatusText');
+  const captionEl = document.getElementById('showcaseCaptionText');
+  if (statusEl) statusEl.textContent = item.status;
+  if (captionEl) captionEl.innerHTML = item.caption;
+}
+
+function updateThreatLanguage() {
+  const langData = threatI18n[currentLang] || threatI18n['sl'];
+  const item = langData[currentThreatKey] || langData['feodo'];
+  const consoleEl = document.getElementById('threatConsole');
+  if (!consoleEl || !item) return;
+
+  const color = (currentThreatKey === 'safe') ? '#10b981' : (currentThreatKey === 'phishing') ? '#f59e0b' : '#ef4444';
+  consoleEl.innerHTML = `
+    <span style="color:${color}; font-weight:700; font-size:0.82rem;">${item.title}</span>
+    <p style="color:#cbd5e1; font-size:0.78rem; margin-top:3px;">${item.desc}</p>
+  `;
+  consoleEl.style.borderColor = color;
+}
+
+function updateScriptDemoLanguage() {
+  const langData = demoScriptsI18n[currentLang] || demoScriptsI18n['sl'];
+  const scriptItem = langData[currentActiveScriptIndex];
+  if (!scriptItem) return;
+
+  const headlineEl = document.getElementById('simScriptHeadline');
+  const metaEl = document.getElementById('simScriptMeta');
+  const badgeEl = document.getElementById('simScriptBadge');
+  const stat1LblEl = document.getElementById('simStat1Lbl');
+  const stat2LblEl = document.getElementById('simStat2Lbl');
+  const stat3LblEl = document.getElementById('simStat3Lbl');
+  const outputEl = document.getElementById('simConsoleOutput');
+
+  if (headlineEl) headlineEl.textContent = scriptItem.headline;
+  if (metaEl) metaEl.textContent = scriptItem.meta;
+  if (badgeEl) badgeEl.textContent = scriptItem.badge;
+  if (stat1LblEl) stat1LblEl.textContent = scriptItem.stat1Lbl;
+  if (stat2LblEl) stat2LblEl.textContent = scriptItem.stat2Lbl;
+  if (stat3LblEl) stat3LblEl.textContent = scriptItem.stat3Lbl;
+
+  if (outputEl && scriptItem.logs) {
+    outputEl.innerHTML = scriptItem.logs.map(log => `
+      <div class="log-line">
+        <span class="log-time">${log.time}</span>
+        <span class="log-${log.type}">${log.text}</span>
+      </div>
+    `).join('');
   }
 }
 
@@ -581,14 +2037,8 @@ function setupThreatSimulator() {
       b.classList.add('active');
 
       const simKey = b.getAttribute('data-sim');
-      const item = threatData[simKey];
-      if (item) {
-        consoleEl.innerHTML = `
-          <span style="color:${item.color}; font-weight:700; font-size:0.82rem;">${item.title}</span>
-          <p style="color:#cbd5e1; font-size:0.78rem; margin-top:3px;">${item.desc}</p>
-        `;
-        consoleEl.style.borderColor = item.color;
-      }
+      currentThreatKey = simKey;
+      updateThreatLanguage();
     });
   });
 }
@@ -712,6 +2162,7 @@ function switchPlatformShowcase(platform) {
 function switchScreenshot(platform, key, btn) {
   window._showcaseManualSwitched = true;
   currentPlatform = platform;
+  currentScreenshotKey = key;
 
   if (btn && btn.parentElement) {
     btn.parentElement.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
@@ -737,10 +2188,16 @@ function updateScreenshotView(platform, key) {
     imgEl.alt = data.status;
   }
 
+  currentScreenshotKey = key;
   if (urlEl) urlEl.textContent = data.url;
-  if (statusEl) statusEl.textContent = data.status;
-  if (captionEl) captionEl.innerHTML = data.caption;
   if (iconEl) iconEl.textContent = data.icon;
+  
+  const langData = showcaseCaptionsI18n[currentLang] || showcaseCaptionsI18n['sl'];
+  const platData = langData[platform];
+  const locItem = platData ? platData[key] : null;
+
+  if (statusEl) statusEl.textContent = locItem ? locItem.status : data.status;
+  if (captionEl) captionEl.innerHTML = locItem ? locItem.caption : data.caption;
 
   if (stageEl) {
     if (platform === 'mobile') {

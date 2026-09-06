@@ -28,7 +28,7 @@
       <ul class="nav-links">
         <li><a href="#features" class="nav-link" data-i18n="nav_features">Zmožnosti</a></li>
         <li><a href="#linux" class="nav-link" style="color:#87cf3e; font-weight:600;" data-i18n="nav_linux">🍃 Linux</a></li>
-        <li><a href="#userscripts" class="nav-link" style="color:#c084fc; font-weight:600;">✨ Skripte</a></li>
+        <li><a href="#userscripts" class="nav-link" style="color:#c084fc; font-weight:600;" data-i18n="nav_scripts">✨ Skripte</a></li>
         <li><a href="#security" class="nav-link" data-i18n="nav_security">Varnost</a></li>
         <li><a href="#compare" class="nav-link" data-i18n="nav_compare">Primerjava</a></li>
         <li><a href="#download" class="nav-link" data-i18n="nav_download">Prenos</a></li>
@@ -85,10 +85,10 @@
           </div>
 
           <div class="hero-trust-bar">
-            <div class="trust-item"><span class="trust-check">✓</span> <span>0 Oglasov</span></div>
-            <div class="trust-item"><span class="trust-check">✓</span> <span>YouTube v ozadju</span></div>
-            <div class="trust-item"><span class="trust-check">✓</span> <span>abuse.ch C2 Ščit</span></div>
-            <div class="trust-item"><span class="trust-check">✓</span> <span>100% Brezplačno</span></div>
+            <div class="trust-item"><span class="trust-check">✓</span> <span data-i18n="trust_ads">0 Oglasov</span></div>
+            <div class="trust-item"><span class="trust-check">✓</span> <span data-i18n="trust_yt">YouTube v ozadju</span></div>
+            <div class="trust-item"><span class="trust-check">✓</span> <span data-i18n="trust_c2">abuse.ch C2 Ščit</span></div>
+            <div class="trust-item"><span class="trust-check">✓</span> <span data-i18n="trust_free">100% Brezplačno</span></div>
           </div>
         </div>
 
@@ -97,50 +97,34 @@
           <!-- Primary Platform Switcher Tabs -->
           <div class="showcase-switch-bar">
             <button class="switch-tab active" id="tabMobileShowcase" onclick="switchPlatformShowcase('mobile')">
-              <span>📱 Telefon (Android)</span>
+              <span data-i18n="tab_showcase_mob">📱 Telefon (Android)</span>
             </button>
             <button class="switch-tab" id="tabTvShowcase" onclick="switchPlatformShowcase('tv')">
-              <span>📺 4K Android TV</span>
+              <span data-i18n="tab_showcase_tv">📺 4K Android TV</span>
             </button>
             <button class="switch-tab" id="tabDesktopShowcase" onclick="switchPlatformShowcase('desktop')">
-              <span>🍃 Linux Mint Namizje</span>
+              <span data-i18n="tab_showcase_desktop">🍃 Linux Mint Namizje</span>
             </button>
           </div>
 
           <!-- Sub-tabs for Mobile Screenshots -->
           <div class="showcase-subtabs-bar" id="subtabsMobile">
-            <button class="subtab-btn active" onclick="switchScreenshot('mobile', 'shield', this)">
-              🛡️ C2 Ščit
-            </button>
-            <button class="subtab-btn" onclick="switchScreenshot('mobile', 'stats', this)">
-              📊 Števec
-            </button>
-            <button class="subtab-btn" onclick="switchScreenshot('mobile', 'search', this)">
-              🔍 Portali
-            </button>
-            <button class="subtab-btn" onclick="switchScreenshot('mobile', 'youtube', this)">
-              🎵 YouTube
-            </button>
+            <button class="subtab-btn active" onclick="switchScreenshot('mobile', 'shield', this)" data-i18n="subtab_mob_shield">🛡️ C2 Ščit</button>
+            <button class="subtab-btn" onclick="switchScreenshot('mobile', 'stats', this)" data-i18n="subtab_mob_stats">📊 Števec</button>
+            <button class="subtab-btn" onclick="switchScreenshot('mobile', 'search', this)" data-i18n="subtab_mob_portals">🔍 Portali</button>
+            <button class="subtab-btn" onclick="switchScreenshot('mobile', 'youtube', this)" data-i18n="subtab_mob_yt">🎵 YouTube</button>
           </div>
 
           <!-- Sub-tabs for TV Screenshots -->
           <div class="showcase-subtabs-bar" id="subtabsTv" style="display:none;">
-            <button class="subtab-btn active" onclick="switchScreenshot('tv', 'home', this)">
-              📺 Portali
-            </button>
-            <button class="subtab-btn" onclick="switchScreenshot('tv', 'dpad', this)">
-              🎮 60 FPS
-            </button>
-            <button class="subtab-btn" onclick="switchScreenshot('tv', 'portals', this)">
-              📑 Postaje
-            </button>
+            <button class="subtab-btn active" onclick="switchScreenshot('tv', 'home', this)" data-i18n="subtab_tv_portals">📺 Portali</button>
+            <button class="subtab-btn" onclick="switchScreenshot('tv', 'dpad', this)" data-i18n="subtab_tv_dpad">🎮 60 FPS</button>
+            <button class="subtab-btn" onclick="switchScreenshot('tv', 'portals', this)" data-i18n="subtab_tv_stations">📑 Postaje</button>
           </div>
 
           <!-- Sub-tabs for Desktop Screenshots -->
           <div class="showcase-subtabs-bar" id="subtabsDesktop" style="display:none;">
-            <button class="subtab-btn active" onclick="switchScreenshot('desktop', 'main', this)">
-              🍃 Namizje
-            </button>
+            <button class="subtab-btn active" onclick="switchScreenshot('desktop', 'main', this)" data-i18n="subtab_desktop_main">🍃 Namizje</button>
           </div>
 
           <!-- Interactive Device Screen Frame -->
@@ -177,11 +161,11 @@
           <div class="metrics-strip">
             <div class="metric-box">
               <span class="metric-val" style="color:var(--accent-cyan);">0</span>
-              <span class="metric-lbl">Oglasov</span>
+              <span class="metric-lbl" data-i18n="metric_ads">Oglasov</span>
             </div>
             <div class="metric-box">
               <span class="metric-val" style="color:var(--accent-emerald);">0 ms</span>
-              <span class="metric-lbl">Zakasnitev</span>
+              <span class="metric-lbl" data-i18n="metric_latency">Zakasnitev</span>
             </div>
             <div class="metric-box">
               <span class="metric-val" style="color:#c084fc;">120 Hz</span>
@@ -219,7 +203,7 @@
               <div class="equalizer-bars">
                 <span></span><span></span><span></span><span></span><span></span>
               </div>
-              <span class="audio-equalizer-text">Predvajanje v ozadju • Zaslon zaklenjen</span>
+              <span class="audio-equalizer-text" data-i18n="card1_eq_text">Predvajanje v ozadju • Zaslon zaklenjen</span>
             </div>
           </div>
           <div class="bento-visual">
@@ -240,13 +224,13 @@
           <div class="threat-interactive-box">
             <div class="threat-radar-indicator">
               <span class="pulse-dot" style="background:#10b981; box-shadow:0 0 8px #10b981;"></span>
-              <span>abuse.ch Radar: <strong style="color:var(--accent-emerald);">0.18 ms</strong> • Status: <strong style="color:var(--accent-cyan);">Neutralizirano</strong></span>
+              <span data-i18n="radar_status_line">abuse.ch Radar: <strong style="color:var(--accent-emerald);">0.18 ms</strong> • Status: <strong style="color:var(--accent-cyan);">Neutralizirano</strong></span>
             </div>
             <div class="threat-chips-row">
               <button class="threat-btn active" data-sim="feodo">C2 Botnet</button>
               <button class="threat-btn" data-sim="urlhaus">Malware Dropper</button>
-              <button class="threat-btn" data-sim="phishing">Lažna banka</button>
-              <button class="threat-btn" data-sim="safe">Varna stran</button>
+              <button class="threat-btn" data-sim="phishing" data-i18n="threat_phishing_btn">Lažna banka</button>
+              <button class="threat-btn" data-sim="safe" data-i18n="threat_safe_btn">Varna stran</button>
             </div>
             <div class="threat-console" id="threatConsole">
               <span style="color:#ef4444; font-weight:700; font-size:0.82rem;">⚠️ ZAZNANA IN BLOKIRANA GROŽNJA</span>
@@ -264,7 +248,7 @@
         <div class="bento-card bento-tv-card" id="cardTvExperience">
           <div class="bento-content">
             <div class="tv-tabs-header-wrap">
-              <span class="bento-tag" style="color:#c084fc;">📺 Android TV &amp; Daljinski Upravljalnik</span>
+              <span class="bento-tag" style="color:#c084fc;" data-i18n="card3_tag_header">📺 Android TV &amp; Daljinski Upravljalnik</span>
               
               <!-- Tab Switcher (Preklop zavihkov) -->
               <div class="tv-feature-tabs-bar">
@@ -287,7 +271,7 @@
                   </p>
                   <div class="tv-tab-highlights">
                     <span class="tv-pill-hl">⚡ 60 FPS D-Pad</span>
-                    <span class="tv-pill-hl">🎯 Brez navidezne miške</span>
+                    <span class="tv-pill-hl" data-i18n="tv_pill_nomouse">🎯 Brez navidezne miške</span>
                     <span class="tv-pill-hl">🎬 ExoPlayer 4K Media3</span>
                   </div>
                 </div>
@@ -306,9 +290,9 @@
                     Hitro preklapljanje med novicami, vremenom in multimedijo z barvnimi gumbi na daljincu brez dolgotrajnega tipkanja naslovov. Vgrajen upravitelj portalov omogoča preprosto dodajanje in urejanje vaših priljubljenih postaj.
                   </p>
                   <div class="tv-tab-highlights">
-                    <span class="tv-pill-hl">🔴 Rdeči gumb: Xplore TV</span>
-                    <span class="tv-pill-hl">🟡 Rumeni gumb: YouTube</span>
-                    <span class="tv-pill-hl">🔵 Modri gumb: 24ur / Novice</span>
+                    <span class="tv-pill-hl" data-i18n="tv_pill_red">🔴 Rdeči gumb: Xplore TV</span>
+                    <span class="tv-pill-hl" data-i18n="tv_pill_yellow">🟡 Rumeni gumb: YouTube</span>
+                    <span class="tv-pill-hl" data-i18n="tv_pill_blue">🔵 Modri gumb: 24ur / Novice</span>
                   </div>
                 </div>
                 <div class="bento-visual tv-visual-box">
@@ -451,14 +435,9 @@
   <section class="userscripts-section" id="userscripts">
     <div class="container">
       <div class="userscripts-header text-center">
-        <span class="userscripts-badge">✨ VGRAJEN TAMPERMONKEY • 100% DIGITALNA SUVERENOST</span>
-        <h2 class="userscripts-title">
-          Tvoj brskalnik. Tvoja pravila.<br class="hide-mobile">
-          <span class="highlight-cyan">Dodaj svojo skripto v 10 sekundah.</span>
-        </h2>
-        <p class="userscripts-lead">
-          Zakaj bi se prilagajali spletnim stranem, če se spletne strani lahko prilagodijo vam? Safeer prinaša vgrajen <strong>Tampermonkey / Greasemonkey mehanizem</strong> za samodejno izvajanje lastnih JavaScript uporabniških skript brez nameščanja zunanjih vtičnikov.
-        </p>
+        <span class="userscripts-badge" data-i18n="userscripts_badge">✨ VGRAJEN TAMPERMONKEY • 100% DIGITALNA SUVERENOST</span>
+        <h2 class="userscripts-title" data-i18n="userscripts_title">Tvoj brskalnik. Tvoja pravila.<br class="hide-mobile"><span class="highlight-cyan">Dodaj svojo skripto v 10 sekundah.</span></h2>
+        <p class="userscripts-lead" data-i18n="userscripts_lead">Zakaj bi se prilagajali spletnim stranem, če se spletne strani lahko prilagodijo vam? Safeer prinaša vgrajen <strong>Tampermonkey / Greasemonkey mehanizem</strong> za samodejno izvajanje lastnih JavaScript uporabniških skript brez nameščanja zunanjih vtičnikov.</p>
       </div>
 
       <!-- Studio Row: Code Editor Window (Left) + Live Execution Simulator (Right) -->
@@ -472,14 +451,14 @@
               <span class="dot green"></span>
             </div>
             <div class="window-title-tab" id="activeScriptTabTitle">youtube_auto_skip.js</div>
-            <div class="window-badge-status">● AKTIVNA</div>
+            <div class="window-badge-status" data-i18n="script_status_active">● AKTIVNA</div>
           </div>
 
           <!-- Preset Switcher Pills -->
           <div class="script-preset-pills">
-            <button class="preset-pill active" onclick="switchScriptDemo(0, this)">1. Preskok oglasov</button>
-            <button class="preset-pill" onclick="switchScriptDemo(1, this)">2. Nočni način</button>
-            <button class="preset-pill" onclick="switchScriptDemo(2, this)">3. Čisti splet</button>
+            <button class="preset-pill active" onclick="switchScriptDemo(0, this)" data-i18n="script_pill_skip">1. Preskok oglasov</button>
+            <button class="preset-pill" onclick="switchScriptDemo(1, this)" data-i18n="script_pill_night">2. Nočni način</button>
+            <button class="preset-pill" onclick="switchScriptDemo(2, this)" data-i18n="script_pill_clean">3. Čisti splet</button>
           </div>
 
           <!-- Code Body -->
@@ -500,7 +479,7 @@ setInterval(() => {
           </div>
 
           <div class="code-window-footer">
-            <span class="footer-hint">💡 Kliknite zgornje profile za takojšnjo menjavo kode in simulacije.</span>
+            <span class="footer-hint" data-i18n="script_code_hint">💡 Kliknite zgornje profile za takojšnjo menjavo kode in simulacije.</span>
           </div>
         </div>
 
@@ -512,8 +491,8 @@ setInterval(() => {
               <span class="dot yellow"></span>
               <span class="dot green"></span>
             </div>
-            <div class="window-title-tab" id="simulatorTabTitle">⚡ Rezultat izvajanja v živo</div>
-            <div class="window-badge-status" style="color:var(--accent-emerald);">▶ V TEKU</div>
+            <div class="window-title-tab" id="simulatorTabTitle" data-i18n="sim_tab_title">⚡ Rezultat izvajanja v živo</div>
+            <div class="window-badge-status" style="color:var(--accent-emerald);" data-i18n="sim_status_running">▶ V TEKU</div>
           </div>
 
           <!-- Live Simulator Body -->
@@ -532,23 +511,23 @@ setInterval(() => {
               <div class="sim-stats-grid">
                 <div class="sim-stat-box">
                   <span class="sim-stat-val" id="simStat1">14</span>
-                  <span class="sim-stat-lbl" id="simStat1Lbl">Oglasov preskočeno</span>
+                  <span class="sim-stat-lbl" id="simStat1Lbl" data-i18n="sim_stat_ads_skipped">Oglasov preskočeno</span>
                 </div>
                 <div class="sim-stat-box">
                   <span class="sim-stat-val" id="simStat2">42 s</span>
-                  <span class="sim-stat-lbl" id="simStat2Lbl">Prihranjen čas</span>
+                  <span class="sim-stat-lbl" id="simStat2Lbl" data-i18n="sim_stat_time_saved">Prihranjen čas</span>
                 </div>
                 <div class="sim-stat-box">
                   <span class="sim-stat-val" id="simStat3">0 ms</span>
-                  <span class="sim-stat-lbl" id="simStat3Lbl">Zakasnitev klika</span>
+                  <span class="sim-stat-lbl" id="simStat3Lbl" data-i18n="sim_stat_click_delay">Zakasnitev klika</span>
                 </div>
               </div>
 
               <!-- Live DOM Console Box -->
               <div class="sim-console-wrap">
                 <div class="sim-console-head">
-                  <span>TERMINALNI DNEVNIK SKRIPTE (CONSOLE)</span>
-                  <span class="sim-console-live">● V ŽIVO</span>
+                  <span data-i18n="sim_console_title">TERMINALNI DNEVNIK SKRIPTE (CONSOLE)</span>
+                  <span class="sim-console-live" data-i18n="sim_console_live">● V ŽIVO</span>
                 </div>
                 <div class="sim-console-output" id="simConsoleOutput">
                   <div class="log-line"><span class="log-time">[10:14:02]</span> <span class="log-info">🛡️ Safeer Userscript Engine inicializiran</span></div>
@@ -561,7 +540,7 @@ setInterval(() => {
           </div>
 
           <div class="code-window-footer">
-            <span class="footer-hint">🚀 Izvajanje je 100% lokalno znotraj procesa brskalnika Safeer.</span>
+            <span class="footer-hint" data-i18n="sim_footer_hint">🚀 Izvajanje je 100% lokalno znotraj procesa brskalnika Safeer.</span>
           </div>
         </div>
       </div>
@@ -571,24 +550,24 @@ setInterval(() => {
         <div class="feature-card-glass">
           <div class="feature-card-icon">⚡</div>
           <div class="feature-card-body">
-            <h4>Enostavno dodajanje in urejanje</h4>
-            <p>Kliknite ikono 🧩, poimenujte skripto, vnesite spletno stran in prilepite kodo. Brskalnik poskrbi za vse ostalo.</p>
+            <h4 data-i18n="script_feat1_title">Enostavno dodajanje in urejanje</h4>
+            <p data-i18n="script_feat1_desc">Kliknite ikono 🧩, poimenujte skripto, vnesite spletno stran in prilepite kodo. Brskalnik poskrbi za vse ostalo.</p>
           </div>
         </div>
 
         <div class="feature-card-glass">
           <div class="feature-card-icon">🎨</div>
           <div class="feature-card-body">
-            <h4>Oblikovanje po meri &amp; Lasten CSS</h4>
-            <p>Izbirajte med 4 vgrajenimi temami (Midnight, Mint Emerald, Cyberpunk, AMOLED) ali z lastnim CSS-jem preuredite videz katerega koli elementa.</p>
+            <h4 data-i18n="script_feat2_title">Oblikovanje po meri &amp; Lasten CSS</h4>
+            <p data-i18n="script_feat2_desc">Izbirajte med 4 vgrajenimi temami (Midnight, Mint Emerald, Cyberpunk, AMOLED) ali z lastnim CSS-jem preuredite videz katerega koli elementa.</p>
           </div>
         </div>
 
         <div class="feature-card-glass">
           <div class="feature-card-icon">🔒</div>
           <div class="feature-card-body">
-            <h4>100% zasebno &amp; lokalno izvajanje</h4>
-            <p>Vse vaše skripte se izvajajo lokalno v vaši napravi, brez sledenja, brez oblačnih strežnikov in brez ogrožanja zasebnosti.</p>
+            <h4 data-i18n="script_feat3_title">100% zasebno &amp; lokalno izvajanje</h4>
+            <p data-i18n="script_feat3_desc">Vse vaše skripte se izvajajo lokalno v vaši napravi, brez sledenja, brez oblačnih strežnikov in brez ogrožanja zasebnosti.</p>
           </div>
         </div>
       </div>
@@ -597,11 +576,11 @@ setInterval(() => {
       <div class="userscripts-cta-center">
         <a href="assets/desktop/safeer-browser_1.0.4_amd64.deb" download class="btn-pill-green">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-          <span>Prenesi Safeer Linux (.deb namestitveni paket)</span>
+          <span data-i18n="btn_linux_short">Prenesi Safeer Linux (.deb namestitveni paket)</span>
         </a>
         <a href="#download" class="btn-pill-primary">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          <span>Vsi prenosi (Telefon, TV, Linux)</span>
+          <span data-i18n="btn_all_downloads">Vsi prenosi (Telefon, TV, Linux)</span>
         </a>
       </div>
     </div>
@@ -611,7 +590,7 @@ setInterval(() => {
   <section class="manifesto-section" id="opensource">
     <div class="container">
       <div class="manifesto-card">
-        <span class="manifesto-badge">🌍 MANIFEST ODPRTE KODE • MOČ V TVOJIH ROKAH</span>
+        <span class="manifesto-badge" data-i18n="manifesto_badge">🌍 MANIFEST ODPRTE KODE • MOČ V TVOJIH ROKAH</span>
         <h2 class="manifesto-title" data-i18n="manifesto_title">Kdor nadzoruje brskalnik, nadzoruje splet.<br><span style="color:var(--accent-cyan);">Vzemi nadzor v svoje roke.</span></h2>
         <p class="manifesto-text" data-i18n="manifesto_text">
           <strong>Spletna stran se obnaša natanko tako, kot ji to dopusti tvoj brskalnik.</strong> Preveč časa so tehnološki monopoli odločali o tem, kaj smeš videti, koliko oglasov moraš potrpeti in kako se trguje s tvojo zasebnostjo. Čas je, da pravila znova določaš ti.<br><br>
@@ -649,42 +628,42 @@ setInterval(() => {
         <table class="spec-table">
           <thead>
             <tr>
-              <th>Funkcionalnost</th>
+              <th data-i18n="th_feature">Funkcionalnost</th>
               <th class="col-highlight">🛡️ Safeer Browser</th>
               <th>Google Chrome / Opera</th>
-              <th>Običajni TV brskalniki</th>
+              <th data-i18n="th_std_tv">Običajni TV brskalniki</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>C2 Botnet & Malware zaščita (abuse.ch)</td>
-              <td class="col-highlight"><span style="color:#10b981;">✓</span> Vgrajeno (O(k) Trie)</td>
-              <td><span style="color:#64748b;">✗</span> Osnovni filter</td>
-              <td><span style="color:#64748b;">✗</span> Brez zaščite</td>
+              <td data-i18n="tr1_feat">C2 Botnet & Malware zaščita (abuse.ch)</td>
+              <td class="col-highlight" data-i18n="tr1_safeer"><span style="color:#10b981;">✓</span> Vgrajeno (O(k) Trie)</td>
+              <td data-i18n="tr1_chrome"><span style="color:#64748b;">✗</span> Osnovni filter</td>
+              <td data-i18n="tr1_tv"><span style="color:#64748b;">✗</span> Brez zaščite</td>
             </tr>
             <tr>
-              <td>YouTube v ozadju z ugasnjenim zaslonom</td>
-              <td class="col-highlight"><span style="color:#10b981;">✓</span> Da (brezplačno)</td>
-              <td><span style="color:#64748b;">✗</span> Plačljiva naročnina</td>
-              <td><span style="color:#64748b;">✗</span> Se zaustavi</td>
+              <td data-i18n="tr2_feat">YouTube v ozadju z ugasnjenim zaslonom</td>
+              <td class="col-highlight" data-i18n="tr2_safeer"><span style="color:#10b981;">✓</span> Da (brezplačno)</td>
+              <td data-i18n="tr2_chrome"><span style="color:#64748b;">✗</span> Plačljiva naročnina</td>
+              <td data-i18n="tr2_tv"><span style="color:#64748b;">✗</span> Se zaustavi</td>
             </tr>
             <tr>
-              <td>Blokada video oglasov & praznih okvirjev</td>
-              <td class="col-highlight"><span style="color:#10b981;">✓</span> 0 oglasov</td>
-              <td><span style="color:#64748b;">✗</span> Vsi oglasi</td>
-              <td><span style="color:#64748b;">✗</span> Brez blokiranja</td>
+              <td data-i18n="tr3_feat">Blokada video oglasov & praznih okvirjev</td>
+              <td class="col-highlight" data-i18n="tr3_safeer"><span style="color:#10b981;">✓</span> 0 oglasov</td>
+              <td data-i18n="tr3_chrome"><span style="color:#64748b;">✗</span> Vsi oglasi</td>
+              <td data-i18n="tr3_tv"><span style="color:#64748b;">✗</span> Brez blokiranja</td>
             </tr>
             <tr>
-              <td>Nativni Media3 ExoPlayer predvajalnik</td>
-              <td class="col-highlight"><span style="color:#10b981;">✓</span> 4K SurfaceView</td>
-              <td><span style="color:#64748b;">✗</span> Standardni web view</td>
-              <td><span style="color:#64748b;">✗</span> Zatikanje</td>
+              <td data-i18n="tr4_feat">Nativni Media3 ExoPlayer predvajalnik</td>
+              <td class="col-highlight" data-i18n="tr4_safeer"><span style="color:#10b981;">✓</span> 4K SurfaceView</td>
+              <td data-i18n="tr4_chrome"><span style="color:#64748b;">✗</span> Standardni web view</td>
+              <td data-i18n="tr4_tv"><span style="color:#64748b;">✗</span> Zatikanje</td>
             </tr>
             <tr>
-              <td>D-Pad fokusni obroč za daljinec</td>
-              <td class="col-highlight"><span style="color:#10b981;">✓</span> 60 FPS navigacija</td>
-              <td><span style="color:#64748b;">✗</span> Nerodna miška</td>
-              <td><span style="color:#64748b;">✗</span> Počasno drsenje</td>
+              <td data-i18n="tr5_feat">D-Pad fokusni obroč za daljinec</td>
+              <td class="col-highlight" data-i18n="tr5_safeer"><span style="color:#10b981;">✓</span> 60 FPS navigacija</td>
+              <td data-i18n="tr5_chrome"><span style="color:#64748b;">✗</span> Nerodna miška</td>
+              <td data-i18n="tr5_tv"><span style="color:#64748b;">✗</span> Počasno drsenje</td>
             </tr>
           </tbody>
         </table>
@@ -708,7 +687,7 @@ setInterval(() => {
               <h3 data-i18n="dl_mob_h3">📱 Mobilni brskalnik (Telefon &amp; Tablica)</h3>
               <p data-i18n="dl_mob_p">Optimizirano za zaslone na dotik, Galaxy S25, tablice in vse Android telefone (120Hz AMOLED).</p>
               <div class="dl-shortlink" style="margin-top:8px;">
-                <span>Kratka povezava: <a href="https://tinyurl.com/298zn386" target="_blank">tinyurl.com/298zn386</a></span>
+                <span><span data-i18n="dl_shortlink_lbl">Kratka povezava:</span> <a href="https://tinyurl.com/298zn386" target="_blank">tinyurl.com/298zn386</a></span>
               </div>
               <div style="margin-top:10px; padding: 6px 10px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px; font-size: 0.78rem; color: #fbbf24; line-height: 1.35;" data-i18n="mob_upgrade_warn">
                 ⚠️ <strong>Nadgradnja z v1.0.0:</strong> Ker imata v1.0.3 in v1.0.4 uradni certifikat (v1.0.0 debug podpis), pred namestitvijo odstranite staro verzijo (Uninstall).
@@ -735,7 +714,7 @@ setInterval(() => {
               <h3 data-i18n="dl_tv_h3">📺 TV brskalnik (Pametni Android TV)</h3>
               <p data-i18n="dl_tv_p">Optimizirano za Philips TV, Sony, Xiaomi, MediaTek in upravljanje z daljincem.</p>
               <div class="dl-shortlink" style="margin-top:8px;">
-                <span>Kratka povezava: <a href="https://tinyurl.com/29y9bg9k" target="_blank" style="color:#c084fc;">tinyurl.com/29y9bg9k</a></span>
+                <span><span data-i18n="dl_shortlink_lbl">Kratka povezava:</span> <a href="https://tinyurl.com/29y9bg9k" target="_blank" style="color:#c084fc;">tinyurl.com/29y9bg9k</a></span>
               </div>
             </div>
             <div class="dl-qr-box" id="qrContainerTv" title="Skenirajte s TV ali telefonom"></div>
@@ -759,7 +738,7 @@ setInterval(() => {
               <h3 style="color:#87cf3e;" data-i18n="dl_desktop_h3">🍃 Linux Mint, Ubuntu &amp; Debian Desktop</h3>
               <p data-i18n="dl_desktop_p">Popolnoma opremljen za Linux: enotna instanca z Unix socketom, Awesomebar (localhost/razvijalci), 1-klik uvoz zaznamkov, Customizer Studio (teme, lasten CSS, UserScripts), 6 svetovnih jezikov in ukaz safeer v terminalu. <strong>3x manj RAM-a, zagon v pol sekunde in glasba v ozadju.</strong></p>
               <div class="dl-shortlink" style="margin-top:8px;">
-                <span>Izdaja: <a href="https://github.com/memelandfaner/linux-mint-safeer-browser/releases/tag/v1.0.4" target="_blank" style="color:#87cf3e;">GitHub Release v1.0.4</a></span>
+                <span><span data-i18n="dl_release_lbl">Izdaja:</span> <a href="https://github.com/memelandfaner/linux-mint-safeer-browser/releases/tag/v1.0.4" target="_blank" style="color:#87cf3e;">GitHub Release v1.0.4</a></span>
               </div>
             </div>
             <div class="dl-qr-box" style="display:flex; align-items:center; justify-content:center; font-size:36px; background:rgba(135, 207, 62, 0.1); border-color:rgba(135, 207, 62, 0.3);">🍃</div>
@@ -777,7 +756,7 @@ setInterval(() => {
             </a>
             <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; padding:2px 4px; flex-wrap:wrap; gap:6px;">
               <span style="color:#64748b; font-family:monospace;">SHA-256: 01beadc35fa4...1ae792e4</span>
-              <a href="assets/desktop/safeer-browser-linux.tar.gz" download style="color:#87cf3e; text-decoration:underline;">Ali prenesi .tar.gz (506 KB)</a>
+              <a href="assets/desktop/safeer-browser-linux.tar.gz" download style="color:#87cf3e; text-decoration:underline;" data-i18n="dl_alt_targz">Ali prenesi .tar.gz (506 KB)</a>
             </div>
           </div>
         </div>
