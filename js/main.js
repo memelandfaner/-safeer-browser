@@ -152,7 +152,7 @@ const i18n = {
     manifesto_text: "<strong>Spletna stran se obnaša natanko tako, kot ji to dopusti tvoj brskalnik.</strong> Preveč časa so tehnološki monopoli odločali o tem, kaj smeš videti, koliko oglasov moraš potrpeti in kako se trguje s tvojo zasebnostjo. Čas je, da pravila znova določaš ti.<br><br>Milijon ljudi ima milijon različnih osebnosti, želja in potreb, a en sam neomajen cilj: <strong>imeti odprt, varen in neukročen internet na dosegu roke</strong>. Safeer zmanjšuje tveganje in blokira znana tveganja kot lokalni varnostni sloj. Projekt je 100% odprtokoden prav zato, da služi kot navdih in odskočna deska: vzemi izvorno kodo v svoje roke, naredi <em>fork</em> in prilagodi svoj brskalnik po lastnih željah in potrebah!",
     btn_mob_text: "Prenesi mobilni brskalnik (1.8 MB)",
     btn_tv_text: "Prenesi TV brskalnik (8.8 MB)",
-    btn_linux_text: "Prenesi za Linux Mint (.deb 1.1 MB)",
+    btn_linux_text: "Prenesi za Linux Mint (.deb 1.3 MB)",
     tab_mob: "📱 Telefon (Galaxy S25)",
     tab_tv: "📺 4K TV",
     tab_desktop: "🍃 Linux Mint Namizje",
@@ -211,7 +211,7 @@ const i18n = {
     linux_b4_sub: "Brez odvečnega balasta • 1-klik zagon",
     dl_desktop_h3: "🍃 Linux Mint, Ubuntu & Debian Desktop",
     dl_desktop_p: "Popolnoma opremljen za Linux: enotna instanca z Unix socketom, Awesomebar (localhost/razvijalci), 1-klik uvoz zaznamkov, Customizer Studio (teme, lasten CSS, UserScripts), 6 svetovnih jezikov in ukaz safeer v terminalu. <strong>3x manj RAM-a, zagon v pol sekunde in glasba v ozadju.</strong>",
-    dl_btn_desktop: "Prenesi .deb paket (1.1 MB)",
+    dl_btn_desktop: "Prenesi .deb paket (1.3 MB)",
     footer_copy: "© 2026 Safeer Browser Project. Vrhunska zasebnost, kibernetska varnost in zabava.",
     footer_disclaimer: "⚖️ Safeer is a security layer, not a guarantee against all online threats. Zmanjšuje tveganje in blokira znana tveganja; ne zagotavlja zaščite pred neznanimi Zero-Day grožnjami. 100% odprta koda pod licenco Apache 2.0 – spodbujamo fork kode in lastno prilagoditev."
   },
@@ -309,7 +309,7 @@ const i18n = {
     manifesto_text: "<strong>A website only behaves the way your browser allows it to.</strong> For far too long, big tech monopolies dictated what you see, how many intrusive ads you endure, and how your data is monetized. It is time for you to set the rules.<br><br>A million people have a million different personalities, habits, and needs, but one shared goal: <strong>an open, secure, and untamed internet at their fingertips</strong>. Safeer serves as a local security layer reducing exposure to known hazards. The project is 100% open source to inspire and empower you: take the source code into your own hands, make a <em>fork</em>, and customize the browser to your own needs and desires!",
     btn_mob_text: "Download Mobile Browser (1.8 MB)",
     btn_tv_text: "Download TV Browser (8.8 MB)",
-    btn_linux_text: "Download for Linux Mint (.deb 1.1 MB)",
+    btn_linux_text: "Download for Linux Mint (.deb 1.3 MB)",
     tab_mob: "📱 Phone (Galaxy S25)",
     tab_tv: "📺 4K TV",
     tab_desktop: "🍃 Linux Mint Desktop",
@@ -368,7 +368,7 @@ const i18n = {
     linux_b4_sub: "Zero bloatware • 1-click launch",
     dl_desktop_h3: "🍃 Linux Mint, Ubuntu & Debian Desktop",
     dl_desktop_p: "Equipped for Linux: single-instance via Unix socket, Awesomebar (localhost/developers), 1-click bookmark import, Customizer Studio (themes, CSS, UserScripts), 6 languages, and safeer CLI. <strong>3x less RAM, launches in 0.5s, background YouTube music.</strong>",
-    dl_btn_desktop: "Download .deb package (1.1 MB)",
+    dl_btn_desktop: "Download .deb package (1.3 MB)",
     footer_copy: "© 2026 Safeer Browser Project. Elite privacy, cyber security, and entertainment.",
     footer_disclaimer: "⚖️ Safeer is a security layer, not a guarantee against all online threats. It reduces risk and blocks known threats; it does not guarantee protection against all unknown Zero-Day attacks. 100% open source under Apache 2.0—fork and customize!"
   },
@@ -467,7 +467,7 @@ const i18n = {
     manifesto_text: "Eine Website verhält sich nur so, wie Ihr Browser es zulässt. Schluss mit Monopolen und Tracking. Safeer ist 100% Open Source.",
     btn_mob_text: "Mobilen Browser herunterladen (1.8 MB)",
     btn_tv_text: "TV Browser herunterladen (8.8 MB)",
-    btn_linux_text: "Für Linux Mint herunterladen (.deb 1.1 MB)",
+    btn_linux_text: "Für Linux Mint herunterladen (.deb 1.3 MB)",
     tab_mob: "📱 Smartphone (Galaxy S25)",
     tab_tv: "📺 4K Fernseher",
     tab_desktop: "🍃 Linux Mint Desktop",
@@ -526,7 +526,7 @@ const i18n = {
     linux_b4_sub: "Ohne Ballast • Sofort einsatzbereit",
     dl_desktop_h3: "🍃 Linux Mint, Ubuntu & Debian Desktop",
     dl_desktop_p: "Ausgerüstet für Linux: Einzelinstanz über Unix-Socket, Awesomebar (localhost), 1-Klick-Lesezeichen-Import, Customizer Studio, UserScripts und safeer-CLI. <strong>3x weniger RAM, Start in 0,5s und YouTube im Hintergrund.</strong>",
-    dl_btn_desktop: ".deb-Paket herunterladen (1.1 MB)",
+    dl_btn_desktop: ".deb-Paket herunterladen (1.3 MB)",
     footer_copy: "© 2026 Safeer Browser Project. Datenschutz, Sicherheit und Unterhaltung."
   },
   es: {
@@ -624,7 +624,7 @@ const i18n = {
     manifesto_text: "Un sitio web solo se comporta como tu navegador se lo permite. Safeer es 100% código abierto para que seas libre.",
     btn_mob_text: "Descargar Navegador Móvil (1.8 MB)",
     btn_tv_text: "Descargar Navegador TV (8.8 MB)",
-    btn_linux_text: "Descargar para Linux Mint (.deb 1.1 MB)",
+    btn_linux_text: "Descargar para Linux Mint (.deb 1.3 MB)",
     tab_mob: "📱 Móvil (Galaxy S25)",
     tab_tv: "📺 4K TV",
     tab_desktop: "🍃 Escritorio Linux Mint",
@@ -683,7 +683,7 @@ const i18n = {
     linux_b4_sub: "Cero sobrecarga • Listo en 1 clic",
     dl_desktop_h3: "🍃 Linux Mint, Ubuntu & Debian Desktop",
     dl_desktop_p: "Equipado para Linux: instancia única vía socket Unix, Awesomebar (localhost), importación de marcadores en 1 clic, Customizer Studio y CLI 'safeer'. <strong>3x menos RAM, inicio en 0.5s y música en segundo plano.</strong>",
-    dl_btn_desktop: "Descargar paquete .deb (1.1 MB)",
+    dl_btn_desktop: "Descargar paquete .deb (1.3 MB)",
     footer_copy: "© 2026 Safeer Browser Project. Máxima privacidad, seguridad y entretenimiento."
   },
   fr: {
@@ -938,7 +938,7 @@ const i18n = {
     manifesto_text: "Un sito web si comporta solo come il browser gli consente. Safeer è 100% open source per restituirti la libertà.",
     btn_mob_text: "Scarica Browser Mobile (1.8 MB)",
     btn_tv_text: "Scarica Browser TV (8.8 MB)",
-    btn_linux_text: "Scarica per Linux Mint (.deb 1.1 MB)",
+    btn_linux_text: "Scarica per Linux Mint (.deb 1.3 MB)",
     tab_mob: "📱 Smartphone (Galaxy S25)",
     tab_tv: "📺 TV 4K",
     tab_desktop: "🍃 Desktop Linux Mint",
@@ -997,7 +997,7 @@ const i18n = {
     linux_b4_sub: "Senza bloatware • Avvio con 1 clic",
     dl_desktop_h3: "🍃 Linux Mint, Ubuntu & Debian Desktop",
     dl_desktop_p: "Equipaggiato per Linux: istanza singola tramite socket Unix, Awesomebar (localhost), importazione segnalibri in 1 clic, Customizer Studio e CLI 'safeer'. <strong>3x meno RAM, avvio in 0,5s e musica in background.</strong>",
-    dl_btn_desktop: "Scarica pacchetto .deb (1.1 MB)",
+    dl_btn_desktop: "Scarica pacchetto .deb (1.3 MB)",
     footer_copy: "© 2026 Safeer Browser Project. Massima privacy, sicurezza e intrattenimento."
   }
 };
@@ -2121,9 +2121,9 @@ const screenshotData = {
     main: {
       img: 'assets/desktop/desktop_mint_showcase.png',
       url: 'safeer://home',
-      status: 'Linux Mint v1.0.7',
+      status: 'Linux Mint v1.0.8',
       icon: '🍃',
-      caption: '<strong>Linux Mint &amp; Ubuntu Izdaja v1.0.7:</strong> Nativni GTK3/WebKit2GTK brskalnik z vrstico zaznamkov (Ctrl+Shift+B), DuckDuckGo privzeto, čarovnikom ob prvem zagonu in 0 oglasov na YouTube.'
+      caption: '<strong>Linux Mint &amp; Ubuntu Izdaja v1.0.8:</strong> Nativni GTK3/WebKit2GTK brskalnik z vrstico zaznamkov (Ctrl+Shift+B), DuckDuckGo privzeto, čarovnikom ob prvem zagonu in 0 oglasov na YouTube.'
     }
   }
 };
