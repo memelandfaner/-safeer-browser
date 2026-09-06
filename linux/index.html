@@ -425,26 +425,43 @@
         <h2 class="section-h2">Kako namestiti Safeer na svoj računalnik</h2>
       </div>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-top: 36px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 36px;">
         
-        <!-- Way 1: GUI Install -->
+        <!-- Way 1: Launchpad PPA -->
+        <div class="dl-card" style="border-color: rgba(255,165,0,0.5);">
+          <div class="badge-mint" style="margin-bottom:12px; background:rgba(255,165,0,0.15); border-color:#ffa500; color:#ffa500;">MOŽNOST 1 • PPA (SAMODEJNE POSODOBITVE)</div>
+          <h3 style="color:#ffa500; font-size:1.2rem; margin-bottom:8px;">Launchpad PPA za Mint & Ubuntu</h3>
+          <p style="color:#94a3b8; font-size:0.88rem; line-height:1.5; margin-bottom:12px;">
+            Omogoča samodejne varnostne nadgradnje preko sistemskega <code>apt upgrade</code>:
+          </p>
+          <div class="code-install-box" style="margin: 8px 0;">
+            <code style="font-size:0.75rem;">sudo add-apt-repository ppa:memelandfaner/safeer</code>
+            <button class="copy-btn" onclick="navigator.clipboard.writeText('sudo add-apt-repository ppa:memelandfaner/safeer'); this.textContent='✓'; setTimeout(()=>this.textContent='Kopiraj', 1500);">Kopiraj</button>
+          </div>
+          <div class="code-install-box" style="margin: 8px 0;">
+            <code style="font-size:0.75rem;">sudo apt update &amp;&amp; sudo apt install safeer-browser</code>
+            <button class="copy-btn" onclick="navigator.clipboard.writeText('sudo apt update && sudo apt install safeer-browser'); this.textContent='✓'; setTimeout(()=>this.textContent='Kopiraj', 1500);">Kopiraj</button>
+          </div>
+        </div>
+
+        <!-- Way 2: GUI Install -->
         <div class="dl-card" style="border-color: rgba(135,207,62,0.4);">
-          <div class="badge-mint" style="margin-bottom:12px;">MOŽNOST 1 • GRAFIČNO</div>
+          <div class="badge-mint" style="margin-bottom:12px;">MOŽNOST 2 • GRAFIČNO</div>
           <h3 style="color:#87cf3e; font-size:1.2rem; margin-bottom:8px;">Dvoklik v Upravitelju programov</h3>
           <p style="color:#94a3b8; font-size:0.88rem; line-height:1.5; margin-bottom:16px;">
-            1. Prenesite <code>.deb</code> datoteko s spodnjim gumbom.<br>
+            1. Prenesite <code>.deb</code> paket z AppStream metainfo.<br>
             2. V mapi <em>Prenosi</em> dvokliknite datoteko.<br>
-            3. Pritisnite <strong>Namesti paket</strong> (Gdebi ali Upravitelj paketov).
+            3. Pritisnite <strong>Namesti paket</strong> (Gdebi / Upravitelj programov).
           </p>
           <a href="../assets/desktop/safeer-browser_1.0.7_all.deb" download class="btn-pill-green" style="width:100%; justify-content:center;">
-            Prenesi .deb (1.1 MB)
+            Prenesi .deb (1.3 MB)
           </a>
         </div>
 
-        <!-- Way 2: Terminal Install -->
+        <!-- Way 3: Terminal Install -->
         <div class="dl-card" style="border-color: rgba(0,210,255,0.4);">
-          <div class="badge-mint" style="margin-bottom:12px; background:rgba(0,210,255,0.15); border-color:#00d2ff; color:#00d2ff;">MOŽNOST 2 • TERMINAL</div>
-          <h3 style="color:#00d2ff; font-size:1.2rem; margin-bottom:8px;">Hitra namestitev z enim ukazom</h3>
+          <div class="badge-mint" style="margin-bottom:12px; background:rgba(0,210,255,0.15); border-color:#00d2ff; color:#00d2ff;">MOŽNOST 3 • TERMINAL</div>
+          <h3 style="color:#00d2ff; font-size:1.2rem; margin-bottom:8px;">Hitra namestitev prenesenega .deb</h3>
           <p style="color:#94a3b8; font-size:0.88rem; line-height:1.5; margin-bottom:12px;">
             Odprite terminal (<kbd>Ctrl+Alt+T</kbd>) in vnesite:
           </p>
@@ -464,7 +481,7 @@
       <div style="margin-top: 30px; padding: 18px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;">
         <h4 style="color:#f8fafc; font-size:0.95rem; margin-bottom:8px;">🔒 Preverjanje pristnosti paketa (SHA-256):</h4>
         <p style="color:#94a3b8; font-size:0.82rem; font-family:'JetBrains Mono', monospace; word-break:break-all;">
-          f15c92aa8c4540fb3893b8ddcd7cd25dfbba19a8b9f57763bdc03ca63339c8ae  safeer-browser_1.0.7_all.deb
+          b9b85a3cf6542adbb18fe9d76ef2da57d824a2119a934c2d312a5bc894a3983b  safeer-browser_1.0.7_all.deb
         </p>
         <p style="color:#64748b; font-size:0.75rem; margin-top:8px;">
           Preverite z ukazom: <code>sha256sum safeer-browser_1.0.7_all.deb</code> v svojem terminalu pred namestitvijo.
