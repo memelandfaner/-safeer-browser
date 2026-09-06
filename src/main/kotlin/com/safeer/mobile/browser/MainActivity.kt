@@ -103,6 +103,9 @@ class MainActivity : android.app.Activity() {
         // Zaženi posodobitev varnostnih seznamov (ThreatFox, URLhaus, Phishing Army) v ozadju
         ThreatFeedsUpdater.updateFeedsAsync(this)
 
+        // 🛡️ Inicializiraj šifriran DNS (DoH) ali šifriran tunel (Tor / Proxy)
+        DoHProxyEngine.applySettings(this)
+
         if (android.os.Build.VERSION.SDK_INT >= 33) {
             val postNotif = "android.permission.POST_NOTIFICATIONS"
             if (checkSelfPermission(postNotif) != PackageManager.PERMISSION_GRANTED) {
@@ -211,6 +214,7 @@ class MainActivity : android.app.Activity() {
     }
 
     override fun onDestroy() {
+        DoHProxyEngine.stopServer()
         super.onDestroy()
     }
 
@@ -593,7 +597,17 @@ class MainActivity : android.app.Activity() {
         if (input.isEmpty()) return
 
         val rawUrl = when {
-            input.startsWith("http://", ignoreCase = true) || input.startsWith("https://", ignoreCase = true) || input.startsWith("file://", ignoreCase = true) -> {
+            input.startsWith("http://", ignoreCase = true) -> {
+                val withoutScheme = input.substring(7)
+                val host = withoutScheme.substringBefore('/').substringBefore(':').lowercase()
+                val isLocal = host == "localhost" || host == "127.0.0.1" ||
+                              host.startsWith("192.168.") || host.startsWith("10.") ||
+                              host.startsWith("172.16.") || host.startsWith("172.17.") ||
+                              host.startsWith("172.18.") || host.startsWith("172.19.") ||
+                              host.startsWith("172.2") || host.startsWith("172.30.") || host.startsWith("172.31.")
+                if (isLocal) input else "https://$withoutScheme"
+            }
+            input.startsWith("https://", ignoreCase = true) || input.startsWith("file://", ignoreCase = true) -> {
                 input
             }
             input.contains(".") && !input.contains(" ") -> {
@@ -985,6 +999,140 @@ class MainActivity : android.app.Activity() {
         }
         view.addView(cbJs)
 
+        val cbAdguard = CheckBox(this).apply {
+            text = "🛡️ AdGuard Zaščita (Vgrajena razširitev)"
+            isChecked = PreferencesManager.isAdguardProtectionEnabled(this@MainActivity)
+            setTextColor(Color.WHITE)
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        }
+        view.addView(cbAdguard)
+
+        val tvAdguardDesc = TextView(this).apply {
+            text = "Sprotno defusanje anti-adblock zidov, stubs za oglasne API-je in kozmetično čiščenje."
+            textSize = 12f
+            setTextColor(Color.parseColor("#94A3B8"))
+            setPadding(64, 0, 0, 8)
+        }
+        view.addView(tvAdguardDesc)
+
+        // Ločilna črta
+        view.addView(View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2).apply {
+                setMargins(0, 24, 0, 24)
+            }
+            setBackgroundColor(Color.parseColor("#334155"))
+        })
+
+        // 2.1. Šifriran DNS (DoH) za zaščito pred cenzuro
+        val tvDohTitle = TextView(this).apply {
+            text = "🛡️ Šifriran DNS (DoH) proti cenzuri:"
+            textSize = 15f
+            setTextColor(Color.parseColor("#00d2ff"))
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(0, 0, 0, 12)
+        }
+        view.addView(tvDohTitle)
+
+        val dohNames = arrayOf(
+            "🛡️ Quad9 Secure DoH (9.9.9.9) [Privzeto / Zaščita pred grožnjami]",
+            "🛡️ AdGuard DNS (dns.adguard-dns.com) [Oglasi + Zlonamerna koda]",
+            "⚡ Cloudflare DoH (1.1.1.1)",
+            "🌐 Google Public DoH (8.8.8.8)",
+            "🔒 Zasebni DNS / Lasten DoH URL",
+            "🚫 Izklopljeno (Sistemski DNS operaterja)"
+        )
+        val dohKeys = arrayOf("quad9", "adguard", "cloudflare", "google", "custom", "disabled")
+        var currentDoh = PreferencesManager.getDohProvider(this)
+        if (!PreferencesManager.isDohEnabled(this)) currentDoh = "disabled"
+        val selectedDohIdx = dohKeys.indexOf(currentDoh).let { if (it >= 0) it else 0 }
+
+        val editCustomDoh = EditText(this).apply {
+            hint = "https://dns.primer.si/dns-query"
+            setText(PreferencesManager.getCustomDohUrl(this@MainActivity))
+            setTextColor(Color.WHITE)
+            setHintTextColor(Color.GRAY)
+            visibility = if (currentDoh == "custom") View.VISIBLE else View.GONE
+            setPadding(24, 16, 24, 16)
+            setBackgroundColor(Color.parseColor("#1e293b"))
+        }
+
+        val rgDoh = RadioGroup(this)
+        dohKeys.forEachIndexed { idx, key ->
+            val rb = RadioButton(this).apply {
+                id = View.generateViewId()
+                text = dohNames[idx]
+                isChecked = (idx == selectedDohIdx)
+                setTextColor(Color.WHITE)
+                setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked && key == "custom") {
+                        editCustomDoh.visibility = View.VISIBLE
+                    } else if (isChecked) {
+                        editCustomDoh.visibility = View.GONE
+                    }
+                }
+            }
+            rgDoh.addView(rb)
+        }
+        view.addView(rgDoh)
+        view.addView(editCustomDoh)
+
+        // Ločilna črta
+        view.addView(View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2).apply {
+                setMargins(0, 24, 0, 24)
+            }
+            setBackgroundColor(Color.parseColor("#334155"))
+        })
+
+        // 2.2. Šifriran tunel / Proxy (Možnost C)
+        val tvProxyTitle = TextView(this).apply {
+            text = "🧅 Šifriran tunel / Proxy (Možnost C):"
+            textSize = 15f
+            setTextColor(Color.parseColor("#00d2ff"))
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(0, 0, 0, 12)
+        }
+        view.addView(tvProxyTitle)
+
+        val proxyNames = arrayOf(
+            "🚫 Izklopljeno (Neposredna povezava)",
+            "🧅 Tor Omrežje (Orbot na 127.0.0.1:8118)",
+            "⚙️ Lasten proxy (vnos naslova spodaj)"
+        )
+        val proxyKeys = arrayOf("disabled", "tor", "custom")
+        val currentProxy = PreferencesManager.getSecureProxyMode(this)
+        val selectedProxyIdx = proxyKeys.indexOf(currentProxy).let { if (it >= 0) it else 0 }
+
+        val editCustomProxy = EditText(this).apply {
+            hint = "127.0.0.1:8080 ali proxy.primer.si:8080"
+            setText(PreferencesManager.getSecureProxyUrl(this@MainActivity))
+            setTextColor(Color.WHITE)
+            setHintTextColor(Color.GRAY)
+            visibility = if (currentProxy == "custom") View.VISIBLE else View.GONE
+            setPadding(24, 16, 24, 16)
+            setBackgroundColor(Color.parseColor("#1e293b"))
+        }
+
+        val rgProxy = RadioGroup(this)
+        proxyKeys.forEachIndexed { idx, key ->
+            val rb = RadioButton(this).apply {
+                id = View.generateViewId()
+                text = proxyNames[idx]
+                isChecked = (idx == selectedProxyIdx)
+                setTextColor(Color.WHITE)
+                setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked && key == "custom") {
+                        editCustomProxy.visibility = View.VISIBLE
+                    } else if (isChecked) {
+                        editCustomProxy.visibility = View.GONE
+                    }
+                }
+            }
+            rgProxy.addView(rb)
+        }
+        view.addView(rgProxy)
+        view.addView(editCustomProxy)
+
         // Ločilna črta
         view.addView(View(this).apply {
             layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2).apply {
@@ -1060,6 +1208,26 @@ class MainActivity : android.app.Activity() {
                 tabManager.getAllTabs().forEach {
                     it.webView.settings.javaScriptEnabled = newJs
                 }
+
+                PreferencesManager.setAdguardProtectionEnabled(this, cbAdguard.isChecked)
+
+                // 🛡️ DoH & Proxy posodobitev
+                val dohCheckedId = rgDoh.checkedRadioButtonId
+                val dohCheckedRb = rgDoh.findViewById<RadioButton>(dohCheckedId)
+                val dohIdx = rgDoh.indexOfChild(dohCheckedRb)
+                val selDoh = if (dohIdx in dohKeys.indices) dohKeys[dohIdx] else "quad9"
+                PreferencesManager.setDohEnabled(this, selDoh != "disabled")
+                PreferencesManager.setDohProvider(this, selDoh)
+                PreferencesManager.setCustomDohUrl(this, editCustomDoh.text.toString().trim())
+
+                val proxyCheckedId = rgProxy.checkedRadioButtonId
+                val proxyCheckedRb = rgProxy.findViewById<RadioButton>(proxyCheckedId)
+                val proxyIdx = rgProxy.indexOfChild(proxyCheckedRb)
+                val selProxy = if (proxyIdx in proxyKeys.indices) proxyKeys[proxyIdx] else "disabled"
+                PreferencesManager.setSecureProxyMode(this, selProxy)
+                PreferencesManager.setSecureProxyUrl(this, editCustomProxy.text.toString().trim())
+
+                DoHProxyEngine.applySettings(this)
 
                 Toast.makeText(this, "✅ Nastavitve shranjene!", Toast.LENGTH_SHORT).show()
             }
