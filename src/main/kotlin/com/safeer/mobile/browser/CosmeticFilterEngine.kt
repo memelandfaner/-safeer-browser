@@ -62,7 +62,6 @@ object CosmeticFilterEngine {
         ".topbar-action-buttons ytm-open-app-button",
         "ytm-mobile-topbar-renderer ytm-open-app-button",
         "a[href*='app_redirect']", "a[href*='open_in_app']",
-        ".contribYtLightShapeStaticWashLight", ".cinematic-renderer", "#cinematic-container", "[class*='WashLight']",
 
         // YouTube: samo oglasi in pause overlay. Mixa/seznama ne skrivaj — sicer klik javi napako.
         ".ytp-pause-overlay", ".ytp-pause-overlay-container",

@@ -583,8 +583,31 @@ object UserScriptManager {
                 }
             }
 
+            function watchPlayerClass() {
+                var p = getMoviePlayer();
+                if (!p || p._safeerAdMo) return;
+                p._safeerAdMo = new MutationObserver(function() {
+                    if (playerHasAd()) {
+                        clickSkipButtons();
+                        var video = document.querySelector('video');
+                        if (video) {
+                            video.muted = true;
+                            try { video.playbackRate = 16.0; } catch(_) {}
+                            if (isFinite(video.duration) && video.duration > 0) {
+                                try { video.currentTime = video.duration; } catch(_) {}
+                            }
+                            if (p && typeof p.skipAd === 'function') {
+                                try { p.skipAd(); } catch(_) {}
+                            }
+                        }
+                    }
+                });
+                p._safeerAdMo.observe(p, { attributes: true, attributeFilter: ['class'] });
+            }
+
             window._safeer_playerHasAd = playerHasAd;
             window._safeer_clickSkipButtons = clickSkipButtons;
+            window._safeer_watchPlayerClass = watchPlayerClass;
 
             function stabilizeWatchPage() {
                 try {
@@ -1052,6 +1075,7 @@ object UserScriptManager {
                         ticks++;
                         if (isWatchPath()) {
                             ensureWatchPlayerVisible();
+                            watchPlayerClass();
                             self.boostPlayback();
                             if (ticks % 2 === 0) self.healErrors();
                             if (ticks % 4 === 0) tameMixPlaylistOverlay();
@@ -1083,20 +1107,31 @@ object UserScriptManager {
                             v._safeer_user_paused = false;
                             v.preload = 'auto';
                         }
-                        self.boostPlayback();
                         scheduleNextCycle(100);
                     });
 
                     window.addEventListener('yt-navigate-finish', function() {
                         window._safeer_yt_mix_panel_tamed = false;
+                        watchPlayerClass();
+                        self.boostPlayback();
                         scheduleNextCycle(150);
                     });
-                    window.addEventListener('yt-page-data-updated', function() { scheduleNextCycle(200); });
+                    window.addEventListener('yt-page-data-updated', function() {
+                        watchPlayerClass();
+                        self.boostPlayback();
+                        scheduleNextCycle(200);
+                    });
                     window.addEventListener('popstate', function() {
                         window._safeer_yt_mix_panel_tamed = false;
+                        watchPlayerClass();
+                        self.boostPlayback();
                         scheduleNextCycle(150);
                     });
-                    document.addEventListener('DOMContentLoaded', function() { scheduleNextCycle(200); });
+                    document.addEventListener('DOMContentLoaded', function() {
+                        watchPlayerClass();
+                        self.boostPlayback();
+                        scheduleNextCycle(200);
+                    });
                 }
             };
 
