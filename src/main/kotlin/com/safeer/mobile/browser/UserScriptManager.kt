@@ -1183,9 +1183,20 @@ object UserScriptManager {
                 Object.defineProperty(document, 'visibilityState', { get: function() { return 'visible'; }, configurable: true });
                 Object.defineProperty(document, 'webkitHidden', { get: function() { return false; }, configurable: true });
                 Object.defineProperty(document, 'webkitVisibilityState', { get: function() { return 'visible'; }, configurable: true });
+                document.hasFocus = function() { return true; };
             } catch(e) {}
 
-            var stopEvents = ['visibilitychange', 'webkitvisibilitychange'];
+            try {
+                var origAddEventListener = EventTarget.prototype.addEventListener;
+                EventTarget.prototype.addEventListener = function(type, listener, options) {
+                    if (type === 'visibilitychange' || type === 'webkitvisibilitychange' || type === 'pagehide') {
+                        return;
+                    }
+                    return origAddEventListener.apply(this, arguments);
+                };
+            } catch(e) {}
+
+            var stopEvents = ['visibilitychange', 'webkitvisibilitychange', 'pagehide'];
             for (var i = 0; i < stopEvents.length; i++) {
                 (function(name) {
                     window.addEventListener(name, function(e) {
@@ -1213,6 +1224,15 @@ object UserScriptManager {
                 media.addEventListener('playing', reportState);
                 media.addEventListener('pause', reportState);
                 media.addEventListener('ended', reportState);
+                media.addEventListener('timeupdate', function() {
+                    if (!media.paused && !media._safeer_reported_playing) {
+                        media._safeer_reported_playing = true;
+                        reportState();
+                    }
+                });
+                if (!media.paused && media.currentTime > 0) {
+                    reportState();
+                }
             }
 
             try {

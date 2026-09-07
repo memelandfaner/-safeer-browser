@@ -204,6 +204,14 @@ class ChromiumEngineView @JvmOverloads constructor(
         }
     }
 
+    override fun onWindowVisibilityChanged(visibility: Int) {
+        if (visibility != View.VISIBLE && isPlayingAudio) {
+            super.onWindowVisibilityChanged(View.VISIBLE)
+            return
+        }
+        super.onWindowVisibilityChanged(visibility)
+    }
+
     override fun loadUrl(url: String) {
         failedNavigationUrl = null
         val sanitized = UrlSanitizer.sanitize(url)

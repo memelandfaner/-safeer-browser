@@ -256,7 +256,11 @@ class MainActivity : android.app.Activity() {
 
     override fun onPause() {
         super.onPause()
-        tabManager.getActiveTab()?.webView?.onPause()
+        val activeTab = tabManager.getActiveTab()
+        if (activeTab != null && (activeTab.isPlayingAudio || activeTab.webView.isPlayingAudio)) {
+            return
+        }
+        activeTab?.webView?.onPause()
     }
 
     override fun onResume() {
