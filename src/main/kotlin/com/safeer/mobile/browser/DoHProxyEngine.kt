@@ -185,12 +185,6 @@ object DoHProxyEngine {
         val dohProviderId = PreferencesManager.getDohProvider(context)
 
         when (proxyMode) {
-            "tor" -> {
-                // Orbot privzeti HTTP/SOCKS porti (8118 za HTTP, 9050 za SOCKS)
-                stopServer()
-                applyProxyToSystemAndChromium(context, "127.0.0.1", 8118, onReady)
-                Log.i(TAG, "Aktiviran Tor tunel (Orbot) prek 127.0.0.1:8118")
-            }
             "custom" -> {
                 stopServer()
                 val customUrl = PreferencesManager.getSecureProxyUrl(context)

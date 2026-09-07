@@ -1241,10 +1241,9 @@ class MainActivity : android.app.Activity() {
 
         val proxyNames = arrayOf(
             I18n.t(this, "proxy_disabled"),
-            I18n.t(this, "proxy_tor"),
             I18n.t(this, "proxy_custom")
         )
-        val proxyKeys = arrayOf("disabled", "tor", "custom")
+        val proxyKeys = arrayOf("disabled", "custom")
         val currentProxy = PreferencesManager.getSecureProxyMode(this)
         val selectedProxyIdx = proxyKeys.indexOf(currentProxy).let { if (it >= 0) it else 0 }
 
