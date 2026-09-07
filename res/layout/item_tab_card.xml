@@ -10,7 +10,7 @@
     <LinearLayout
         android:id="@+id/tabHeader"
         android:layout_width="match_parent"
-        android:layout_height="32dp"
+        android:layout_height="48dp"
         android:layout_alignParentTop="true"
         android:gravity="center_vertical"
         android:orientation="horizontal">
@@ -38,9 +38,9 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/btnTabClose"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:id="@+id/btnTabClose" android:focusable="true" android:contentDescription="@string/btn_close"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="@drawable/bg_mobile_icon_button"
             android:gravity="center"
             android:text="✕"

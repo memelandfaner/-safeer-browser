@@ -582,6 +582,7 @@ class MainActivity : android.app.Activity() {
 
     private fun setupOmnibox() {
         editUrl.setOnFocusChangeListener { _, hasFocus ->
+            omniboxContainer.isActivated = hasFocus
             btnTabCount.visibility = if (hasFocus) View.GONE else View.VISIBLE
             btnMenu.visibility = if (hasFocus) View.GONE else View.VISIBLE
             tvSecurityLock.visibility = if (hasFocus) View.GONE else View.VISIBLE

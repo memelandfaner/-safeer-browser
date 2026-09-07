@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="tab_grid_columns">3</integer>
+    <dimen name="browser_toolbar_height">76dp</dimen>
+    <dimen name="browser_address_height">60dp</dimen>
+    <dimen name="browser_address_text">18sp</dimen>
+</resources>

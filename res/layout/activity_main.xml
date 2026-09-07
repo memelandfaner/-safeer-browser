@@ -9,7 +9,7 @@
     <!-- Large address field; secondary actions remain available in the menu. -->
     <LinearLayout
         android:id="@+id/mobileTopBar"
-        android:layout_width="match_parent" android:layout_height="64dp"
+        android:layout_width="match_parent" android:layout_height="@dimen/browser_toolbar_height"
         android:layout_alignParentTop="true" android:background="@color/bg_primary"
         android:gravity="center_vertical" android:orientation="horizontal"
         android:paddingHorizontal="8dp" android:elevation="6dp">
@@ -26,7 +26,7 @@
             android:visibility="visible" />
         <LinearLayout
             android:id="@+id/omniboxContainer"
-            android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1"
+            android:layout_width="0dp" android:layout_height="@dimen/browser_address_height" android:layout_weight="1"
             android:background="@drawable/bg_mobile_omnibox" android:gravity="center_vertical"
             android:orientation="horizontal" android:paddingStart="12dp" android:paddingEnd="4dp">
             <TextView android:id="@+id/tvSecurityLock"
@@ -40,13 +40,13 @@
                 android:selectAllOnFocus="true"
                 android:paddingVertical="0dp" android:singleLine="true"
                 android:textColor="@color/text_primary" android:textColorHint="@color/text_dim"
-                android:textSize="16sp" android:contentDescription="@string/url_hint" />
-            <TextView android:id="@+id/btnClearUrl"
+                android:textSize="@dimen/browser_address_text" android:contentDescription="@string/url_hint" />
+            <TextView android:id="@+id/btnClearUrl" android:focusable="true"
                 android:layout_width="48dp" android:layout_height="48dp" android:gravity="center"
                 android:text="✕" android:textColor="@color/text_secondary" android:textSize="18sp"
                 android:visibility="gone" android:contentDescription="@string/btn_clear"
                 android:background="@drawable/bg_mobile_icon_button" />
-            <TextView android:id="@+id/btnSearchTrigger"
+            <TextView android:id="@+id/btnSearchTrigger" android:focusable="true"
                 android:layout_width="48dp" android:layout_height="48dp" android:gravity="center"
                 android:text="→" android:textColor="@color/accent_cyan" android:textSize="24sp"
                 android:visibility="gone" android:contentDescription="@string/btn_go"
@@ -90,7 +90,7 @@
     <LinearLayout
         android:id="@+id/findInPageBar"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="56dp"
         android:layout_below="@id/mobileTopBar"
         android:background="@color/bg_secondary"
         android:gravity="center_vertical"
@@ -102,7 +102,7 @@
         <EditText
             android:id="@+id/editFindText"
             android:layout_width="0dp"
-            android:layout_height="36dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:background="@drawable/bg_mobile_omnibox"
             android:hint="Najdi na strani..."
@@ -123,8 +123,8 @@
 
         <Button
             android:id="@+id/btnFindPrev"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_marginStart="6dp"
             android:background="@drawable/bg_mobile_icon_button"
             android:text="▲"
@@ -133,8 +133,8 @@
 
         <Button
             android:id="@+id/btnFindNext"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_marginStart="2dp"
             android:background="@drawable/bg_mobile_icon_button"
             android:text="▼"
@@ -143,8 +143,8 @@
 
         <Button
             android:id="@+id/btnFindClose"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_marginStart="2dp"
             android:background="@drawable/bg_mobile_icon_button"
             android:text="✕"
@@ -185,7 +185,7 @@
             <Button
                 android:id="@+id/btnNewTabInSwitcher"
                 android:layout_width="wrap_content"
-                android:layout_height="36dp"
+                android:layout_height="48dp"
                 android:background="@drawable/bg_mobile_omnibox"
                 android:paddingHorizontal="14dp"
                 android:text="@string/tabs_new_tab"
@@ -194,9 +194,9 @@
                 android:textStyle="bold" />
 
             <Button
-                android:id="@+id/btnCloseTabsSwitcher"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:id="@+id/btnCloseTabsSwitcher" android:contentDescription="@string/btn_close"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_marginStart="8dp"
                 android:background="@drawable/bg_mobile_icon_button"
                 android:text="✕"
@@ -211,7 +211,7 @@
             android:layout_height="match_parent"
             android:layout_below="@id/tabSwitcherHeader"
             android:layout_above="@+id/tabSwitcherFooter"
-            android:numColumns="2"
+            android:numColumns="@integer/tab_grid_columns"
             android:horizontalSpacing="12dp"
             android:verticalSpacing="12dp"
             android:padding="14dp"

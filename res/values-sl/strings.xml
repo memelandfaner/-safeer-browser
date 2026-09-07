@@ -33,4 +33,5 @@
     <string name="default_browser_active">Safeer je vaš privzeti brskalnik</string>
     <string name="default_browser_unchanged">Privzeti brskalnik ni bil spremenjen</string>
     <string name="default_browser_unavailable">Izberite brskalnik v Androidovih nastavitvah privzetih aplikacij</string>
+    <string name="btn_close">Zapri</string>
 </resources>

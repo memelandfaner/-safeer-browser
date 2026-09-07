@@ -33,4 +33,5 @@
     <string name="default_browser_active">Safeer is your default browser</string>
     <string name="default_browser_unchanged">Default browser was not changed</string>
     <string name="default_browser_unavailable">Choose your browser in Android default app settings</string>
+    <string name="btn_close">Close</string>
 </resources>
