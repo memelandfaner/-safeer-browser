@@ -14,7 +14,16 @@
         android:gravity="center_vertical" android:orientation="horizontal"
         android:paddingHorizontal="8dp" android:elevation="6dp">
 
-        <Button android:id="@+id/btnHome" android:layout_width="48dp" android:layout_height="48dp" android:visibility="gone" android:text="⌂" />
+        <Button android:id="@+id/btnHome"
+            android:layout_width="48dp" android:layout_height="48dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_mobile_icon_button"
+            android:text="⌂"
+            android:textColor="@color/accent_cyan"
+            android:textSize="22sp"
+            android:padding="0dp"
+            android:contentDescription="@string/btn_home"
+            android:visibility="visible" />
         <LinearLayout
             android:id="@+id/omniboxContainer"
             android:layout_width="0dp" android:layout_height="52dp" android:layout_weight="1"
@@ -74,6 +83,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/pageProgressBar"
+        android:layout_alignParentBottom="true"
         android:background="@color/bg_pure_black" />
 
     <!-- Find In Page Bar (Optional overlay) -->

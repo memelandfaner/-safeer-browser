@@ -350,8 +350,8 @@ class MainActivity : android.app.Activity() {
         tabSwitcherOverlay.setPadding(0, statusBarHeight, 0, navBarHeight)
 
         val rootLp = webViewContainer.layoutParams as? RelativeLayout.LayoutParams
-        if (rootLp != null && rootLp.bottomMargin != navBarHeight) {
-            rootLp.bottomMargin = navBarHeight
+        if (rootLp != null && rootLp.bottomMargin != 0) {
+            rootLp.bottomMargin = 0
             webViewContainer.layoutParams = rootLp
         }
     }
@@ -694,7 +694,7 @@ class MainActivity : android.app.Activity() {
 
     private fun setupTopButtons() {
         btnHome.setOnClickListener {
-            tabManager.getActiveTab()?.webView?.loadUrl("file:///android_asset/brave_home.html")
+            openUrlInBrowser("file:///android_asset/brave_home.html")
         }
 
         btnReload.setOnClickListener {

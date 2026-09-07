@@ -69,6 +69,18 @@ object CosmeticFilterEngine {
         "ytm-companion-ad-renderer",
         "ytm-promoted-sparkles-web-renderer", "ytm-paid-content-overlay-renderer",
 
+        // YouTube Playables (vsiljene mini-igre in sponzorirane police na viru)
+        "ytm-rich-section-renderer:has([is-mini-game-card-shelf])",
+        "ytm-rich-section-renderer:has(ytm-game-card-renderer)",
+        "ytm-rich-section-renderer:has(a[href*='/playables'])",
+        "[is-mini-game-card-shelf]",
+        "ytm-game-card-renderer",
+        "ytm-mini-game-card-renderer",
+        "[section-identifier='playables-shelf']",
+        "ytd-rich-section-renderer:has([is-mini-game-card-shelf])",
+        "ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-mini-game-card-shelf])",
+        "ytd-rich-shelf-renderer[is-mini-game-card-shelf]",
+
         // 🎬 Oglasni bannerji in zunanji oglasni elementi (brez vpliva na sam video predvajalnik)
         ".removeAds", ".topAd", ".bottomAd", ".wideBanner", ".underPlayerAd",
         ".commercial-unit", ".ad-zone", "[class*='ad-banner']", ".ad-banner-overlay",
@@ -82,9 +94,30 @@ object CosmeticFilterEngine {
     /**
      * Zgradi strnjen CSS niz za injiciranje v spletno stran.
      */
-    fun buildCosmeticCss(): String {
+    fun buildCosmeticCss(pageUrl: String? = null): String {
         if (!isEnabled) return ""
-        val selectors = GENERIC_ELEMENT_HIDING_RULES.joinToString(", ")
+        val host = try {
+            java.net.URI(pageUrl ?: "").host?.lowercase()
+        } catch (_: Exception) {
+            null
+        }
+        // Posebna pravila veljajo samo za Delo in njegove poddomene.
+        // CSS skrije tudi oglasne okvirje, dodane po nalaganju strani.
+        val publisherRules = if (
+            host == "delo.si" || host?.endsWith(".delo.si") == true
+        ) {
+            listOf(
+                ".adzone",
+                "#iprom_branded_bg_anchor",
+                "[id^='iprom_adtag_']",
+                "[data-iadserver-zone]"
+            )
+        } else {
+            emptyList()
+        }
+        val selectors = (
+            GENERIC_ELEMENT_HIDING_RULES + publisherRules
+        ).joinToString(", ")
         return """
             $selectors {
                 display: none !important;

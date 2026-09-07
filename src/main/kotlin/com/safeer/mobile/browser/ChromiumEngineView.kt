@@ -46,8 +46,8 @@ class ChromiumEngineView @JvmOverloads constructor(
             val ua = if (value) DESKTOP_USER_AGENT else defaultMobileUserAgent
             currentUserAgent = ua
             settings.userAgentString = ua
-            settings.useWideViewPort = value
-            settings.loadWithOverviewMode = value
+            settings.useWideViewPort = true
+            settings.loadWithOverviewMode = true
         }
 
     private var failedNavigationUrl: String? = null
@@ -123,8 +123,8 @@ class ChromiumEngineView @JvmOverloads constructor(
             setSupportZoom(true)
             builtInZoomControls = true
             displayZoomControls = false
-            useWideViewPort = isDesktopMode
-            loadWithOverviewMode = isDesktopMode
+            useWideViewPort = true
+            loadWithOverviewMode = true
             
             cacheMode = WebSettings.LOAD_DEFAULT
             val ua = if (isDesktopMode) DESKTOP_USER_AGENT else defaultMobileUserAgent

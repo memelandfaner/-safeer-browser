@@ -71,6 +71,9 @@ object AdBlockEngine {
 
     private fun initializeBlockedDomains() {
         val adsAndTrackers = listOf(
+            // Oglasno omrežje iPROM, ki ga uporabljajo Slovenske novice / Delo.
+            "iprom.net", "ipromcloud.com",
+
             // Popunderji, In-Page Push & Agresivna oglasna omrežja
             "popads.net", "popcash.net", "monetag.com", "adcash.com", "propellerads.com",
             "exoclick.com", "trafficjunky.com", "trafficjunky.net", "ads.trafficjunky.net", "delivery.trafficjunky.net",

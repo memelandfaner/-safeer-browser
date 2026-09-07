@@ -942,7 +942,7 @@ object UserScriptManager {
                         if (!video._safeer_instant_hooks) {
                             video._safeer_instant_hooks = true;
                             var onMediaReady = function() {
-                                if (!video._safeer_user_paused && video.paused && video.readyState >= 3) {
+                                if (!video._safeer_user_paused && video.paused) {
                                     try { video.play().catch(function() {}); } catch(_) {}
                                 }
                             };
@@ -966,16 +966,23 @@ object UserScriptManager {
                         }
 
                         var isAd = playerHasAd();
-                        // 🚫 Samo potrjen preroll: klikni gumb za preskok, originalni video ostane pri 1x
+                        // ⚡ 16x pospešitev in preskok na konec oglasa (Option 3)
                         if (isAd) {
                             video.muted = true;
+                            try { video.playbackRate = 16.0; } catch(_) {}
+                            if (isFinite(video.duration) && video.duration > 0) {
+                                try { video.currentTime = video.duration; } catch(_) {}
+                            }
+                            if (moviePlayer && typeof moviePlayer.skipAd === 'function') {
+                                try { moviePlayer.skipAd(); } catch(_) {}
+                            }
                             clickSkipButtons();
                         } else {
                             if (video.playbackRate > 2.0) {
-                                video.playbackRate = 1.0;
+                                try { video.playbackRate = 1.0; } catch(_) {}
                             }
-                            // Trigger play only if enough buffer is available (readyState >= 3: HAVE_FUTURE_DATA) to avoid audio stutter
-                            if (video.paused && !video.ended && !video._safeer_user_paused && video.readyState >= 3) {
+                            // Hipni zagon takoj, ko je video pripravljen
+                            if (video.paused && !video.ended && !video._safeer_user_paused) {
                                 var playPromise = video.play();
                                 if (playPromise !== undefined) {
                                     playPromise.catch(function() {});
@@ -1076,7 +1083,8 @@ object UserScriptManager {
                             v._safeer_user_paused = false;
                             v.preload = 'auto';
                         }
-                        scheduleNextCycle(150);
+                        self.boostPlayback();
+                        scheduleNextCycle(100);
                     });
 
                     window.addEventListener('yt-navigate-finish', function() {
@@ -1372,7 +1380,7 @@ object UserScriptManager {
         // oba bi pobrisala legitimne elemente (.adguard-banner, logotipe itd.)
         val skipAdguardScripts = isAdguardDomain(currentUrl)
         if (!skipAdguardScripts) {
-            val cosmeticCss = CosmeticFilterEngine.buildCosmeticCss()
+            val cosmeticCss = CosmeticFilterEngine.buildCosmeticCss(currentUrl)
             injectCss(webView, cosmeticCss, "safeer-cosmetic-filter")
         }
         if (isDesktop) {
@@ -1396,7 +1404,7 @@ object UserScriptManager {
 
         val skipAdguardScripts = isAdguardDomain(currentUrl)
         if (!skipAdguardScripts) {
-            val cosmeticCss = CosmeticFilterEngine.buildCosmeticCss()
+            val cosmeticCss = CosmeticFilterEngine.buildCosmeticCss(currentUrl)
             injectCss(webView, cosmeticCss, "safeer-cosmetic-filter")
         }
         if (isDesktop) {
