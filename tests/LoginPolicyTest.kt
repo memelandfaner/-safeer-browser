@@ -16,7 +16,10 @@ fun main() {
     check(UrlSanitizer.sanitize("https://example.org/?utm_source=test&bad=%ZZ") == "https://example.org/?bad=%ZZ")
     check(UrlSanitizer.sanitize("about:srcdoc") == "about:srcdoc")
     listOf("https://chatgpt.com/", "https://accounts.google.com/v3/signin", "https://example.org/login",
-        "https://tenant.auth0.com/", "https://challenges.cloudflare.com/").forEach {
+        "https://tenant.auth0.com/", "https://challenges.cloudflare.com/",
+        "https://accounts.x.ai/check-login?redirect=grok-com", "https://grok.com/",
+        "https://challenges.cloudflare.com/turnstile/v0/api.js",
+        "https://example.com/cdn-cgi/challenge-platform/turnstile").forEach {
         check(AuthenticationPages.isAuthenticationPage(it)) { "Unprotected login page: $it" }
     }
     listOf("https://accounts.google.com.example.org/", "https://notauth0.com/", "https://example.org/blog/login-help",

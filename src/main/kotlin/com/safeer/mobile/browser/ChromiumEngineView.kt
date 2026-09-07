@@ -118,7 +118,7 @@ class ChromiumEngineView @JvmOverloads constructor(
             mediaPlaybackRequiresUserGesture = false
             mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
             setSupportMultipleWindows(true)
-            javaScriptCanOpenWindowsAutomatically = false
+            javaScriptCanOpenWindowsAutomatically = true
             
             setSupportZoom(true)
             builtInZoomControls = true
@@ -555,6 +555,9 @@ class ChromiumEngineView @JvmOverloads constructor(
 
             override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
                 val url = request?.url?.toString() ?: return null
+                if (AuthenticationPages.isAuthenticationPage(url)) {
+                    return null
+                }
                 val isMainFrame = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     request.isForMainFrame
                 } else {

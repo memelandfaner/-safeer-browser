@@ -26,7 +26,7 @@ object DoHProxyEngine {
 
     private var currentServer: LocalDoHServer? = null
     private val isRunning = AtomicBoolean(false)
-    private var activeProviderId = "quad9"
+    private var activeProviderId = "cloudflare"
 
     // --- 1. DoH Razreševalnik z lokalnim predpomnilnikom ---
     class DoHResolver(providerUrl: String, private val transport: (String, ByteArray, Int) -> ByteArray? = Http2DnsTransport::query) {
@@ -214,7 +214,7 @@ object DoHProxyEngine {
                     val effectiveUrl = if (dohProviderId == "custom" && customUrl.isNotBlank()) {
                         customUrl
                     } else {
-                        (PROVIDERS[dohProviderId] ?: PROVIDERS["quad9"]!!).url
+                        (PROVIDERS[dohProviderId] ?: PROVIDERS["cloudflare"]!!).url
                     }
                     activeProviderId = dohProviderId
 

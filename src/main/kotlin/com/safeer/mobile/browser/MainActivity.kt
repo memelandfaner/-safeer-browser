@@ -1189,7 +1189,7 @@ class MainActivity : android.app.Activity() {
         val dohKeys = arrayOf("quad9", "adguard", "cloudflare", "google", "custom", "disabled")
         var currentDoh = PreferencesManager.getDohProvider(this)
         if (!PreferencesManager.isDohEnabled(this)) currentDoh = "disabled"
-        val selectedDohIdx = dohKeys.indexOf(currentDoh).let { if (it >= 0) it else 0 }
+        val selectedDohIdx = dohKeys.indexOf(currentDoh).let { if (it >= 0) it else dohKeys.indexOf("cloudflare") }
 
         val editCustomDoh = EditText(this).apply {
             hint = I18n.t(this@MainActivity, "custom_doh_hint")
@@ -1367,7 +1367,7 @@ class MainActivity : android.app.Activity() {
                 val dohCheckedId = rgDoh.checkedRadioButtonId
                 val dohCheckedRb = rgDoh.findViewById<RadioButton>(dohCheckedId)
                 val dohIdx = rgDoh.indexOfChild(dohCheckedRb)
-                val selDoh = if (dohIdx in dohKeys.indices) dohKeys[dohIdx] else "quad9"
+                val selDoh = if (dohIdx in dohKeys.indices) dohKeys[dohIdx] else "cloudflare"
                 PreferencesManager.setDohEnabled(this, selDoh != "disabled")
                 PreferencesManager.setDohProvider(this, selDoh)
                 PreferencesManager.setCustomDohUrl(this, editCustomDoh.text.toString().trim())

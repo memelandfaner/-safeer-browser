@@ -92,7 +92,7 @@ object PreferencesManager {
 
     // --- 5. Piškotki tretjih oseb ---
     fun isThirdPartyCookiesEnabled(context: Context): Boolean {
-        return getPrefs(context).getBoolean(KEY_THIRD_PARTY_COOKIES, false)
+        return getPrefs(context).getBoolean(KEY_THIRD_PARTY_COOKIES, true)
     }
 
     fun setThirdPartyCookiesEnabled(context: Context, enabled: Boolean) {
@@ -137,7 +137,7 @@ object PreferencesManager {
     }
 
     fun getDohProvider(context: Context): String {
-        return getPrefs(context).getString(KEY_DOH_PROVIDER, "quad9") ?: "quad9"
+        return getPrefs(context).getString(KEY_DOH_PROVIDER, "cloudflare") ?: "cloudflare"
     }
 
     fun setDohProvider(context: Context, provider: String) {
@@ -145,7 +145,7 @@ object PreferencesManager {
     }
 
     fun getCustomDohUrl(context: Context): String {
-        return getPrefs(context).getString(KEY_CUSTOM_DOH_URL, "https://dns.quad9.net/dns-query") ?: "https://dns.quad9.net/dns-query"
+        return getPrefs(context).getString(KEY_CUSTOM_DOH_URL, "https://1.1.1.1/dns-query") ?: "https://1.1.1.1/dns-query"
     }
 
     fun setCustomDohUrl(context: Context, url: String) {
