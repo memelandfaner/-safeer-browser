@@ -51,7 +51,7 @@
   "Download and details ↗": "Prenos in podrobnosti ↗",
   "Comfortable, light and efficient.": "Udoben, lahek in varčen.",
   "Designed for comfortable one-handed browsing, a responsive tab grid on tablets and minimal battery use.": "Ergonomsko prilagojen za sproščeno brskanje z eno roko, odzivna mreža zavihkov na tablicah ter minimalna poraba baterije.",
-  "Version 1.0.10 · APK": "Različica 1.0.10 · APK",
+  "Version 1.0.11 · APK": "Različica 1.0.11 · APK",
   "Full control on the big screen.": "Popoln nadzor na velikem zaslonu.",
   "Intuitive remote control, precise navigation between items and smooth video playback powered by Media3.": "Intuitivno vodenje z daljincem, natančen premik med vsebinami ter tekoče predvajanje video vsebin z Media3 pogonom.",
   "Version 2.1.81 · APK": "Različica 2.1.81 · APK",
