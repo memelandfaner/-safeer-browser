@@ -95,6 +95,10 @@ class MainActivity : android.app.Activity() {
             android.util.Log.e("SafeerCrashHandler", "Uncaught exception in thread ${thread.name}: ${throwable.message}", throwable)
             defaultHandler?.uncaughtException(thread, throwable)
         }
+        if (android.os.Build.VERSION.SDK_INT >= 30) {
+            // Own system-bar and IME insets consistently, including Android 15+.
+            window.setDecorFitsSystemWindows(false)
+        }
         setContentView(R.layout.activity_main)
 
         applyAppTheme(PreferencesManager.getTheme(this))
@@ -328,26 +332,11 @@ class MainActivity : android.app.Activity() {
         btnFindClose = findViewById(R.id.btnFindClose)
     }
 
-    private fun getStatusBarHeight(): Int {
-        val resId = resources.getIdentifier("status_bar_height", "dimen", "android")
-        if (resId > 0) {
-            val h = resources.getDimensionPixelSize(resId)
-            if (h > 0) return h
-        }
-        return (24 * resources.displayMetrics.density).toInt()
-    }
-
-    private fun getNavigationBarHeight(): Int {
-        val resId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
-        if (resId > 0) {
-            val h = resources.getDimensionPixelSize(resId)
-            if (h > 0) return h
-        }
-        return (48 * resources.displayMetrics.density).toInt()
-    }
-
-    private fun applySystemBarInsets(statusBarHeight: Int, navBarHeight: Int) {
-        val baseToolbarHeight = (64 * resources.displayMetrics.density).toInt()
+    private fun applySystemBarInsets(statusBarHeight: Int, bottomInset: Int, leftInset: Int = 0, rightInset: Int = 0) {
+        // Resize the native viewport so fixed website controls stay above the
+        // navigation bar/keyboard. Do not add the keyboard and nav heights.
+        mainRoot.setPadding(leftInset, 0, rightInset, bottomInset)
+        val baseToolbarHeight = resources.getDimensionPixelSize(R.dimen.browser_toolbar_height)
         val totalToolbarHeight = baseToolbarHeight + statusBarHeight
         val lp = mobileTopBar.layoutParams
         if (lp != null && lp.height != totalToolbarHeight) {
@@ -361,7 +350,8 @@ class MainActivity : android.app.Activity() {
             mobileTopBar.paddingBottom
         )
 
-        tabSwitcherOverlay.setPadding(0, statusBarHeight, 0, navBarHeight)
+        // The root already reserves the bottom and side insets for all children.
+        tabSwitcherOverlay.setPadding(0, statusBarHeight, 0, 0)
 
         val rootLp = webViewContainer.layoutParams as? RelativeLayout.LayoutParams
         if (rootLp != null && rootLp.bottomMargin != 0) {
@@ -371,37 +361,33 @@ class MainActivity : android.app.Activity() {
     }
 
     private fun setupWindowInsets() {
-        val initialStatusBar = getStatusBarHeight()
-        val initialNavBar = getNavigationBarHeight()
-        applySystemBarInsets(initialStatusBar, initialNavBar)
-
         mainRoot.setOnApplyWindowInsetsListener { _, insets ->
-            val statusBarHeight = if (android.os.Build.VERSION.SDK_INT >= 30) {
-                val sb = insets.getInsets(android.view.WindowInsets.Type.statusBars()).top
-                if (sb > 0) sb else getStatusBarHeight()
-            } else {
-                @Suppress("DEPRECATION")
-                val sb = insets.systemWindowInsetTop
-                if (sb > 0) sb else getStatusBarHeight()
+            if (customVideoView != null) {
+                mainRoot.setPadding(0, 0, 0, 0)
+                return@setOnApplyWindowInsetsListener insets
             }
-            val navBarHeight = if (android.os.Build.VERSION.SDK_INT >= 30) {
-                val nb = insets.getInsets(android.view.WindowInsets.Type.navigationBars()).bottom
-                if (nb > 0) nb else getNavigationBarHeight()
-            } else {
-                @Suppress("DEPRECATION")
-                val nb = insets.systemWindowInsetBottom
-                if (nb > 0) nb else getNavigationBarHeight()
-            }
-            applySystemBarInsets(statusBarHeight, navBarHeight)
             if (android.os.Build.VERSION.SDK_INT >= 30) {
+                val bars = insets.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout())
+                val ime = insets.getInsets(WindowInsets.Type.ime())
+                applySystemBarInsets(bars.top, maxOf(bars.bottom, ime.bottom),
+                    maxOf(bars.left, ime.left), maxOf(bars.right, ime.right))
                 val keyboardVisible = insets.isVisible(android.view.WindowInsets.Type.ime())
                 if (keyboardWasVisible && !keyboardVisible && editUrl.hasFocus()) {
                     editUrl.clearFocus()
                     mainRoot.requestFocus()
                 }
                 keyboardWasVisible = keyboardVisible
+                // Children are already inside the safe viewport.
+                WindowInsets.CONSUMED
+            } else {
+                // Android 9/10 retain the platform's fitted window/adjustResize.
+                // Only reserve remaining insets; zero is a valid value.
+                @Suppress("DEPRECATION")
+                applySystemBarInsets(insets.systemWindowInsetTop, insets.systemWindowInsetBottom,
+                    insets.systemWindowInsetLeft, insets.systemWindowInsetRight)
+                @Suppress("DEPRECATION")
+                insets.consumeSystemWindowInsets()
             }
-            insets
         }
         mainRoot.requestApplyInsets()
     }
