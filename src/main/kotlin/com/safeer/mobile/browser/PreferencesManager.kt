@@ -28,6 +28,19 @@ object PreferencesManager {
     private const val KEY_SECURE_PROXY_URL = "pref_secure_proxy_url"
     private const val KEY_ADGUARD_PROTECTION_ENABLED = "pref_adguard_protection_enabled"
     private const val KEY_TEXT_ZOOM = "pref_text_zoom"
+    private const val KEY_THEME = "pref_theme"
+    private const val KEY_FONT_FAMILY = "pref_font_family"
+    private const val KEY_BRAVE_MODE_ENABLED = "pref_brave_mode_enabled"
+
+    const val THEME_DARK_SLATE = "dark_slate"
+    const val THEME_AMOLED = "amoled"
+    const val THEME_MIDNIGHT = "midnight"
+    const val THEME_EMERALD = "emerald"
+
+    const val FONT_SYSTEM = "system"
+    const val FONT_SANS = "sans"
+    const val FONT_SERIF = "serif"
+    const val FONT_MONOSPACE = "monospace"
 
     private fun getPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -89,6 +102,33 @@ object PreferencesManager {
 
     fun setTextZoom(context: Context, zoom: Int) {
         getPrefs(context).edit().putInt(KEY_TEXT_ZOOM, zoom).apply()
+    }
+
+    // --- 3.2. Izbira teme brskalnika ---
+    fun getTheme(context: Context): String {
+        return getPrefs(context).getString(KEY_THEME, THEME_DARK_SLATE) ?: THEME_DARK_SLATE
+    }
+
+    fun setTheme(context: Context, theme: String) {
+        getPrefs(context).edit().putString(KEY_THEME, theme).apply()
+    }
+
+    // --- 3.3. Izbor pisave (Font Family) ---
+    fun getFontFamily(context: Context): String {
+        return getPrefs(context).getString(KEY_FONT_FAMILY, FONT_SYSTEM) ?: FONT_SYSTEM
+    }
+
+    fun setFontFamily(context: Context, font: String) {
+        getPrefs(context).edit().putString(KEY_FONT_FAMILY, font).apply()
+    }
+
+    // --- 3.4. Brave način (Brave Shield stil začetne strani) ---
+    fun isBraveModeEnabled(context: Context): Boolean {
+        return getPrefs(context).getBoolean(KEY_BRAVE_MODE_ENABLED, true)
+    }
+
+    fun setBraveModeEnabled(context: Context, enabled: Boolean) {
+        getPrefs(context).edit().putBoolean(KEY_BRAVE_MODE_ENABLED, enabled).apply()
     }
 
     // --- 4. Namizni način ---

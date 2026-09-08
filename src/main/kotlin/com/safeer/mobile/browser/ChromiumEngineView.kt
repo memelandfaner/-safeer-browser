@@ -88,6 +88,29 @@ class ChromiumEngineView @JvmOverloads constructor(
         UserScriptManager.injectDarkModeToggle(this, enable)
     }
 
+    fun applyFontFamily(fontFamily: String) {
+        settings.apply {
+            when (fontFamily) {
+                "sans" -> {
+                    standardFontFamily = "sans-serif"
+                    sansSerifFontFamily = "sans-serif"
+                }
+                "serif" -> {
+                    standardFontFamily = "serif"
+                    serifFontFamily = "serif"
+                }
+                "monospace" -> {
+                    standardFontFamily = "monospace"
+                    fixedFontFamily = "monospace"
+                }
+                else -> {
+                    standardFontFamily = "sans-serif"
+                    sansSerifFontFamily = "sans-serif"
+                }
+            }
+        }
+    }
+
     private fun setupSettings() {
         setLayerType(View.LAYER_TYPE_HARDWARE, null)
         try {
@@ -124,6 +147,7 @@ class ChromiumEngineView @JvmOverloads constructor(
             builtInZoomControls = true
             displayZoomControls = false
             textZoom = PreferencesManager.getTextZoom(context)
+            applyFontFamily(PreferencesManager.getFontFamily(context))
             useWideViewPort = true
             loadWithOverviewMode = true
             
@@ -140,6 +164,11 @@ class ChromiumEngineView @JvmOverloads constructor(
     }
 
     class SafeerWebAppInterface(private val context: Context, private val webView: WebView) {
+        @android.webkit.JavascriptInterface
+        fun isBraveMode(): Boolean {
+            return PreferencesManager.isBraveModeEnabled(context)
+        }
+
         @android.webkit.JavascriptInterface
         fun getStats(): String {
             val sessionAds = AdBlockEngine.blockedAdsCount.get().toLong()

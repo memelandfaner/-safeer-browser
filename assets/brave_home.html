@@ -829,10 +829,30 @@
         } catch(e) {}
     }
 
+    // Brave način (Brave Shield stil ali minimalistični način)
+    window.setBraveMode = function(enabled) {
+        try {
+            var shieldCard = document.querySelector('.shield-card');
+            if (shieldCard) {
+                shieldCard.style.display = enabled ? 'flex' : 'none';
+            }
+        } catch(e) {}
+    };
+
+    function checkBraveMode() {
+        try {
+            if (window.SafeerBridge && typeof window.SafeerBridge.isBraveMode === 'function') {
+                var isBrave = window.SafeerBridge.isBraveMode();
+                window.setBraveMode(isBrave);
+            }
+        } catch(e) {}
+    }
+
     setInterval(updateClock, 1000);
 
     renderFavorites();
     setMobileLanguage(detectMobileLanguage());
+    checkBraveMode();
 
 </script>
 

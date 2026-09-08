@@ -97,8 +97,7 @@ class MainActivity : android.app.Activity() {
         }
         setContentView(R.layout.activity_main)
 
-        window.statusBarColor = Color.parseColor("#06090F")
-        window.navigationBarColor = Color.parseColor("#000000")
+        applyAppTheme(PreferencesManager.getTheme(this))
 
         repository = BrowserRepository(this)
         downloadHandler = DownloadHandler(this)
@@ -134,6 +133,17 @@ class MainActivity : android.app.Activity() {
             }
         }
 
+    }
+
+    private fun applyAppTheme(theme: String) {
+        val (statusColor, navColor) = when (theme) {
+            "amoled" -> Pair(Color.BLACK, Color.BLACK)
+            "midnight" -> Pair(Color.parseColor("#0b1120"), Color.parseColor("#020617"))
+            "emerald" -> Pair(Color.parseColor("#051f15"), Color.parseColor("#020f0a"))
+            else -> Pair(Color.parseColor("#06090F"), Color.BLACK)
+        }
+        window.statusBarColor = statusColor
+        window.navigationBarColor = navColor
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -1103,9 +1113,9 @@ class MainActivity : android.app.Activity() {
             setBackgroundColor(Color.parseColor("#334155"))
         })
 
-        // 2. Videz in prilagoditev (Appearance & Customization)
+        // 2. Izgled brskalnika (Browser Appearance & Styling)
         val tvAppearanceTitle = TextView(this).apply {
-            text = "🎨 " + (if (currentLang == "sl") "Videz in prikaz" else "Appearance & Display")
+            text = "🎨 " + (if (currentLang == "sl") "Izgled brskalnika" else "Browser Appearance")
             textSize = 15f
             setTextColor(Color.parseColor("#00d2ff"))
             setTypeface(null, android.graphics.Typeface.BOLD)
@@ -1113,13 +1123,84 @@ class MainActivity : android.app.Activity() {
         }
         view.addView(tvAppearanceTitle)
 
+        // 2.1. Izbira teme brskalnika
+        val tvThemeLabel = TextView(this).apply {
+            text = if (currentLang == "sl") "Izbira teme brskalnika:" else "Browser Theme:"
+            textSize = 13f
+            setTextColor(Color.parseColor("#94A3B8"))
+            setPadding(0, 4, 0, 4)
+        }
+        view.addView(tvThemeLabel)
+
+        val themeKeys = arrayOf("dark_slate", "amoled", "midnight", "emerald")
+        val themeLabels = if (currentLang == "sl") {
+            arrayOf("🌙 Nočna", "🖤 AMOLED", "🌌 Midnight", "🍃 Emerald")
+        } else {
+            arrayOf("🌙 Dark Slate", "🖤 AMOLED", "🌌 Midnight", "🍃 Emerald")
+        }
+        val currentTheme = PreferencesManager.getTheme(this)
+        val selectedThemeIdx = themeKeys.indexOf(currentTheme).let { if (it >= 0) it else 0 }
+
+        val rgTheme = RadioGroup(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+        }
+        themeKeys.forEachIndexed { idx, _ ->
+            val rb = RadioButton(this).apply {
+                id = View.generateViewId()
+                text = themeLabels[idx]
+                isChecked = (idx == selectedThemeIdx)
+                setTextColor(Color.WHITE)
+                textSize = 12f
+                setPadding(0, 0, 14, 0)
+            }
+            rgTheme.addView(rb)
+        }
+        view.addView(rgTheme)
+
+        // 2.2. Temni način
         val cbDarkMode = CheckBox(this).apply {
             text = I18n.t(this@MainActivity, "dark_mode")
             isChecked = PreferencesManager.isDarkModeEnabled(this@MainActivity)
             setTextColor(Color.WHITE)
+            setPadding(0, 8, 0, 0)
         }
         view.addView(cbDarkMode)
 
+        // 2.3. Izbor pisave
+        val tvFontLabel = TextView(this).apply {
+            text = if (currentLang == "sl") "Izbor pisave:" else "Font Style:"
+            textSize = 13f
+            setTextColor(Color.parseColor("#94A3B8"))
+            setPadding(0, 10, 0, 4)
+        }
+        view.addView(tvFontLabel)
+
+        val fontKeys = arrayOf("system", "sans", "serif", "monospace")
+        val fontLabels = if (currentLang == "sl") {
+            arrayOf("🖥️ Sistemska", "🔤 Sans-serif", "📖 Serif", "💻 Monospace")
+        } else {
+            arrayOf("🖥️ System", "🔤 Sans-serif", "📖 Serif", "💻 Monospace")
+        }
+        val currentFont = PreferencesManager.getFontFamily(this)
+        val selectedFontIdx = fontKeys.indexOf(currentFont).let { if (it >= 0) it else 0 }
+
+        val rgFont = RadioGroup(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+        }
+        fontKeys.forEachIndexed { idx, _ ->
+            val rb = RadioButton(this).apply {
+                id = View.generateViewId()
+                text = fontLabels[idx]
+                isChecked = (idx == selectedFontIdx)
+                setTextColor(Color.WHITE)
+                textSize = 12f
+                setPadding(0, 0, 14, 0)
+            }
+            rgFont.addView(rb)
+        }
+        view.addView(rgFont)
+
+        // 2.4. Velikost pisave strani (Povečava)
         val tvZoomLabel = TextView(this).apply {
             text = if (currentLang == "sl") "Velikost pisave strani (Povečava):" else "Page Text Size / Zoom:"
             textSize = 13f
@@ -1148,6 +1229,23 @@ class MainActivity : android.app.Activity() {
             rgZoom.addView(rb)
         }
         view.addView(rgZoom)
+
+        // 2.5. Brave način
+        val cbBraveMode = CheckBox(this).apply {
+            text = if (currentLang == "sl") "🦁 Brave način (Brave Shield začetna stran in statistika)" else "🦁 Brave Mode (Brave Shield dashboard & widgets)"
+            isChecked = PreferencesManager.isBraveModeEnabled(this@MainActivity)
+            setTextColor(Color.WHITE)
+            setPadding(0, 10, 0, 0)
+        }
+        view.addView(cbBraveMode)
+
+        val tvBraveDesc = TextView(this).apply {
+            text = if (currentLang == "sl") "    Ob izklopu začetna stran deluje v čistem minimalističnem načinu zgolj z iskalnikom." else "    When disabled, home page operates in minimalist mode with search bar only."
+            textSize = 11f
+            setTextColor(Color.parseColor("#94A3B8"))
+            setPadding(0, 2, 0, 6)
+        }
+        view.addView(tvBraveDesc)
 
         // Ločilna črta
         view.addView(View(this).apply {
@@ -1402,6 +1500,32 @@ class MainActivity : android.app.Activity() {
                 val selZoom = if (zoomIdx in zoomKeys.indices) zoomKeys[zoomIdx] else 100
                 PreferencesManager.setTextZoom(this, selZoom)
                 tabManager.getAllTabs().forEach { it.webView.settings.textZoom = selZoom }
+
+                // 🎨 Tema
+                val themeCheckedId = rgTheme.checkedRadioButtonId
+                val themeCheckedRb = rgTheme.findViewById<RadioButton>(themeCheckedId)
+                val themeIdx = rgTheme.indexOfChild(themeCheckedRb)
+                val selTheme = if (themeIdx in themeKeys.indices) themeKeys[themeIdx] else "dark_slate"
+                PreferencesManager.setTheme(this, selTheme)
+                applyAppTheme(selTheme)
+
+                // 🔤 Pisava
+                val fontCheckedId = rgFont.checkedRadioButtonId
+                val fontCheckedRb = rgFont.findViewById<RadioButton>(fontCheckedId)
+                val fontIdx = rgFont.indexOfChild(fontCheckedRb)
+                val selFont = if (fontIdx in fontKeys.indices) fontKeys[fontIdx] else "system"
+                PreferencesManager.setFontFamily(this, selFont)
+                tabManager.getAllTabs().forEach { it.webView.applyFontFamily(selFont) }
+
+                // 🦁 Brave način
+                val newBraveMode = cbBraveMode.isChecked
+                PreferencesManager.setBraveModeEnabled(this, newBraveMode)
+                tabManager.getAllTabs().forEach { tab ->
+                    val curUrl = tab.webView.url ?: ""
+                    if (curUrl.startsWith("file:///android_asset/brave_home.html")) {
+                        tab.webView.evaluateJavascript("if (window.setBraveMode) { window.setBraveMode($newBraveMode); }", null)
+                    }
+                }
 
                 val newThirdParty = cbThirdPartyCookies.isChecked
                 PreferencesManager.setThirdPartyCookiesEnabled(this, newThirdParty)
