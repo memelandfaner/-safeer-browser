@@ -1103,7 +1103,61 @@ class MainActivity : android.app.Activity() {
             setBackgroundColor(Color.parseColor("#334155"))
         })
 
-        // 2. Preklopniki
+        // 2. Videz in prilagoditev (Appearance & Customization)
+        val tvAppearanceTitle = TextView(this).apply {
+            text = "🎨 " + (if (currentLang == "sl") "Videz in prikaz" else "Appearance & Display")
+            textSize = 15f
+            setTextColor(Color.parseColor("#00d2ff"))
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(0, 0, 0, 12)
+        }
+        view.addView(tvAppearanceTitle)
+
+        val cbDarkMode = CheckBox(this).apply {
+            text = I18n.t(this@MainActivity, "dark_mode")
+            isChecked = PreferencesManager.isDarkModeEnabled(this@MainActivity)
+            setTextColor(Color.WHITE)
+        }
+        view.addView(cbDarkMode)
+
+        val tvZoomLabel = TextView(this).apply {
+            text = if (currentLang == "sl") "Velikost pisave strani (Povečava):" else "Page Text Size / Zoom:"
+            textSize = 13f
+            setTextColor(Color.parseColor("#94A3B8"))
+            setPadding(0, 10, 0, 6)
+        }
+        view.addView(tvZoomLabel)
+
+        val zoomKeys = intArrayOf(85, 100, 115, 130)
+        val zoomLabels = arrayOf("85%", "100%", "115%", "130%")
+        val currentZoom = PreferencesManager.getTextZoom(this)
+        val selectedZoomIdx = zoomKeys.indexOf(currentZoom).let { if (it >= 0) it else 1 }
+
+        val rgZoom = RadioGroup(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+        }
+        zoomKeys.forEachIndexed { idx, _ ->
+            val rb = RadioButton(this).apply {
+                id = View.generateViewId()
+                text = zoomLabels[idx]
+                isChecked = (idx == selectedZoomIdx)
+                setTextColor(Color.WHITE)
+                textSize = 12f
+                setPadding(0, 0, 20, 0)
+            }
+            rgZoom.addView(rb)
+        }
+        view.addView(rgZoom)
+
+        // Ločilna črta
+        view.addView(View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2).apply {
+                setMargins(0, 24, 0, 24)
+            }
+            setBackgroundColor(Color.parseColor("#334155"))
+        })
+
+        // 3. Zasebnost & Varnost
         val tvShieldTitle = TextView(this).apply {
             text = I18n.t(this@MainActivity, "settings_privacy_security")
             textSize = 15f
@@ -1119,13 +1173,6 @@ class MainActivity : android.app.Activity() {
             setTextColor(Color.WHITE)
         }
         view.addView(cbAdBlock)
-
-        val cbDarkMode = CheckBox(this).apply {
-            text = I18n.t(this@MainActivity, "dark_mode")
-            isChecked = PreferencesManager.isDarkModeEnabled(this@MainActivity)
-            setTextColor(Color.WHITE)
-        }
-        view.addView(cbDarkMode)
 
         val cbThirdPartyCookies = CheckBox(this).apply {
             text = I18n.t(this@MainActivity, "third_party_cookies")
@@ -1310,7 +1357,7 @@ class MainActivity : android.app.Activity() {
 
         // 4. Info
         val tvInfo = TextView(this).apply {
-            text = "\nSafeer Mobile Browser v1.0.6 • Target SDK 36\nSafeer is a security layer, not a guarantee against all online threats."
+            text = "\nSafeer Mobile Browser v1.0.10 • Target SDK 36\nSafeer is a security layer, not a guarantee against all online threats."
             textSize = 11f
             setTextColor(Color.parseColor("#64748b"))
             setPadding(0, 16, 0, 0)
@@ -1348,6 +1395,13 @@ class MainActivity : android.app.Activity() {
                 PreferencesManager.setDarkModeEnabled(this, newDark)
                 isDarkModeActive = newDark
                 tabManager.getAllTabs().forEach { it.webView.applyDarkMode(newDark) }
+
+                val zoomCheckedId = rgZoom.checkedRadioButtonId
+                val zoomCheckedRb = rgZoom.findViewById<RadioButton>(zoomCheckedId)
+                val zoomIdx = rgZoom.indexOfChild(zoomCheckedRb)
+                val selZoom = if (zoomIdx in zoomKeys.indices) zoomKeys[zoomIdx] else 100
+                PreferencesManager.setTextZoom(this, selZoom)
+                tabManager.getAllTabs().forEach { it.webView.settings.textZoom = selZoom }
 
                 val newThirdParty = cbThirdPartyCookies.isChecked
                 PreferencesManager.setThirdPartyCookiesEnabled(this, newThirdParty)

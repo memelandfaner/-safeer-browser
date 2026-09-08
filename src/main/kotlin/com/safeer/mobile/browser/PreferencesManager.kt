@@ -27,6 +27,7 @@ object PreferencesManager {
     private const val KEY_SECURE_PROXY_MODE = "pref_secure_proxy_mode"
     private const val KEY_SECURE_PROXY_URL = "pref_secure_proxy_url"
     private const val KEY_ADGUARD_PROTECTION_ENABLED = "pref_adguard_protection_enabled"
+    private const val KEY_TEXT_ZOOM = "pref_text_zoom"
 
     private fun getPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -79,6 +80,15 @@ object PreferencesManager {
 
     fun setDarkModeEnabled(context: Context, enabled: Boolean) {
         getPrefs(context).edit().putBoolean(KEY_DARK_MODE_ENABLED, enabled).apply()
+    }
+
+    // --- 3.1. Povečava besedila strani ---
+    fun getTextZoom(context: Context): Int {
+        return getPrefs(context).getInt(KEY_TEXT_ZOOM, 100)
+    }
+
+    fun setTextZoom(context: Context, zoom: Int) {
+        getPrefs(context).edit().putInt(KEY_TEXT_ZOOM, zoom).apply()
     }
 
     // --- 4. Namizni način ---

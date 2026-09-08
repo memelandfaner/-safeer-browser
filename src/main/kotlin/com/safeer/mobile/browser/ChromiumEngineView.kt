@@ -123,6 +123,7 @@ class ChromiumEngineView @JvmOverloads constructor(
             setSupportZoom(true)
             builtInZoomControls = true
             displayZoomControls = false
+            textZoom = PreferencesManager.getTextZoom(context)
             useWideViewPort = true
             loadWithOverviewMode = true
             
