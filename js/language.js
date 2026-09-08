@@ -54,7 +54,7 @@
   "Version 1.0.11 · APK": "Različica 1.0.11 · APK",
   "Full control on the big screen.": "Popoln nadzor na velikem zaslonu.",
   "Intuitive remote control, precise navigation between items and smooth video playback powered by Media3.": "Intuitivno vodenje z daljincem, natančen premik med vsebinami ter tekoče predvajanje video vsebin z Media3 pogonom.",
-  "Version 2.1.81 · APK": "Različica 2.1.81 · APK",
+  "Version 2.1.82 · APK": "Različica 2.1.82 · APK",
   "Why choose Safeer?": "Zakaj izbrati Safeer?",
   "Faster, cleaner": "Hitrejši, čistejši",
   "and in your hands.": "in v vaših rokah.",
