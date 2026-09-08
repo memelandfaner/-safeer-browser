@@ -652,7 +652,7 @@ class MainActivity : android.app.Activity() {
         if (url.isEmpty() || url == "about:blank" || url.startsWith("file:///android_asset/brave_home.html")) {
             editUrl.setText("")
             editUrl.hint = getString(R.string.url_hint)
-            tvSecurityLock.text = "🦁"
+            tvSecurityLock.text = "S"
             return
         }
 

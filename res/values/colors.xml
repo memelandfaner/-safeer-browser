@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- AMOLED Deep Dark & True Pitch Black -->
-    <color name="bg_primary">#101814</color>
+    <color name="bg_primary">#11141C</color>
     <color name="bg_pure_black">#000000</color>
-    <color name="bg_secondary">#19241E</color>
-    <color name="bg_card">#1C2A22</color>
-    <color name="bg_card_active">#263D2C</color>
+    <color name="bg_secondary">#1B202D</color>
+    <color name="bg_card">#202737</color>
+    <color name="bg_card_active">#2D4064</color>
     
     <!-- Omnibox URL Bar -->
-    <color name="bg_omnibox">#1C2A22</color>
-    <color name="bg_omnibox_focus">#263D2C</color>
-    <color name="border_omnibox">#42574A</color>
-    <color name="border_omnibox_focus">#9BD478</color>
+    <color name="bg_omnibox">#202737</color>
+    <color name="bg_omnibox_focus">#2D4064</color>
+    <color name="border_omnibox">#435571</color>
+    <color name="border_omnibox_focus">#B8CAFF</color>
     
     <!-- Neon Accents -->
-    <color name="accent_cyan">#9BD478</color>
-    <color name="accent_cyan_glow">#409BD478</color>
+    <color name="accent_cyan">#B8CAFF</color>
+    <color name="accent_cyan_glow">#40B8CAFF</color>
     <color name="accent_blue">#3B82F6</color>
     <color name="accent_purple">#8B5CF6</color>
     
     <!-- Text Colors -->
     <color name="text_primary">#F8FAFC</color>
-    <color name="text_secondary">#B7C5BC</color>
-    <color name="text_dim">#A3B5A9</color>
+    <color name="text_secondary">#BECBE0</color>
+    <color name="text_dim">#AFBBD3</color>
     
     <!-- Badges & Status -->
     <color name="security_green">#10B981</color>
@@ -30,11 +30,11 @@
     <color name="danger_red">#EF4444</color>
     
     <!-- Tab Badge -->
-    <color name="badge_tab_bg">#1C2A22</color>
-    <color name="badge_tab_border">#9BD478</color>
-    <color name="badge_tab_text">#9BD478</color>
+    <color name="badge_tab_bg">#202737</color>
+    <color name="badge_tab_border">#B8CAFF</color>
+    <color name="badge_tab_text">#B8CAFF</color>
     
     <!-- Touch Ripples & Overlays -->
-    <color name="ripple_color">#269BD478</color>
+    <color name="ripple_color">#26B8CAFF</color>
     <color name="overlay_backdrop">#CC04060A</color>
 </resources>

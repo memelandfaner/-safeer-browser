@@ -2,7 +2,7 @@
 <html lang="sl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Safeer Browser - Začetna stran</title>
     <style>
         * {
@@ -413,6 +413,7 @@
             100% { opacity: 0.4; }
         }
     </style>
+<link rel="stylesheet" href="safeer-home.css">
 </head>
 <body>
 
@@ -422,11 +423,11 @@
     <div class="shield-card">
         <div class="shield-header">
             <div class="shield-title">
-                <span class="shield-icon">🦁</span>
-                <span>Safeer Shield</span>
+                <img class="safeer-logo" src="safeer-mark.png" width="44" height="44" alt="">
+                <span>Safeer</span>
             </div>
             <div style="display:flex; align-items:center; gap:6px;">
-                <span class="shield-badge" data-i18n="shield_active">Zaščita aktivna</span>
+                <span class="shield-badge">Android</span>
                 <div class="mob-lang-toggle">
                     <span class="mob-lang-opt active" data-lang="sl" onclick="setMobileLanguage('sl')">SL</span>
                     <span class="mob-lang-opt" data-lang="en" onclick="setMobileLanguage('en')">EN</span>
@@ -435,20 +436,6 @@
                     <span class="mob-lang-opt" data-lang="fr" onclick="setMobileLanguage('fr')">FR</span>
                     <span class="mob-lang-opt" data-lang="it" onclick="setMobileLanguage('it')">IT</span>
                 </div>
-            </div>
-        </div>
-        <div class="stats-grid">
-            <div class="stat-box">
-                <div class="stat-val ads" id="valAds">0</div>
-                <div class="stat-lbl" data-i18n="lbl_blocked">Blokirano</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-val data" id="valData">0.0 MB</div>
-                <div class="stat-lbl" data-i18n="lbl_saved">Prihranek</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-val time" id="valTime">0.0 min</div>
-                <div class="stat-lbl" data-i18n="lbl_time">Prihranjen čas</div>
             </div>
         </div>
     </div>
@@ -462,7 +449,7 @@
     <!-- 🔍 3. Omnibox / Search Widget -->
     <div class="search-card">
         <form class="search-bar-wrapper" id="searchForm" onsubmit="return handleSearch(event)">
-            <input type="text" class="search-input" id="searchInput" placeholder="Iščite ali vnesite naslov spleta..." autocomplete="off" autocorrect="off">
+            <input type="text" class="search-input" id="searchInput" aria-label="Išči ali vnesi naslov" enterkeyhint="go" placeholder="Iščite ali vnesite naslov spleta..." autocomplete="off" autocorrect="off">
             <button type="submit" class="search-btn">🔍</button>
         </form>
         <div class="engine-chips">
@@ -476,7 +463,7 @@
 
     <!-- ⭐ 4. Priljubljene strani in multimedija -->
     <div class="section-header">
-        <div class="section-title" data-i18n="fav_title">Priljubljene strani & multimedija</div>
+        <div class="section-title" data-i18n="fav_title">Tvoje priljubljene strani</div>
         <div style="display:flex; gap:6px;">
             <button type="button" class="section-edit-btn" id="btnEditFavs" onclick="toggleEditFavorites()" data-i18n="btn_edit">⚙️ Uredi</button>
             <button type="button" class="section-edit-btn" onclick="addNewFavorite()" data-i18n="btn_add">➕ Dodaj</button>
@@ -490,7 +477,7 @@
     <!-- 🛡️ Footer -->
     <div class="footer-badge">
         <div class="pulse-dot"></div>
-        <span>Safeer Shield & Anti-Threat Engine</span>
+        <span>Safeer · Filtriranje oglasov in znanih groženj</span>
     </div>
 
 </div>
@@ -603,16 +590,26 @@
         grid.innerHTML = '';
 
         list.forEach(function(item, index) {
-            var tile = document.createElement('div');
+            var tile = document.createElement('button');
+            tile.type = 'button';
             tile.className = 'favorite-tile';
-            var col = item.color || '#00d2ff';
-
-            var delHtml = isEditFavoritesMode ? '<div class="tile-delete-btn" onclick="event.stopPropagation(); deleteFavorite(' + index + ')">✕</div>' : '';
-
-            tile.innerHTML = delHtml +
-                '<div class="tile-icon-wrapper" style="background: rgba(255, 255, 255, 0.07); border-color: ' + col + ';">' + (item.mark || '🌐') + '</div>' +
-                '<div class="tile-name">' + item.title + '</div>';
-
+            var mark = document.createElement('span');
+            mark.className = 'tile-icon-wrapper';
+            mark.textContent = item.mark || '🌐';
+            var label = document.createElement('span');
+            label.className = 'tile-name';
+            label.textContent = item.title;
+            tile.appendChild(mark); tile.appendChild(label);
+            if (isEditFavoritesMode) {
+                // Keep delete separate from the shortcut button (no nested buttons).
+                var wrap = document.createElement('div');
+                wrap.className = 'favorite-edit-wrap';
+                var del = document.createElement('button');
+                del.type = 'button'; del.className = 'tile-delete-btn';
+                del.textContent = '✕'; del.setAttribute('aria-label', 'Odstrani ' + item.title);
+                del.onclick = function(e) { e.stopPropagation(); deleteFavorite(index); };
+                wrap.appendChild(tile); wrap.appendChild(del); grid.appendChild(wrap);
+            }
             tile.onclick = function() {
                 if (isEditFavoritesMode) {
                     editFavorite(index);
@@ -620,11 +617,12 @@
                     openUrl(item.url);
                 }
             };
-            grid.appendChild(tile);
+            if (!isEditFavoritesMode) grid.appendChild(tile);
         });
 
         // Gumb za dodajanje
-        var addTile = document.createElement('div');
+        var addTile = document.createElement('button');
+        addTile.type = 'button';
         addTile.className = 'favorite-tile';
         addTile.innerHTML = '<div class="tile-icon-wrapper" style="background: rgba(255, 85, 0, 0.15); border-color: rgba(255, 85, 0, 0.4); color: #ff7700;">➕</div><div class="tile-name">Dodaj</div>';
         addTile.onclick = addNewFavorite;
@@ -679,19 +677,21 @@
     // --- 5. Mobile Internationalization (i18n) ---
     var mobileI18n = {
         sl: {
+            lbl_threats: "Blokirane grožnje",
             locale: "sl-SI",
             shield_active: "Zaščita aktivna",
             lbl_blocked: "Blokirano",
             lbl_saved: "Prihranek",
             lbl_time: "Prihranjen čas",
             search_placeholder: "Iščite ali vnesite naslov spleta...",
-            fav_title: "Priljubljene strani & multimedija",
+            fav_title: "Tvoje priljubljene strani",
             btn_edit: "⚙️ Uredi",
             btn_done: "✓ Končano",
             btn_add: "➕ Dodaj",
             tile_add: "Dodaj"
         },
         en: {
+            lbl_threats: "Threats blocked",
             locale: "en-US",
             shield_active: "Shield Active",
             lbl_blocked: "Blocked",
@@ -705,6 +705,7 @@
             tile_add: "Add"
         },
         de: {
+            lbl_threats: "Blockierte Bedrohungen",
             locale: "de-DE",
             shield_active: "Schutz Aktiv",
             lbl_blocked: "Blockiert",
@@ -718,6 +719,7 @@
             tile_add: "Neu"
         },
         es: {
+            lbl_threats: "Amenazas bloqueadas",
             locale: "es-ES",
             shield_active: "Escudo Activo",
             lbl_blocked: "Bloqueado",
@@ -731,6 +733,7 @@
             tile_add: "Añadir"
         },
         fr: {
+            lbl_threats: "Menaces bloquées",
             locale: "fr-FR",
             shield_active: "Bouclier Actif",
             lbl_blocked: "Bloqué",
@@ -744,6 +747,7 @@
             tile_add: "Ajouter"
         },
         it: {
+            lbl_threats: "Minacce bloccate",
             locale: "it-IT",
             shield_active: "Protezione Attiva",
             lbl_blocked: "Bloccato",
@@ -820,17 +824,16 @@
                 var jsonStr = window.SafeerBridge.getStats();
                 var s = JSON.parse(jsonStr);
                 document.getElementById('valAds').textContent = s.ads.toLocaleString('sl-SI');
-                document.getElementById('valData').textContent = s.dataMb;
-                document.getElementById('valTime').textContent = s.timeMin;
+                document.getElementById('valThreats').textContent = Number(s.threats || 0).toLocaleString('sl-SI');
             }
         } catch(e) {}
     }
 
     setInterval(updateClock, 1000);
-    setInterval(updateStats, 2000);
+
     renderFavorites();
     setMobileLanguage(detectMobileLanguage());
-    updateStats();
+
 </script>
 
 </body>
