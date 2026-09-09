@@ -2,6 +2,7 @@
 (function () {
   "use strict";
   const sl = {
+  "Choose this version →": "Izberite to različico →",
   "Privacy and connections · Safeer": "Zasebnost in povezave · Safeer",
   "Downloads": "Prenosi",
   "How it works": "Kako deluje",
@@ -10,7 +11,7 @@
   "What privacy means in Safeer.": "Kaj pomeni zasebnost v Safeerju.",
   "Local filters do not mean anonymity. Below is a clear description of the network connections every user should know about.": "Lokalni filtri niso enako kot anonimnost. Spodaj je pregleden opis omrežnih povezav, ki jih mora vsak uporabnik poznati.",
   "This website": "Ta spletna stran",
-  "This website includes no analytics, tracking or advertising scripts. It is hosted on GitHub Pages; the host receives standard HTTP network information, including your IP address, when you visit.": "Ta spletna stran ne vključuje analitičnih, sledilnih ali oglaševalskih skript. Gostuje na GitHub Pages; gostitelj ob obisku prejme običajne omrežne podatke HTTP, vključno z naslovom IP.",
+  "This website includes no analytics, tracking or advertising scripts. It is hosted on Cloudflare Pages; the host receives standard HTTP network information, including your IP address, when you visit.": "Ta spletna stran ne vključuje analitičnih, sledilnih ali oglaševalskih skript. Gostuje na Cloudflare Pages; gostitelj ob obisku prejme običajne omrežne podatke HTTP, vključno z naslovom IP.",
   "The browser and visited websites": "Brskalnik in obiskane strani",
   "Websites see your connection's network address and receive their requests, cookies and the information you enter. Your chosen search engine receives search queries. Bookmarks and local settings stay exclusively on your device. Private browsing does not hide your IP address from your internet provider or the website you visit.": "Spletna mesta vidijo omrežni naslov vaše povezave in prejmejo svoje zahteve, piškotke ter podatke, ki jih vnašate. Iskalne poizvedbe prejme izbrani iskalnik. Zaznamki in lokalne nastavitve ostanejo shranjeni izključno na vaši napravi. Zasebni način ne skrije omrežnega naslova IP pred ponudnikom interneta ali obiskano stranjo.",
   "External services": "Zunanje storitve",
@@ -162,7 +163,8 @@
     const preferred = (browser.languages && browser.languages[0]) || browser.language || 'en';
     return String(preferred).toLowerCase().split(/[-_]/)[0] === 'sl' ? 'sl' : 'en';
   }
-  const lang = detectLanguage(navigator);
+  let lang; try { lang = new URLSearchParams(location.search).get('lang') || localStorage.getItem('safeer_user_lang'); } catch(e) {}
+  if (!['sl','en'].includes(lang)) lang=detectLanguage(navigator);
   document.documentElement.lang = lang;
   if (lang !== 'sl') return;
   const walker = document.createTreeWalker(document.documentElement, NodeFilter.SHOW_TEXT);
