@@ -63,12 +63,12 @@ object DoHProxyEngine {
             // Pošlji poizvedbo prek DoH
             val resolvedIp = queryDoH(h, timeoutMs)
             if (resolvedIp != null) {
-                cache[h] = Pair(resolvedIp, now + 60_000L) // Short cache limits stale DNS answers.
+                cache[h] = Pair(resolvedIp, now + 600_000L) // 10 minut za hitro ponovno odpiranje
                 return resolvedIp
             }
 
-            // An enabled encrypted resolver must not silently leak public queries to ISP DNS
-            // or bypass a provider's blocked/NXDOMAIN answer. Briefly cache failures.
+            // Vklopljen šifriran DNS ne sme tiho poslati poizvedbe sistemskemu (ISP) DNS-u ali obiti
+            // blokade/NXDOMAIN odgovora ponudnika. Neuspeh kratko predpomnimo.
             cache[h] = Pair(null, now + 5_000L)
             return null
         }

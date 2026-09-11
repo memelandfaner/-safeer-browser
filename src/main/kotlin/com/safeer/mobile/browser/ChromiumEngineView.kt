@@ -585,19 +585,20 @@ class ChromiumEngineView @JvmOverloads constructor(
 
             override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
                 val url = request?.url?.toString() ?: return null
-                if (AuthenticationPages.isAuthenticationPage(url)) {
-                    return null
-                }
                 val isMainFrame = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     request.isForMainFrame
                 } else {
                     false
                 }
 
-                // 🛑 1. Brezkompromisni Threat Shield (Botnet C2, Malware, Phishing, IOC)
+                // 🛑 1. Brezkompromisni Threat Shield (Botnet C2, Malware, Phishing, IOC) — pred vsemi izjemami,
+                // sicer bi npr. /login ali /cdn-cgi/ pot na nevarni domeni obšla preverjanje.
                 val threatResponse = ThreatBlockEngine.handleThreatIntercept(url, isMainFrame)
                 if (threatResponse != null) {
                     return threatResponse
+                }
+                if (AuthenticationPages.isAuthenticationPage(url)) {
+                    return null
                 }
 
                 // ⚡ 2. Napredni AdBlock & Sledilci (Suffix Trie, Streaming Guard & Path Rules)
@@ -658,6 +659,7 @@ class ChromiumEngineView @JvmOverloads constructor(
 
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
+                bankCheckGeneration++ // prekliči preverjanje prejšnje strani
                 url?.let {
                     android.util.Log.d("SafeerNav", "start $it")
                     onUrlChanged?.invoke(visibleUrl(it))
@@ -671,6 +673,7 @@ class ChromiumEngineView @JvmOverloads constructor(
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 url?.let {
+                    view?.let { wv -> scheduleFakeBankCheck(wv, it) }
                     android.util.Log.d("SafeerNav", "finish $it")
                     onUrlChanged?.invoke(visibleUrl(it))
                     onSecurityChanged?.invoke(it.startsWith("https://", ignoreCase = true))
@@ -712,6 +715,47 @@ class ChromiumEngineView @JvmOverloads constructor(
             }
         }
     }
+
+    // 🏦 BankGuard: preverjanje naložene strani (lokalno, po naložitvi, brez vpliva na hitrost nalaganja)
+    private var bankCheckGeneration = 0
+
+    private fun scheduleFakeBankCheck(wv: WebView, url: String) {
+        if (!ThreatBlockEngine.isEnabled) return
+        if (!url.startsWith("https://", ignoreCase = true) && !url.startsWith("http://", ignoreCase = true)) return
+        val host = try { Uri.parse(url).host } catch (_: Exception) { null } ?: return
+        if (ThreatBlockEngine.isRealBankHost(host)) return
+        if (returnedFromFakeBankWarning(wv, host)) {
+            wv.goBack() // "Nazaj" z opozorila preskoči lažno stran, namesto da bi znova opozorilo
+            return
+        }
+        val generation = ++bankCheckGeneration
+        val check = Runnable {
+            if (generation != bankCheckGeneration || !sameHost(wv.url, host)) return@Runnable
+            wv.evaluateJavascript(com.safeer.threatfeed.BankGuard.PAGE_SCRIPT) { json ->
+                if (generation != bankCheckGeneration || !sameHost(wv.url, host)) return@evaluateJavascript
+                val match = ThreatBlockEngine.checkFakeBankPage(url, json) ?: return@evaluateJavascript
+                bankCheckGeneration++ // eno opozorilo na stran
+                ThreatBlockEngine.recordBlock(match)
+                ThreatBlockEngine.onThreatBlocked?.invoke(match.matchedDomain, match.category ?: "", match.sourceFeed ?: "", true)
+                val html = ThreatBlockEngine.createSecurityInterstitialHtml(url, match, afterPageLoad = true)
+                wv.stopLoading()
+                wv.loadDataWithBaseURL("safeer://security-interstitial", html, "text/html", "UTF-8", ThreatBlockEngine.FAKE_BANK_HISTORY_URL)
+            }
+        }
+        wv.post(check)
+        wv.postDelayed(check, 2500L) // strani, ki obrazec za prijavo narišejo pozneje
+    }
+
+    private fun returnedFromFakeBankWarning(wv: WebView, host: String): Boolean = try {
+        val list = wv.copyBackForwardList()
+        val next = if (list.currentIndex + 1 < list.size) list.getItemAtIndex(list.currentIndex + 1) else null
+        next?.url == ThreatBlockEngine.FAKE_BANK_HISTORY_URL && wv.canGoBack() && !ThreatBlockEngine.isAllowedForSession(host)
+    } catch (_: Exception) {
+        false
+    }
+
+    private fun sameHost(current: String?, host: String): Boolean =
+        try { Uri.parse(current ?: "").host.equals(host, ignoreCase = true) } catch (_: Exception) { false }
 
     private fun isYouTubeHtmlDocument(url: String): Boolean {
         return try {

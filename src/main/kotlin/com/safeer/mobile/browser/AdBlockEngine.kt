@@ -134,6 +134,9 @@ object AdBlockEngine {
         val host = uri?.host?.lowercase()?.trim() ?: ""
 
         // 2. Preveri belo listo (z izjemo oglasnih googlevideo tokov)
+        // Prave banke in plačilna infrastruktura (katalog BankGuard) delujejo brez posegov
+        if (host.isNotEmpty() && ThreatBlockEngine.isRealBankHost(host)) return false
+
         if (host.isNotEmpty() && whitelistTrie.matches(host)) {
             // Če gre za googlevideo, preveri, ali vsebuje parametre oglasa
             if (host.contains("googlevideo.com")) {

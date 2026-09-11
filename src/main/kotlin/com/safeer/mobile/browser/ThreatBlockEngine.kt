@@ -2,6 +2,8 @@ package com.safeer.mobile.browser
 
 import android.net.Uri
 import android.webkit.WebResourceResponse
+import com.safeer.threatfeed.BankGuard
+import com.safeer.threatfeed.BankVerdict
 import java.io.ByteArrayInputStream
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
@@ -27,6 +29,31 @@ object ThreatBlockEngine {
     // Hitri Domain Suffix Trie za grožnje (podpora za atomsko zamenjavo ob posodobitvi feedov)
     @Volatile
     private var threatTrie = DomainSuffixTrie()
+
+    /**
+     * Dodatni preverjeni vir groženj: Safeer Threat Intelligence (Ed25519 podpisan seznam, glej
+     * SignedThreatIntel.kt). Dopolnjuje vgrajeni seznam, nikoli ga ne nadomešča; napaka vira nikoli
+     * ne prekine navigacije.
+     */
+    @Volatile
+    var signedFeedMatcher: ((url: String, host: String) -> DomainSuffixTrie.MatchResult?)? = null
+
+    private fun signedMatch(url: String, host: String): DomainSuffixTrie.MatchResult? {
+        val matcher = signedFeedMatcher ?: return null
+        return try {
+            matcher(url, host)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /** Vgrajeni seznam in podpisani vir; kritična kategorija (C2/malware) ima vedno prednost. */
+    private fun findThreat(url: String, host: String): DomainSuffixTrie.MatchResult? {
+        val local = threatTrie.findMatch(host)
+        if (local != null && isCriticalThreat(local.category)) return local
+        val signed = signedMatch(url, host) ?: return local
+        return if (local == null || isCriticalThreat(signed.category)) signed else local
+    }
 
     // Začasno odobrena spletna mesta (uporabnik je izrecno kliknil 'Nadaljuj na lastno odgovornost' za to sejo)
     private val sessionBypassedDomains = ConcurrentHashMap.newKeySet<String>()
@@ -75,6 +102,70 @@ object ThreatBlockEngine {
         "abuse.ch", "phishing.army"
     )
 
+
+    /** Kategorija opozorila BankGuard: ni kritična, uporabnik lahko po opozorilu nadaljuje. */
+    const val FAKE_BANK_CATEGORY = "Lažna banka (Phishing)"
+
+    // Gostitelji, ki gostijo vsebino uporabnikov: zanje velja preverjanje vsebine strani kljub izjemam.
+    private val USER_CONTENT_HOSTS = setOf("sites.google.com", "docs.google.com", "forms.office.com")
+
+    private val bankHostCache = object : LinkedHashMap<String, BankVerdict?>(256, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, BankVerdict?>?) = size > 512
+    }
+
+    /** BankGuard: gostitelj, ki se s svojim imenom izdaja za banko (rezultat se hrani, preverjanje je lokalno). */
+    fun fakeBankHost(host: String): BankVerdict? {
+        synchronized(bankHostCache) {
+            if (bankHostCache.containsKey(host)) return bankHostCache[host]
+        }
+        val verdict = try { BankGuard.hostVerdict(host) } catch (e: Exception) { null }
+        synchronized(bankHostCache) { bankHostCache[host] = verdict }
+        return verdict
+    }
+
+    /** Uporabnik je po opozorilu izbral nadaljevanje za ta gostitelj (ta seja). */
+    fun isAllowedForSession(host: String): Boolean = sessionBypassedDomains.contains(host.lowercase().trim().trimEnd('.'))
+
+    /** Naslov zgodovine za opozorilo po naložitvi strani (prepozna vrnitev z "Nazaj"). */
+    const val FAKE_BANK_HISTORY_URL = "safeer://security-interstitial/fake-bank"
+
+    /** Prave banke (uradne domene, domene bančnih skupin, plačilna in identitetna infrastruktura). */
+    fun isRealBankHost(host: String): Boolean = try { BankGuard.isTrusted(host) } catch (e: Exception) { false }
+
+    // Gostitelj lažne banke -> uradna domena prave banke (za gumb "Odpri pravo stran" na opozorilu)
+    private val fakeBankOfficialDomains = ConcurrentHashMap<String, String>()
+
+    private fun fakeBankMatch(host: String, verdict: BankVerdict, fromPage: Boolean): DomainSuffixTrie.MatchResult {
+        if (fakeBankOfficialDomains.size > 256) fakeBankOfficialDomains.clear()
+        fakeBankOfficialDomains[host] = verdict.officialDomain
+        val how = if (fromPage) "Stran se predstavlja kot" else "Naslov posnema"
+        return DomainSuffixTrie.MatchResult(
+            isMatched = true,
+            matchedDomain = host,
+            category = FAKE_BANK_CATEGORY,
+            sourceFeed = "Safeer Threat Shield · $how ${verdict.bankName}; prava stran je ${verdict.officialDomain}",
+        )
+    }
+
+    /**
+     * BankGuard za naloženo stran: [signalsJson] je rezultat BankGuard.PAGE_SCRIPT v glavnem oknu.
+     * Opozori le, če stran na tuji domeni prikazuje polje za geslo, kodo ali kartico in se predstavlja kot banka.
+     */
+    fun checkFakeBankPage(pageUrl: String, signalsJson: String?): DomainSuffixTrie.MatchResult? {
+        if (!isEnabled) return null
+        return try {
+            val signals = BankGuard.signalsFromJson(signalsJson) ?: return null
+            val pageHost = Uri.parse(pageUrl).host?.lowercase()?.trim()?.trimEnd('.') ?: return null
+            val host = signals.host.lowercase().trim().trimEnd('.')
+            if (host.isEmpty() || host != pageHost) return null // odgovor stare strani po navigaciji
+            if (isNeverBlockDomain(host) && host !in USER_CONTENT_HOSTS) return null
+            if (sessionBypassedDomains.contains(host)) return null
+            val verdict = BankGuard.pageVerdict(signals) ?: return null
+            fakeBankMatch(host, verdict, fromPage = true)
+        } catch (e: Exception) {
+            null
+        }
+    }
 
     fun isNeverBlockDomain(host: String): Boolean {
         val h = host.lowercase().trim()
@@ -160,6 +251,27 @@ object ThreatBlockEngine {
     }
 
     /**
+     * Zgradi novo drevo iz vgrajenega seznama in seznamov agenta ter ga atomsko zamenja.
+     * Domene pravih bank se iz zunanjih seznamov prevzamejo samo kot potrjen C2/malware, nikoli kot ribarjenje.
+     */
+    fun rebuildFromLists(lists: List<com.safeer.threatfeed.PlainList>): Int {
+        val newTrie = DomainSuffixTrie()
+        loadSeedThreatDatabase(newTrie)
+        var added = 0
+        for (list in lists) {
+            val critical = isCriticalThreat(list.source.category)
+            for (domain in list.entries) {
+                if (!critical && isRealBankHost(domain)) continue
+                if (!critical && isNeverBlockDomain(domain)) continue
+                newTrie.insert(domain, list.source.category, list.source.name)
+                added++
+            }
+        }
+        swapThreatTrie(newTrie)
+        return added
+    }
+
+    /**
      * Vstavi novo zaznano grožnjo v bazo.
      */
     fun addThreat(domain: String, category: String, sourceFeed: String) {
@@ -187,7 +299,13 @@ object ThreatBlockEngine {
             val host = uri.host?.lowercase()?.trim() ?: return null
             if (host.isEmpty()) return null
 
-            val match = threatTrie.findMatch(host) ?: return null
+            val match = findThreat(url, host)
+            if (match == null) {
+                // 🏦 BankGuard: naslov, ki posnema banko (npr. nlb-klik-prijava.com, otpbamka.si)
+                if (isNeverBlockDomain(host) || sessionBypassedDomains.contains(host)) return null
+                val verdict = fakeBankHost(host) ?: return null
+                return fakeBankMatch(host, verdict, fromPage = false)
+            }
 
             // 🔒 ZERO-BYPASS PRAVILO: Kritične C2 in Malware grožnje NIKOLI nimajo izjeme!
             if (isCriticalThreat(match.category)) {
@@ -195,10 +313,11 @@ object ThreatBlockEngine {
             }
 
             // Compatibility exceptions never override a confirmed malware/C2 match.
-            if (isNeverBlockDomain(host)) return null
+            // Prave banke nikoli ne dobijo opozorila o ribarjenju ali prevari (seznami se lahko zmotijo).
+            if (isNeverBlockDomain(host) || isRealBankHost(host)) return null
 
             // Manj nevarne kategorije (phishing/ad opozorila) lahko imajo sejne izjeme
-            if (sessionBypassedDomains.contains(host)) {
+            if (sessionBypassedDomains.contains(host) || sessionBypassedDomains.contains(match.matchedDomain.lowercase())) {
                 return null
             }
 
@@ -219,14 +338,21 @@ object ThreatBlockEngine {
      */
     fun allowForSession(domain: String) {
         val clean = domain.trim().lowercase()
-        if (clean.isNotEmpty()) {
-            val match = threatTrie.findMatch(clean)
-            if (match != null && isCriticalThreat(match.category)) {
-                android.util.Log.w("SafeerSecurity", "🔒 Zero-Bypass: zavrnjen poskus obvoza za kritično grožnjo '$clean' (${match.category})")
-                return
-            }
-            sessionBypassedDomains.add(clean)
+        if (clean.isEmpty()) return
+        val isUrl = clean.contains("://")
+        val host = if (isUrl) {
+            (try { Uri.parse(clean).host } catch (e: Exception) { null })?.lowercase() ?: return
+        } else {
+            clean
         }
+        val local = threatTrie.findMatch(host)
+        val signed = signedMatch(if (isUrl) clean else "https://$clean/", host)
+        val critical = listOfNotNull(local, signed).firstOrNull { isCriticalThreat(it.category) }
+        if (critical != null) {
+            android.util.Log.w("SafeerSecurity", "🔒 Zero-Bypass: zavrnjen poskus obvoza za kritično grožnjo '$clean' (${critical.category})")
+            return
+        }
+        sessionBypassedDomains.add(clean)
     }
 
     /**
@@ -254,11 +380,25 @@ object ThreatBlockEngine {
     /**
      * Ustvari privlačen AMOLED Red varnostni opozorilni zaslon (Security Interstitial Page) za glavno okno.
      */
-    fun createSecurityInterstitialHtml(blockedUrl: String, match: DomainSuffixTrie.MatchResult): String {
+    fun createSecurityInterstitialHtml(blockedUrl: String, match: DomainSuffixTrie.MatchResult, afterPageLoad: Boolean = false): String {
+        // Opozorilo po naložitvi strani stoji za lažno stranjo v zgodovini: "Nazaj" preskoči obe.
+        val backSteps = if (afterPageLoad) 2 else 1
         val domain = htmlEscape(match.matchedDomain)
         val category = htmlEscape(match.category ?: "Varnostna grožnja")
         val source = htmlEscape(match.sourceFeed ?: "Varnostni ščit Safeer Browser")
         val isCritical = isCriticalThreat(match.category)
+        val isFakeBank = match.category == FAKE_BANK_CATEGORY
+        val officialDomain = if (isFakeBank) fakeBankOfficialDomains[match.matchedDomain.lowercase()] else null
+        val heading = if (isFakeBank) "Lažna spletna banka" else "Varnostna grožnja blokirana"
+        val description = if (isFakeBank) {
+            "Ta stran ni prava spletna banka. Na njej ne vpisujte uporabniškega imena, gesla, kode SMS ali podatkov kartice. " +
+                "Do banke vedno dostopajte z vpisom uradnega naslova ali prek uradne aplikacije."
+        } else {
+            "Safeer Browser je preprečil povezavo z nevarnim spletnim mestom, ki lahko ogrozi varnost vaše naprave ali poskuša ukrasti osebne podatke."
+        }
+        val officialButtonHtml = if (officialDomain != null) {
+            "<a class=\"btn btn-primary\" style=\"background:#16a34a\" href=\"https://${htmlEscape(officialDomain)}/\">Odpri pravo stran: ${htmlEscape(officialDomain)}</a>"
+        } else ""
 
         val bypassActionHtml = if (isCritical) {
             """
@@ -267,7 +407,7 @@ object ThreatBlockEngine {
             </div>
             """.trimIndent()
         } else {
-            val bypassToken = createBypassToken(domain, blockedUrl)
+            val bypassToken = createBypassToken(match.matchedDomain, blockedUrl)
             """
             <a class="btn btn-danger-outline" href="safeer://bypass-threat?token=$bypassToken">
                 Nadaljuj na lastno odgovornost (Odkleni za to sejo)
@@ -392,8 +532,8 @@ object ThreatBlockEngine {
         <body>
             <div class="card">
                 <div class="icon">🛑</div>
-                <h1>Varnostna grožnja blokirana</h1>
-                <p class="desc">Safeer Browser je preprečil povezavo z nevarnim spletnim mestom, ki lahko ogrozi varnost vaše naprave ali poskuša ukrasti osebne podatke.</p>
+                <h1>$heading</h1>
+                <p class="desc">$description</p>
                 
                 <div class="badge-box">
                     <div class="badge-row">
@@ -410,9 +550,11 @@ object ThreatBlockEngine {
                     </div>
                 </div>
 
-                <button class="btn btn-primary" onclick="if (history.length > 1) { history.back(); } else { location.href = 'about:blank'; }">
+                <button class="btn btn-primary" onclick="if (history.length > $backSteps) { history.go(-$backSteps); } else { location.href = 'about:blank'; }">
                     ⬅ Nazaj na varno (Priporočeno)
                 </button>
+
+                $officialButtonHtml
                 
                 $bypassActionHtml
 

@@ -545,7 +545,7 @@
     var defaultFavoritesList = [
         { title: "YouTube", url: "https://www.youtube.com", mark: "▶️", color: "#cc0000" },
         { title: "24ur", url: "https://www.24ur.com", mark: "📰", color: "#1256a8" },
-        { title: "RTV SLO", url: "https://www.rtvslo.si", mark: "📡", color: "#0284c7" },
+        { title: "RTV SLO", url: "https://www.rtvslo.si/", mark: "🇸🇮", color: "#0284c7" },
         { title: "SiOL", url: "https://siol.net", mark: "🌐", color: "#0ea5e9" },
         { title: "ChatGPT", url: "https://chatgpt.com", mark: "🤖", color: "#10a37f" },
         { title: "GitHub", url: "https://github.com", mark: "🐙", color: "#64748b" },
@@ -559,7 +559,22 @@
             var raw = localStorage.getItem('safeer_mobile_favs_v2');
             if (raw) {
                 var arr = JSON.parse(raw);
-                if (Array.isArray(arr) && arr.length > 0) return arr;
+                if (Array.isArray(arr) && arr.length > 0) {
+                    var modified = false;
+                    arr.forEach(function(item) {
+                        if (item.title === 'RTV SLO' || (item.url && item.url.indexOf('rtvslo.si') !== -1)) {
+                            if (item.url !== 'https://www.rtvslo.si/' || item.mark !== '🇸🇮') {
+                                item.url = 'https://www.rtvslo.si/';
+                                item.mark = '🇸🇮';
+                                modified = true;
+                            }
+                        }
+                    });
+                    if (modified) {
+                        localStorage.setItem('safeer_mobile_favs_v2', JSON.stringify(arr));
+                    }
+                    return arr;
+                }
             }
         } catch(e) {}
         return defaultFavoritesList;

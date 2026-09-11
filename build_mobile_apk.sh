@@ -26,6 +26,13 @@ if [ -z "$TOOLS_DIR" ] || [ ! -d "$TOOLS_DIR" ]; then
     exit 1
 fi
 
+# 🧪 Testni podpisni ključ Safeer Threat Intelligence se ne sme znajti v objavljeni različici
+if grep -rqs '"safeer-test-' "$DIR/src/main/kotlin" --include=SignedThreatIntel.kt && [ "${SAFEER_ALLOW_TEST_KEY:-}" != "1" ]; then
+    echo "❌ SignedThreatIntel.kt vsebuje TESTNI ključ (safeer-test-*). To je testna gradnja."
+    echo "👉 Za testno gradnjo: SAFEER_ALLOW_TEST_KEY=1 $0   (take različice ne objavljaj)"
+    exit 1
+fi
+
 KOTLINC="$TOOLS_DIR/kotlinc/bin/kotlinc"
 KOTLIN_LIB="$TOOLS_DIR/kotlinc/lib/kotlin-stdlib.jar"
 LIB_CLASSPATH=""
@@ -60,6 +67,7 @@ echo "☕ 2/5: Prevajam Kotlin izvorno kodo (kotlinc)..."
     -d "$BUILD_DIR/classes" \
     -jvm-target 1.8 \
     "$DIR/src/main/kotlin/com/safeer/mobile/browser/"*.kt \
+    "$DIR/src/main/kotlin/com/safeer/threatfeed/"*.kt \
     "$BUILD_DIR/gen/com/safeer/mobile/browser/R.java"
 
 echo "⚡ 3/5: Prevajam v Dalvik Executable (D8)..."
@@ -68,6 +76,7 @@ java -cp "$TOOLS_DIR/r8.jar" com.android.tools.r8.D8 \
     --output "$BUILD_DIR/dex" \
     --lib "$TOOLS_DIR/android.jar" \
     "$BUILD_DIR/classes/com/safeer/mobile/browser/"*.class \
+    "$BUILD_DIR/classes/com/safeer/threatfeed/"*.class \
     "$KOTLIN_LIB" "$DIR"/libs/*.jar
 
 echo "📦 4/5: Sestavljam APK paket..."

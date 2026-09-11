@@ -12,6 +12,10 @@ object Http2DnsTransport {
         .proxy(Proxy.NO_PROXY)
         .followRedirects(false)
         .followSslRedirects(false)
+        .connectTimeout(1200L, TimeUnit.MILLISECONDS)
+        .readTimeout(1200L, TimeUnit.MILLISECONDS)
+        .callTimeout(2000L, TimeUnit.MILLISECONDS)
+        .connectionPool(okhttp3.ConnectionPool(8, 5, TimeUnit.MINUTES))
         .build()
 
     fun query(endpoint: String, wireQuery: ByteArray, timeoutMs: Int): ByteArray? {
@@ -20,10 +24,7 @@ object Http2DnsTransport {
             val request = Request.Builder().url(endpoint)
                 .header("Accept", "application/dns-message")
                 .post(wireQuery.toRequestBody("application/dns-message".toMediaType())).build()
-            val bounded = client.newBuilder().connectTimeout(timeoutMs.toLong(), TimeUnit.MILLISECONDS)
-                .readTimeout(timeoutMs.toLong(), TimeUnit.MILLISECONDS)
-                .callTimeout(timeoutMs.toLong() * 2, TimeUnit.MILLISECONDS).build()
-            bounded.newCall(request).execute().use { response ->
+            client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) return null
                 val body = response.body ?: return null
                 if (body.contentLength() > 65535) return null
