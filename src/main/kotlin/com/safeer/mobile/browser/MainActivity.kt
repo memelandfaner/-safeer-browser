@@ -1593,7 +1593,7 @@ class MainActivity : android.app.Activity() {
                 • Skupaj preprečenih groženj: $totalThreats
                 • Blokiranih oglasov in sledilcev: $totalAds
                 
-                Viri: abuse.ch ThreatFox IOC, URLhaus, Phishing Army, StevenBlack Hosts.
+                Viri: abuse.ch ThreatFox IOC, URLhaus, Phishing Army, HaGeZi TIF in Fake, StevenBlack Hosts.
                 Zaščita pred lažnimi spletnimi bankami: prave banke delujejo nemoteno.
                 """.trimIndent() + "\n" + ThreatFeedsUpdater.statusLine() + "\n" + SignedThreatIntel.statusLine()
             )

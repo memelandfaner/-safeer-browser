@@ -26,6 +26,7 @@ Vsa zaščita deluje izključno lokalno na vaši napravi:
 Za zaznavanje novih spletnih groženj brskalnik občasno (največ enkrat na 24 ur) prenese javno dostopne varnostne sezname neposredno prek šifrirane HTTPS povezave iz zaupanja vrednih virov:
 - **abuse.ch** (ThreatFox IOC, URLhaus)
 - **Phishing Army Extended**
+- **HaGeZi DNS Blocklists** (Threat Intelligence Feeds – mini, Fake) prek omrežja jsDelivr
 
 Ob prenosu se izračuna kriptografska kontrolna vsota SHA-256 za preverjanje celovitosti podatkov. Ti seznami ne vsebujejo nobenih osebnih podatkov in se uporabljajo izključno za posodobitev lokalnega registra groženj.
 
