@@ -28,6 +28,7 @@ Za zaznavanje novih spletnih groženj brskalnik občasno (največ enkrat na 24 u
 - **Phishing Army Extended**
 - **HaGeZi DNS Blocklists** (Threat Intelligence Feeds – mini, Fake) prek omrežja jsDelivr
 - **SI-CERT** (seznam potrjenih phishing domen, www.cert.si)
+- **EasyList** (pravila za blokiranje oglasov, easylist.to)
 
 Ob prenosu se izračuna kriptografska kontrolna vsota SHA-256 za preverjanje celovitosti podatkov. Ti seznami ne vsebujejo nobenih osebnih podatkov in se uporabljajo izključno za posodobitev lokalnega registra groženj.
 

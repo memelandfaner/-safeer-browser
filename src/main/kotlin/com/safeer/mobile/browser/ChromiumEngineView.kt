@@ -622,8 +622,8 @@ class ChromiumEngineView @JvmOverloads constructor(
                     return null
                 }
 
-                // ⚡ 2. Napredni AdBlock & Sledilci (Suffix Trie, Streaming Guard & Path Rules)
-                val adResponse = AdBlockEngine.handleIntercept(url)
+                // ⚡ 2. Napredni AdBlock & Sledilci (Suffix Trie, Streaming Guard, Path Rules in pravila EasyList)
+                val adResponse = AdBlockEngine.handleIntercept(url, interceptPageUrl, request.requestHeaders?.get("Accept"), isMainFrame)
                 if (adResponse != null) {
                     return adResponse
                 }
@@ -681,6 +681,7 @@ class ChromiumEngineView @JvmOverloads constructor(
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 bankCheckGeneration++ // prekliči preverjanje prejšnje strani
+                url?.let { interceptPageUrl = it }
                 url?.let {
                     android.util.Log.d("SafeerNav", "start $it")
                     onUrlChanged?.invoke(visibleUrl(it))
@@ -708,6 +709,7 @@ class ChromiumEngineView @JvmOverloads constructor(
 
             override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
                 super.doUpdateVisitedHistory(view, url, isReload)
+                url?.let { interceptPageUrl = it }
                 url?.let {
                     android.util.Log.d("SafeerNav", "hist $it")
                     onUrlChanged?.invoke(visibleUrl(it))
@@ -736,6 +738,10 @@ class ChromiumEngineView @JvmOverloads constructor(
             }
         }
     }
+
+    // Naslov strani za pravila EasyList (shouldInterceptRequest teče na drugi niti, WebView.url tam ni dovoljen)
+    @Volatile
+    private var interceptPageUrl: String = ""
 
     // 🏦 BankGuard: preverjanje naložene strani (lokalno, po naložitvi, brez vpliva na hitrost nalaganja)
     private var bankCheckGeneration = 0

@@ -116,4 +116,24 @@ fun main() {
     check(!ThreatBlockEngine.isAllowedForSession("secure-login.example") && ThreatBlockEngine.isAllowedForSession("NKBM-prijava.eu."))
     check(ThreatBlockEngine.isThreat("https://payload-delivery.cc/")) { "built-in list kept" }
     println("PASS: BankGuard hosts and pages, real banks untouched, agent lists")
+
+    // EasyList rules: raw lists go to the ad blocker, never into the threat tree; real banks and the allowlist stay untouched
+    val easylist = PlainListSource("easylist", "EasyList", "https://easylist.to/easylist/easylist.txt", "Oglasi (EasyList)", "easylist", minEntries = 1, raw = true)
+    val rules = listOf("||adnetwork.example^", "/ads/banners/*\$image", "@@||adnetwork.example/ok.js\$script", "@@||allowed-site.example^\$document",
+        "||nlb.si/ads/", "||cdn.example/tracker.js\$third-party", "||googlevideo.com^")
+    check(ThreatBlockEngine.rebuildFromLists(listOf(PlainList(easylist, rules, 0))) == 0) { "raw lists must not become threats" }
+    check(!ThreatBlockEngine.isThreat("https://adnetwork.example/"))
+    check(AdBlockEngine.installFilterLists(listOf(PlainList(easylist, rules, 0))) == 7)
+    check(AdBlockEngine.filterRuleCount == 7)
+    check(AdBlockEngine.handleIntercept("https://adnetwork.example/a.js", "https://news.example/", "*/*", false) != null) { "easylist host rule" }
+    check(AdBlockEngine.handleIntercept("https://adnetwork.example/ok.js", "https://news.example/", "*/*", false) == null) { "easylist exception" }
+    check(AdBlockEngine.handleIntercept("https://site.example/ads/banners/x.png", "https://news.example/", "image/*", false) != null)
+    check(AdBlockEngine.handleIntercept("https://site.example/ads/banners/x.js", "https://news.example/", "*/*", false) == null) { "type option" }
+    check(AdBlockEngine.handleIntercept("https://adnetwork.example/", "https://news.example/", "text/html", true) == null) { "main frame is never blocked by lists" }
+    check(AdBlockEngine.handleIntercept("https://adnetwork.example/a.js", "https://allowed-site.example/page", "*/*", false) == null) { "\$document exception allows the page" }
+    check(AdBlockEngine.handleIntercept("https://www.nlb.si/ads/x.js", "https://news.example/", "*/*", false) == null) { "real banks are never touched by lists" }
+    check(AdBlockEngine.handleIntercept("https://cdn.example/tracker.js", "https://cdn.example/", "*/*", false) == null && AdBlockEngine.handleIntercept("https://cdn.example/tracker.js", "https://other.example/", "*/*", false) != null) { "third-party" }
+    check(AdBlockEngine.handleIntercept("https://r1.googlevideo.com/videoplayback?x=1", "https://www.youtube.com/", "*/*", false) == null) { "allowlisted hosts stay allowlisted" }
+    check(AdBlockEngine.installFilterLists(emptyList()) == 0 && AdBlockEngine.handleIntercept("https://adnetwork.example/a.js", "https://news.example/", "*/*", false) == null)
+    println("PASS: EasyList rules through the ad blocker")
 }

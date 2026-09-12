@@ -43,6 +43,10 @@ object ThreatFeedsUpdater {
             category = "Lažne trgovine in prevare", marker = "hagezi",
         ),
         PlainListSource(
+            id = "easylist", name = "EasyList (pravila za oglase)", url = "https://easylist.to/easylist/easylist.txt",
+            category = "Oglasi (EasyList)", marker = "easylist", minEntries = 1000, raw = true,
+        ),
+        PlainListSource(
             id = "si-cert", name = "SI-CERT phishing domene (Slovenija)",
             url = "https://www.cert.si/misp/rpz/last.txt",
             category = "Spletno ribarjenje (Phishing) – potrdil SI-CERT", marker = "", csv = true,
@@ -56,13 +60,19 @@ object ThreatFeedsUpdater {
     var ruleCount: Int = 0
         private set
 
+    /** Število prevedenih pravil EasyList v uporabi. */
+    @Volatile
+    var filterRuleCount: Int = 0
+        private set
+
     /** Zažene agenta (enkrat na proces). Vrne takoj; vse delo poteka v ozadju. */
     @Synchronized
     fun start(context: Context) {
         if (agent != null) return
         val listAgent = ThreatListAgent(File(context.applicationContext.filesDir, "threat-lists"), SOURCES) { lists ->
-            ruleCount = ThreatBlockEngine.rebuildFromLists(lists)
-            android.util.Log.i("SafeerSecurity", "Seznami groženj v uporabi: ${lists.joinToString { "${it.source.name} (${it.entries.size})" }}")
+            ruleCount = ThreatBlockEngine.rebuildFromLists(lists.filter { !it.source.raw })
+            filterRuleCount = AdBlockEngine.installFilterLists(lists.filter { it.source.raw })
+            android.util.Log.i("SafeerSecurity", "Seznami v uporabi: ${lists.joinToString { "${it.source.name} (${it.entries.size})" }}; pravila EasyList: $filterRuleCount")
         }
         agent = listAgent
         listAgent.start()
@@ -78,6 +88,6 @@ object ThreatFeedsUpdater {
     fun statusLine(): String {
         val lists = agent?.lists.orEmpty()
         if (lists.isEmpty()) return "Seznami groženj: prvi prenos poteka v ozadju"
-        return "Seznami groženj: ${lists.sumOf { it.entries.size }} pravil (${lists.size}/${SOURCES.size} virov)"
+        return "Seznami groženj: ${lists.filter { !it.source.raw }.sumOf { it.entries.size }} pravil (${lists.size}/${SOURCES.size} virov); EasyList: $filterRuleCount pravil"
     }
 }

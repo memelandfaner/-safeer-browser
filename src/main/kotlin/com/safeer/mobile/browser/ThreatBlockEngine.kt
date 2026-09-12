@@ -99,7 +99,7 @@ object ThreatBlockEngine {
         "delavska-hranilnica.si", "sparkasse.si", "bks-bank.si", "unicreditbank.si",
         "posta.si", "zvezapotrosnikov.si",
         // Gostitelji varnostnih feedov
-        "abuse.ch", "phishing.army", "cert.si"
+        "abuse.ch", "phishing.army", "cert.si", "easylist.to"
     )
 
 
@@ -275,6 +275,7 @@ object ThreatBlockEngine {
         loadSeedThreatDatabase(newTrie)
         var added = 0
         for (list in lists) {
+            if (list.source.raw) continue // pravila EasyList spadajo v AdBlockEngine, ne v drevo groženj
             val critical = isCriticalThreat(list.source.category)
             for (domain in list.entries) {
                 if (!critical && isRealBankHost(domain)) continue
