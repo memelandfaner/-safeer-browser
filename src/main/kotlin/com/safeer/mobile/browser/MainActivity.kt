@@ -1296,6 +1296,20 @@ class MainActivity : android.app.Activity() {
         }
         view.addView(tvAdguardDesc)
 
+        val cbSponsorBlock = CheckBox(this).apply {
+            text = I18n.t(this@MainActivity, "sponsorblock")
+            isChecked = PreferencesManager.isSponsorBlockEnabled(this@MainActivity)
+            setTextColor(Color.WHITE)
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        }
+        view.addView(cbSponsorBlock)
+        view.addView(TextView(this).apply {
+            text = I18n.t(this@MainActivity, "sponsorblock_desc")
+            textSize = 12f
+            setTextColor(Color.parseColor("#94A3B8"))
+            setPadding(64, 0, 0, 8)
+        })
+
         // Ločilna črta
         view.addView(View(this).apply {
             layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2).apply {
@@ -1530,6 +1544,7 @@ class MainActivity : android.app.Activity() {
                 }
 
                 PreferencesManager.setAdguardProtectionEnabled(this, cbAdguard.isChecked)
+                PreferencesManager.setSponsorBlockEnabled(this, cbSponsorBlock.isChecked)
 
                 // 🛡️ DoH & Proxy posodobitev
                 val dohCheckedId = rgDoh.checkedRadioButtonId

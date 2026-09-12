@@ -33,6 +33,9 @@ Ob prenosu se izračuna kriptografska kontrolna vsota SHA-256 za preverjanje cel
 
 ---
 
+## 3a. ⏭ SponsorBlock (YouTube)
+Brskalnik lahko samodejno preskoči sponzorske odseke v videih YouTube s pomočjo skupnostne baze **SponsorBlock** (sponsor.ajay.app). Zaradi zasebnosti brskalnik strežniku nikoli ne pošlje ID-ja videa: pošlje le prve štiri znake zgoščene vrednosti SHA-256 (postopek k-anonimnosti), prejme odseke vseh videov s to predpono in pravega izbere lokalno. Zahteve so anonimne, brez piškotkov. Funkcijo lahko izklopite v nastavitvah.
+
 ## 4. 🔑 Standardi W3C: GPC in DNT
 Safeer Browser pri vsakem spletnem zahtevku in v DOM okolju samodejno uveljavlja:
 - `Sec-GPC: 1` in `navigator.globalPrivacyControl = true` (Global Privacy Control)

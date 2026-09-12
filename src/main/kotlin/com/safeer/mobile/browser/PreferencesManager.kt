@@ -27,6 +27,7 @@ object PreferencesManager {
     private const val KEY_SECURE_PROXY_MODE = "pref_secure_proxy_mode"
     private const val KEY_SECURE_PROXY_URL = "pref_secure_proxy_url"
     private const val KEY_ADGUARD_PROTECTION_ENABLED = "pref_adguard_protection_enabled"
+    private const val KEY_SPONSORBLOCK_ENABLED = "pref_sponsorblock_enabled"
     private const val KEY_TEXT_ZOOM = "pref_text_zoom"
     private const val KEY_THEME = "pref_theme"
     private const val KEY_FONT_FAMILY = "pref_font_family"
@@ -225,5 +226,14 @@ object PreferencesManager {
 
     fun setAdguardProtectionEnabled(context: Context, enabled: Boolean) {
         getPrefs(context).edit().putBoolean(KEY_ADGUARD_PROTECTION_ENABLED, enabled).apply()
+    }
+
+    // --- 10. SponsorBlock (preskakovanje sponzorskih odsekov na YouTubu) ---
+    fun isSponsorBlockEnabled(context: Context): Boolean {
+        return getPrefs(context).getBoolean(KEY_SPONSORBLOCK_ENABLED, true)
+    }
+
+    fun setSponsorBlockEnabled(context: Context, enabled: Boolean) {
+        getPrefs(context).edit().putBoolean(KEY_SPONSORBLOCK_ENABLED, enabled).apply()
     }
 }

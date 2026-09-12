@@ -194,6 +194,27 @@ class ChromiumEngineView @JvmOverloads constructor(
             return "{\"ads\": $totalAds, \"threats\": $totalThreats, \"dataMb\": \"$dataMb\", \"timeMin\": \"$timeMin\"}"
         }
 
+        /**
+         * ⏭ SponsorBlock: stran YouTube sporoči ID videa, aplikacija v ozadju poišče sponzorske odseke (po
+         * predponi zgoščene vrednosti, brez ID-ja) in jih vrne strani. Deluje samo za stran YouTube v tem zavihku.
+         */
+        @android.webkit.JavascriptInterface
+        fun sponsorSegments(videoId: String) {
+            if (!PreferencesManager.isSponsorBlockEnabled(context)) return
+            val id = videoId.trim()
+            if (!Regex("[A-Za-z0-9_-]{11}").matches(id)) return
+            webView.post {
+                if (!UserScriptManager.isYouTubeDomain(webView.url)) return@post
+                com.safeer.threatfeed.SponsorBlock.fetchAsync(id) { segments ->
+                    webView.post {
+                        if (UserScriptManager.isYouTubeDomain(webView.url)) {
+                            webView.evaluateJavascript(com.safeer.threatfeed.SponsorBlock.applyScript(id, segments), null)
+                        }
+                    }
+                }
+            }
+        }
+
         @android.webkit.JavascriptInterface
         fun navigate(url: String) {
             val target = url.trim()

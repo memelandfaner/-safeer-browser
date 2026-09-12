@@ -1675,6 +1675,9 @@ object UserScriptManager {
             webView.evaluateJavascript(BACKGROUND_PLAYBACK_JS, null)
             webView.evaluateJavascript(YOUTUBE_FREEDOM_MOBILE_JS, null)
             webView.evaluateJavascript(YOUTUBE_KEEP_WATCHING_JS, null)
+            if (PreferencesManager.isSponsorBlockEnabled(webView.context)) {
+                webView.evaluateJavascript(com.safeer.threatfeed.SponsorBlock.RUNTIME_JS, null)
+            }
         }
         webView.evaluateJavascript(STREAMING_INSTANT_START_JS, null)
         if (!isAdguardDomain(currentUrl)) webView.evaluateJavascript(HOOKSHOT_INSERTS_JS, null)
@@ -1705,6 +1708,9 @@ object UserScriptManager {
             webView.evaluateJavascript(BACKGROUND_PLAYBACK_JS, null)
             webView.evaluateJavascript(YOUTUBE_FREEDOM_MOBILE_JS, null)
             webView.evaluateJavascript(YOUTUBE_KEEP_WATCHING_JS, null)
+            if (PreferencesManager.isSponsorBlockEnabled(webView.context)) {
+                webView.evaluateJavascript(com.safeer.threatfeed.SponsorBlock.RUNTIME_JS, null)
+            }
         }
         webView.evaluateJavascript(STREAMING_INSTANT_START_JS, null)
         if (!isAdguardDomain(currentUrl)) webView.evaluateJavascript(HOOKSHOT_INSERTS_JS, null)
