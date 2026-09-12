@@ -1419,10 +1419,50 @@ object UserScriptManager {
                     if (ev.isTrusted) lastUserInput = Date.now();
                 }, true);
             });
+
+            // _lact alone is not enough: YouTube's "you there?" flow (youThereManager, armed by the server
+            // for every playback with promptDelaySec) only looks at _lact behind an experiment flag. What
+            // always cancels the scheduled warning, dialog and pause is the app's own activity signal: every
+            // real key, mouse or touch event ends in ytglobal.ytUtilActivityCallback_(), which fires
+            // yt-user-activity, and the watch page then drops the flow (the autoplay pause listens to the
+            // same signal). Report activity the same way every 20 s while media plays. timeupdate drives it,
+            // so it keeps working in a background tab where timers are throttled; a keyup on the document
+            // (one of the events YouTube binds for activity) is the fallback when the callback is missing.
+            var lastPulse = 0;
+            function pulse(force) {
+                var now = Date.now();
+                if (!force && now - lastPulse < 20000) return;
+                lastPulse = now;
+                markActive();
+                var reported = false;
+                try {
+                    var yt = window.ytglobal;
+                    if (yt && typeof yt.ytUtilActivityCallback_ === 'function') { yt.ytUtilActivityCallback_(); reported = true; }
+                } catch (e) {}
+                if (!reported) {
+                    try {
+                        document.dispatchEvent(new KeyboardEvent('keyup', { key: 'Shift', code: 'ShiftLeft', keyCode: 16, which: 16, bubbles: true }));
+                    } catch (e) {}
+                }
+            }
+            document.addEventListener('timeupdate', function (ev) {
+                var v = ev.target;
+                if (!v || v.tagName !== 'VIDEO' || v.paused || v.ended) return;
+                var player = playerVideo();
+                if (player && v !== player) return;
+                pulse(false);
+            }, true);
+            setInterval(function () {
+                var v = mainVideo();
+                if (v && !v.paused && !v.ended) pulse(false);
+            }, 20000);
             // A pause without user input is how the idle prompt stops playback.
             document.addEventListener('pause', function (ev) {
                 var v = ev.target;
                 if (!v || v.tagName !== 'VIDEO' || v.ended) return;
+                // Hover previews on the home page pause on their own; only the player's video counts.
+                var player = playerVideo();
+                if (player && v !== player) return;
                 if (Date.now() - lastUserInput > 2000) {
                     lastAutoPause = Date.now();
                     autoPausedVideo = v;
@@ -1435,28 +1475,58 @@ object UserScriptManager {
             var PROMPTS = 'ytmusic-you-there-renderer, ytd-you-there-renderer, ytm-you-there-renderer, yt-confirm-dialog-renderer';
             // In priority order: querySelector with a selector list would return the outer wrapper first.
             var BUTTONS = ['#confirm-button button', '#confirm-button tp-yt-paper-button', 'yt-button-renderer button',
-                'button', 'tp-yt-paper-button', '[role="button"]', '#confirm-button'];
+                'ytmusic-button-renderer button', 'ytmusic-button-renderer a', 'button', 'tp-yt-paper-button',
+                'a[role="button"]', '[role="button"]', '#confirm-button', 'yt-formatted-string.ytmusic-you-there-renderer'];
 
+            // A tab in the background is not laid out, so element sizes are 0 and say nothing about
+            // whether the prompt is up. Only the style of the element and its ancestors decides.
             function isShown(el) {
                 if (!el || !el.isConnected) return false;
-                var r = el.getBoundingClientRect();
-                if (r.width <= 0 || r.height <= 0) return false;
-                var s = window.getComputedStyle(el);
-                return s.visibility !== 'hidden' && s.display !== 'none';
+                for (var node = el; node && node.nodeType === 1; node = node.parentElement || hostOf(node)) {
+                    if (node.hasAttribute('hidden') || node.getAttribute('aria-hidden') === 'true') return false;
+                    var style = window.getComputedStyle(node);
+                    if (style && (style.display === 'none' || style.visibility === 'hidden')) return false;
+                }
+                return true;
+            }
+
+            function hostOf(node) {
+                var root = node.getRootNode ? node.getRootNode() : null;
+                return root && root.host ? root.host : null;
+            }
+
+            function playerVideo() {
+                return document.querySelector('#movie_player video, ytmusic-player video, video.html5-main-video');
             }
 
             function mainVideo() {
+                var player = playerVideo();
+                if (player) return player;
                 if (autoPausedVideo && autoPausedVideo.isConnected) return autoPausedVideo;
-                return document.querySelector('#movie_player video, ytmusic-player video, video.html5-main-video, video');
+                return document.querySelector('video');
+            }
+
+            // "Video paused. Continue watching?" in the languages Safeer ships and the English original.
+            var IDLE_TEXT = /continue watching|still watching|still there|nadaljuj|še gled|ste še tu|weiter ?(an)?schauen|noch da|continuer|toujours l|continuare|ancora l|continuar|sigues ah/i;
+
+            function looksLikeIdlePrompt(el) {
+                // The idle dialog has a single "Yes" button; real questions (delete, sign out ...) also
+                // offer a cancel button, so they are never confirmed by mistake.
+                var buttons = el.querySelectorAll('button, tp-yt-paper-button, a[role="button"]');
+                if (buttons.length === 1 && !el.querySelector('#cancel-button')) return true;
+                return IDLE_TEXT.test(el.textContent || '');
             }
 
             function isIdlePrompt(el) {
                 if (/YOU-THERE|STILL-WATCHING/.test(el.tagName)) return true;
-                // The generic confirm dialog is also used for real questions; accept it only when
-                // YouTube paused the video by itself and the user has not just interacted.
+                // The generic confirm dialog is also used for real questions; leave it alone right after
+                // the user did something, otherwise accept it when YouTube paused the video by itself or
+                // when it plainly is the idle prompt (shown before the pause, or found long after it).
+                if (Date.now() - lastUserInput < 5000) return false;
                 var v = mainVideo();
-                return !!v && v.paused && !v.ended &&
-                    Date.now() - lastAutoPause < 10000 && Date.now() - lastUserInput > 5000;
+                if (!v) return false;
+                if (v.paused && !v.ended && Date.now() - lastAutoPause < 10000) return true;
+                return looksLikeIdlePrompt(el);
             }
 
             function resume() {
