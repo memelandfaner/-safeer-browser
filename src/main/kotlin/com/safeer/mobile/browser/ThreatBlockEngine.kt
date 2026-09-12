@@ -99,7 +99,7 @@ object ThreatBlockEngine {
         "delavska-hranilnica.si", "sparkasse.si", "bks-bank.si", "unicreditbank.si",
         "posta.si", "zvezapotrosnikov.si",
         // Gostitelji varnostnih feedov
-        "abuse.ch", "phishing.army"
+        "abuse.ch", "phishing.army", "cert.si"
     )
 
 
@@ -128,6 +128,8 @@ object ThreatBlockEngine {
 
     /** Naslov zgodovine za opozorilo po naložitvi strani (prepozna vrnitev z "Nazaj"). */
     const val FAKE_BANK_HISTORY_URL = "safeer://security-interstitial/fake-bank"
+    /** Sheme lokalno odprtih strani (priponke HTML iz pošte), ki jih BankGuard preveri po vsebini. */
+    val LOCAL_PAGE_SCHEMES = setOf("file", "content")
 
     /** Prave banke (uradne domene, domene bančnih skupin, plačilna in identitetna infrastruktura). */
     fun isRealBankHost(host: String): Boolean = try { BankGuard.isTrusted(host) } catch (e: Exception) { false }
@@ -135,15 +137,22 @@ object ThreatBlockEngine {
     // Gostitelj lažne banke -> uradna domena prave banke (za gumb "Odpri pravo stran" na opozorilu)
     private val fakeBankOfficialDomains = ConcurrentHashMap<String, String>()
 
+    /** Ključ za lokalno odprto datoteko (priponka iz pošte), ki nima gostitelja. */
+    const val LOCAL_PAGE_KEY = "lokalna-datoteka"
+
     private fun fakeBankMatch(host: String, verdict: BankVerdict, fromPage: Boolean): DomainSuffixTrie.MatchResult {
         if (fakeBankOfficialDomains.size > 256) fakeBankOfficialDomains.clear()
-        fakeBankOfficialDomains[host] = verdict.officialDomain
-        val how = if (fromPage) "Stran se predstavlja kot" else "Naslov posnema"
+        if (verdict.officialDomain.isNotEmpty()) fakeBankOfficialDomains[host] = verdict.officialDomain
+        val explanation = when (verdict.reason) {
+            "lure" -> "Stran zahteva podatke plačilne kartice pod pretvezo »${verdict.detail}«; policija, FURS in dostavne službe kazni in poštnine ne pobirajo prek takih strani"
+            "local" -> "Datoteka, odprta iz priponke ali prenosa, se predstavlja kot ${verdict.bankName}; prava stran je ${verdict.officialDomain}"
+            else -> "${if (fromPage) "Stran se predstavlja kot" else "Naslov posnema"} ${verdict.bankName}; prava stran je ${verdict.officialDomain}"
+        }
         return DomainSuffixTrie.MatchResult(
             isMatched = true,
             matchedDomain = host,
             category = FAKE_BANK_CATEGORY,
-            sourceFeed = "Safeer Threat Shield · $how ${verdict.bankName}; prava stran je ${verdict.officialDomain}",
+            sourceFeed = "Safeer Threat Shield · $explanation",
         )
     }
 
@@ -155,6 +164,13 @@ object ThreatBlockEngine {
         if (!isEnabled) return null
         return try {
             val signals = BankGuard.signalsFromJson(signalsJson) ?: return null
+            val pageScheme = Uri.parse(pageUrl).scheme?.lowercase() ?: return null
+            if (pageScheme in LOCAL_PAGE_SCHEMES) {
+                // Priponka HTML (file:, content:) nima gostitelja; zadostuje, da se strinjata shemi.
+                if (signals.scheme != pageScheme || sessionBypassedDomains.contains(LOCAL_PAGE_KEY)) return null
+                val verdict = BankGuard.pageVerdict(signals) ?: return null
+                return fakeBankMatch(LOCAL_PAGE_KEY, verdict, fromPage = true)
+            }
             val pageHost = Uri.parse(pageUrl).host?.lowercase()?.trim()?.trimEnd('.') ?: return null
             val host = signals.host.lowercase().trim().trimEnd('.')
             if (host.isEmpty() || host != pageHost) return null // odgovor stare strani po navigaciji
@@ -391,8 +407,9 @@ object ThreatBlockEngine {
         val officialDomain = if (isFakeBank) fakeBankOfficialDomains[match.matchedDomain.lowercase()] else null
         val heading = if (isFakeBank) "Lažna spletna banka" else "Varnostna grožnja blokirana"
         val description = if (isFakeBank) {
-            "Ta stran ni prava spletna banka. Na njej ne vpisujte uporabniškega imena, gesla, kode SMS ali podatkov kartice. " +
-                "Do banke vedno dostopajte z vpisom uradnega naslova ali prek uradne aplikacije."
+            "Ta stran ni prava spletna banka. Na njej ne vpisujte uporabniškega imena, gesla, kode SMS, davčne številke, PIN-a ali podatkov kartice. " +
+                "Do banke vedno dostopajte z vpisom uradnega naslova ali prek uradne aplikacije. " +
+                "Banka vas nikoli ne pokliče, da bi zahtevala kodo ali PIN, in nikoli ne zahteva namestitve programov za oddaljeni dostop (AnyDesk, TeamViewer)."
         } else {
             "Safeer Browser je preprečil povezavo z nevarnim spletnim mestom, ki lahko ogrozi varnost vaše naprave ali poskuša ukrasti osebne podatke."
         }

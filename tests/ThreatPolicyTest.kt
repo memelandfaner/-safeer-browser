@@ -85,6 +85,23 @@ fun main() {
     check(ThreatBlockEngine.checkFakeBankPage("https://secure-login.example/", pageJson.replace("\"password\":true", "\"password\":false")) == null) { "no credential field" }
     check(ThreatBlockEngine.checkFakeBankPage("https://secure-login.example/", "null") == null && ThreatBlockEngine.checkFakeBankPage("https://secure-login.example/", "{bad") == null)
 
+    // HTML attachment opened locally (SI-CERT TZ009): checked by content, no host; the warning names the real bank
+    val localJson = pageJson.replace("\"host\":\"secure-login.example\",\"scheme\":\"https\"", "\"host\":\"\",\"scheme\":\"content\"")
+    val localMatch = ThreatBlockEngine.checkFakeBankPage("content://com.android.providers.downloads.documents/document/1", localJson)
+    check(localMatch?.category == fake && localMatch!!.sourceFeed!!.contains("priponke") && localMatch.sourceFeed!!.contains("nlb.si")) { "local attachment: $localMatch" }
+    check(localMatch!!.matchedDomain == ThreatBlockEngine.LOCAL_PAGE_KEY)
+    check(ThreatBlockEngine.checkFakeBankPage("https://secure-login.example/", localJson) == null) { "scheme of the answer must match the page" }
+    check(ThreatBlockEngine.checkFakeBankPage("file:///sdcard/Download/racun.html", localJson.replace("NLB Klik - prijava", "Moj racun")) == null) { "local page without a bank name" }
+    ThreatBlockEngine.allowForSession(ThreatBlockEngine.LOCAL_PAGE_KEY)
+    check(ThreatBlockEngine.checkFakeBankPage("content://x/y", localJson) == null) { "session bypass for local pages" }
+
+    // Card form dressed up as a police fine (SI-CERT, May 2026): no bank name, no official site button
+    val lureJson = """{"host":"kazen-placilo.example","scheme":"https","password":false,"otp":false,"card":true,"title":"Placilo kazni","site":"","headings":"Policija - prekrsek","logos":"","text":"Kazen 39 EUR placajte s kartico. Stevilka kartice"}"""
+    val lureMatch = ThreatBlockEngine.checkFakeBankPage("https://kazen-placilo.example/pay", lureJson)
+    check(lureMatch?.category == fake && lureMatch!!.sourceFeed!!.contains("plačilne kartice") && !lureMatch.sourceFeed!!.contains("prava stran")) { "lure: $lureMatch" }
+    val lureHtml = ThreatBlockEngine.createSecurityInterstitialHtml("https://kazen-placilo.example/pay", lureMatch!!, afterPageLoad = true)
+    check(!lureHtml.contains("Odpri pravo stran") && lureHtml.contains("nikoli ne pokliče")) { "lure warning has no official-site button and carries the phone-call advice" }
+
     // Lists from the agent: real banks are never taken over, the built-in list stays
     val urlhaus = PlainListSource("urlhaus", "abuse.ch URLhaus", "https://urlhaus.abuse.ch/downloads/hostfile/", "Zlonamerna koda (Malware)", "urlhaus")
     val phishing = PlainListSource("phishing-army", "Phishing Army", "https://phishing.army/", "Spletno ribarjenje (Phishing)", "phishing")
