@@ -23,6 +23,16 @@ class TabManager(
     private val tabs = mutableListOf<TabModel>()
     private var activeTabId: String? = null
 
+    /** Called whenever a tab starts or stops playing sound (background playback service). */
+    var onAudioStateChanged: ((tab: TabModel, playing: Boolean) -> Unit)? = null
+
+    /** The tab that currently plays sound, the active one first. */
+    fun getPlayingTab(): TabModel? {
+        val active = getActiveTab()
+        if (active != null && (active.isPlayingAudio || active.webView.isPlayingAudio)) return active
+        return tabs.firstOrNull { it.isPlayingAudio || it.webView.isPlayingAudio }
+    }
+
     val count: Int get() = tabs.size
 
     fun createTab(context: Context, url: String = "file:///android_asset/brave_home.html", makeActive: Boolean = true): TabModel {
@@ -43,6 +53,7 @@ class TabManager(
             if (!playing && activeTabId != tab.id) {
                 try { tab.webView.onPause() } catch (_: Exception) {}
             }
+            onAudioStateChanged?.invoke(tab, playing)
         }
 
         tabs.add(tab)

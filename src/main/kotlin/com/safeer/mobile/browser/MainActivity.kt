@@ -120,6 +120,7 @@ class MainActivity : android.app.Activity() {
         initViews()
         setupWindowInsets()
         setupTabManager()
+        setupMediaPlaybackService()
         setupOmnibox()
         setupTopButtons()
         setupTouchGestures()
@@ -273,18 +274,52 @@ class MainActivity : android.app.Activity() {
         }
     }
 
+    private var inForeground = false
+
     override fun onPause() {
         super.onPause()
-        val activeTab = tabManager.getActiveTab()
-        if (activeTab != null && (activeTab.isPlayingAudio || activeTab.webView.isPlayingAudio)) {
+        inForeground = false
+        val playing = tabManager.getPlayingTab()
+        if (playing != null) {
+            // 🎵 Sound keeps playing: the WebView stays "visible" (ChromiumEngineView) and a foreground service with
+            // a media notification keeps the process alive while the user is on the home screen or the screen is off.
+            MediaPlaybackService.start(this, mediaTitle(playing), playing = true)
             return
         }
-        activeTab?.webView?.onPause()
+        tabManager.getActiveTab()?.webView?.onPause()
     }
 
     override fun onResume() {
         super.onResume()
+        inForeground = true
+        MediaPlaybackService.stop(this)
         tabManager.getActiveTab()?.webView?.onResume()
+    }
+
+    private fun mediaTitle(tab: TabModel): String {
+        val title = try { tab.webView.title?.trim().orEmpty() } catch (_: Exception) { "" }
+        if (title.isNotEmpty() && title != "Nov zavihek") return title
+        return try { android.net.Uri.parse(tab.url).host ?: I18n.t(this, "media_background_title", "Safeer") } catch (_: Exception) { "Safeer" }
+    }
+
+    private fun mediaCommand(script: String) {
+        val tab = tabManager.getPlayingTab() ?: tabManager.getActiveTab() ?: return
+        runOnUiThread { try { tab.webView.evaluateJavascript(script, null) } catch (_: Exception) {} }
+    }
+
+    private fun setupMediaPlaybackService() {
+        MediaPlaybackService.toggleHandler = {
+            mediaCommand("(function(){var m=Array.prototype.slice.call(document.querySelectorAll('video,audio')).filter(function(x){return x.readyState>0||!x.paused;})[0]||document.querySelector('video,audio');if(!m)return;if(m.paused){m.play();}else{m.pause();}})();")
+        }
+        MediaPlaybackService.pauseHandler = {
+            mediaCommand("(function(){document.querySelectorAll('video,audio').forEach(function(m){try{m.pause();}catch(e){}});})();")
+        }
+        tabManager.onAudioStateChanged = { tab, playing ->
+            if (!inForeground) {
+                if (playing) MediaPlaybackService.start(this, mediaTitle(tab), playing = true)
+                else if (tabManager.getPlayingTab() == null) MediaPlaybackService.start(this, mediaTitle(tab), playing = false)
+            }
+        }
     }
 
     override fun onStop() {
@@ -292,6 +327,9 @@ class MainActivity : android.app.Activity() {
     }
 
     override fun onDestroy() {
+        MediaPlaybackService.toggleHandler = null
+        MediaPlaybackService.pauseHandler = null
+        MediaPlaybackService.stop(this)
         DoHProxyEngine.stopServer()
         super.onDestroy()
     }
