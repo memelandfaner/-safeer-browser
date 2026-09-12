@@ -206,7 +206,8 @@ class ChromiumEngineView @JvmOverloads constructor(
             webView.post {
                 if (!UserScriptManager.isYouTubeDomain(webView.url)) return@post
                 com.safeer.threatfeed.SponsorBlock.fetchAsync(id) { segments ->
-                    android.util.Log.i("SafeerSponsorBlock", "video $id: ${segments.size} odsekov za preskok")
+                    val error = com.safeer.threatfeed.SponsorBlock.lastError
+                    android.util.Log.i("SafeerSponsorBlock", "video $id: ${segments.size} odsekov za preskok" + if (error.isEmpty()) "" else " ($error)")
                     webView.post {
                         if (UserScriptManager.isYouTubeDomain(webView.url)) {
                             webView.evaluateJavascript(com.safeer.threatfeed.SponsorBlock.applyScript(id, segments), null)
