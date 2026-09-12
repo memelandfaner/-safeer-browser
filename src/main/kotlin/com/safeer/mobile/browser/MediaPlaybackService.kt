@@ -120,7 +120,7 @@ class MediaPlaybackService : Service() {
         val open = PendingIntent.getActivity(this, 1, Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) Notification.Builder(this, CHANNEL_ID) else @Suppress("DEPRECATION") Notification.Builder(this)
-        builder.setSmallIcon(R.drawable.app_icon)
+        builder.setSmallIcon(R.drawable.ic_media_notification)
             .setContentTitle(title)
             .setContentText(I18n.t(this, if (playing) "media_background_playing" else "media_background_paused", if (playing) "Playing in the background" else "Paused"))
             .setContentIntent(open)
