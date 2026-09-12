@@ -130,24 +130,53 @@ class BrowserRepository(context: Context) : SQLiteOpenHelper(context, DATABASE_N
         return exists
     }
 
+    /** Pages that never belong in the history: the browser's own pages and error screens. */
+    fun isHistoryUrl(url: String): Boolean {
+        if (url.isEmpty()) return false
+        val lower = url.lowercase()
+        return !(lower.startsWith("about:") || lower.startsWith("safeer://") || lower.startsWith("file:///android_asset/") ||
+            lower.startsWith("data:") || lower.startsWith("javascript:") || lower.startsWith("blob:"))
+    }
+
+    /**
+     * Records a visit. A page that is already in the history is moved to the top (its title refreshed)
+     * instead of being added again, so the list stays a list of places, not of page loads.
+     */
     fun addHistory(title: String, url: String) {
-        if (url.startsWith("about:") || url.isEmpty()) return
+        if (!isHistoryUrl(url)) return
         val db = writableDatabase
         val cv = ContentValues().apply {
             put(COL_HIST_TITLE, title.ifEmpty { url })
-            put(COL_HIST_URL, url)
             put(COL_HIST_TIME, System.currentTimeMillis())
         }
-        db.insert(TABLE_HISTORY, null, cv)
+        val updated = db.update(TABLE_HISTORY, cv, "$COL_HIST_URL = ?", arrayOf(url))
+        if (updated == 0) {
+            cv.put(COL_HIST_URL, url)
+            db.insert(TABLE_HISTORY, null, cv)
+        }
         try {
-            db.execSQL("DELETE FROM $TABLE_HISTORY WHERE $COL_HIST_ID NOT IN (SELECT $COL_HIST_ID FROM $TABLE_HISTORY ORDER BY $COL_HIST_TIME DESC LIMIT 1000)")
+            db.execSQL("DELETE FROM $TABLE_HISTORY WHERE $COL_HIST_ID NOT IN (SELECT $COL_HIST_ID FROM $TABLE_HISTORY ORDER BY $COL_HIST_TIME DESC LIMIT 3000)")
         } catch (_: Exception) {}
     }
 
-    fun getHistory(limit: Int = 100): List<HistoryItem> {
+    /** Newest first; with [query] only entries whose title or address contains every word of the query. */
+    fun searchHistory(query: String, limit: Int = 300): List<HistoryItem> {
+        val words = query.trim().lowercase().split(Regex("\\s+")).filter { it.isNotEmpty() }
+        if (words.isEmpty()) return getHistory(limit)
+        val where = words.joinToString(" AND ") { "(LOWER($COL_HIST_TITLE) LIKE ? OR LOWER($COL_HIST_URL) LIKE ?)" }
+        val args = words.flatMap { listOf("%$it%", "%$it%") }.toTypedArray()
+        return readHistory("SELECT * FROM $TABLE_HISTORY WHERE $where ORDER BY $COL_HIST_TIME DESC LIMIT $limit", args)
+    }
+
+    fun removeHistory(id: Long): Boolean = writableDatabase.delete(TABLE_HISTORY, "$COL_HIST_ID = ?", arrayOf(id.toString())) > 0
+
+    fun getHistory(limit: Int = 100): List<HistoryItem> =
+        readHistory("SELECT * FROM $TABLE_HISTORY ORDER BY $COL_HIST_TIME DESC LIMIT $limit", null)
+
+    private fun readHistory(sql: String, args: Array<String>?): List<HistoryItem> {
         val list = mutableListOf<HistoryItem>()
         val db = readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM $TABLE_HISTORY ORDER BY $COL_HIST_TIME DESC LIMIT $limit", null)
+        val cursor = db.rawQuery(sql, args)
         if (cursor.moveToFirst()) {
             do {
                 val id = cursor.getLong(cursor.getColumnIndexOrThrow(COL_HIST_ID))

@@ -69,6 +69,7 @@ class MainActivity : android.app.Activity() {
     // Managers & Repositories
     private lateinit var tabManager: TabManager
     private lateinit var repository: BrowserRepository
+    private var historySuggestions: HistorySuggestions? = null
     private lateinit var downloadHandler: DownloadHandler
 
     private var customVideoView: View? = null
@@ -599,16 +600,26 @@ class MainActivity : android.app.Activity() {
                 btnClearUrl.visibility = if (editUrl.text.isNotEmpty()) View.VISIBLE else View.GONE
             } else {
                 btnClearUrl.visibility = View.GONE
+                historySuggestions?.dismiss()
                 val activeTab = tabManager.getActiveTab()
                 updateOmniboxDisplay(activeTab?.url ?: "", activeTab?.webView?.title)
             }
         }
 
+        // 🕒 Predlogi iz zgodovine in zaznamkov med tipkanjem
+        historySuggestions = HistorySuggestions(this, omniboxContainer, repository) { url ->
+            hideKeyboard()
+            editUrl.clearFocus()
+            performNavigation(url)
+        }
         editUrl.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (editUrl.hasFocus()) {
                     btnClearUrl.visibility = if (!s.isNullOrEmpty()) View.VISIBLE else View.GONE
+                    val typed = s?.toString() ?: ""
+                    // the address of the current page is preselected on focus: suggest only once the user types
+                    if (editUrl.selectionStart == editUrl.selectionEnd) historySuggestions?.update(typed) else historySuggestions?.dismiss()
                 }
             }
             override fun afterTextChanged(s: Editable?) {}
@@ -616,6 +627,7 @@ class MainActivity : android.app.Activity() {
 
         editUrl.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
+                historySuggestions?.dismiss()
                 performNavigation(editUrl.text.toString().trim())
                 hideKeyboard()
                 editUrl.clearFocus()
@@ -1694,21 +1706,14 @@ class MainActivity : android.app.Activity() {
     }
 
     private fun showHistoryDialog() {
-        val history = repository.getHistory(50)
-        val items = history.map { "${it.title}\n${it.url}" }.toTypedArray()
-
-        AlertDialog.Builder(this)
-            .setTitle("🕒 Zgodovina brskanja")
-            .setItems(items) { _, which ->
-                val selected = history[which]
-                tabManager.getActiveTab()?.webView?.navigateDocument(selected.url)
-            }
-            .setPositiveButton("Počisti zgodovino") { _, _ ->
-                repository.clearHistory()
-                Toast.makeText(this, "Zgodovina počiščena", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("Zapri", null)
-            .show()
+        HistoryUi.show(
+            this, repository,
+            open = { url ->
+                val tab = tabManager.getActiveTab()
+                if (tab != null) tab.webView.navigateDocument(url) else tabManager.createTab(this, url, true)
+            },
+            openInNewTab = { url -> tabManager.createTab(this, url, true) },
+        )
     }
 
     private fun setupFindInPage() {
