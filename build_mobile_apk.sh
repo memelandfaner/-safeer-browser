@@ -62,21 +62,29 @@ echo "⚙️ 1/5: Prevajam Android XML vire (AAPT2)..."
     --java "$BUILD_DIR/gen" \
     "$BUILD_DIR/compiled_res.zip"
 
+# Vse datoteke .kt pod src/main/kotlin -- polje, ker poti vsebujejo presledke.
+mapfile -d '' -t KT_VIRI < <(find "$DIR/src/main/kotlin" -name '*.kt' -print0 | sort -z)
+if [ "${#KT_VIRI[@]}" -eq 0 ]; then
+    echo "❌ Pod src/main/kotlin ni nobene datoteke .kt."
+    exit 1
+fi
+
 echo "☕ 2/5: Prevajam Kotlin izvorno kodo (kotlinc)..."
 "$KOTLINC" -cp "$TOOLS_DIR/android.jar:$BUILD_DIR/gen$LIB_CLASSPATH" \
     -d "$BUILD_DIR/classes" \
     -jvm-target 1.8 \
-    "$DIR/src/main/kotlin/com/safeer/mobile/browser/"*.kt \
-    "$DIR/src/main/kotlin/com/safeer/threatfeed/"*.kt \
+    "${KT_VIRI[@]}" \
     "$BUILD_DIR/gen/com/safeer/mobile/browser/R.java"
+
+# Vsi prevedeni razredi, vkljucno s podpaketi (npr. cast/).
+mapfile -d '' -t RAZREDI < <(find "$BUILD_DIR/classes" -name '*.class' -print0 | sort -z)
 
 echo "⚡ 3/5: Prevajam v Dalvik Executable (D8)..."
 java -cp "$TOOLS_DIR/r8.jar" com.android.tools.r8.D8 \
     --min-api 28 \
     --output "$BUILD_DIR/dex" \
     --lib "$TOOLS_DIR/android.jar" \
-    "$BUILD_DIR/classes/com/safeer/mobile/browser/"*.class \
-    "$BUILD_DIR/classes/com/safeer/threatfeed/"*.class \
+    "${RAZREDI[@]}" \
     "$KOTLIN_LIB" "$DIR"/libs/*.jar
 
 echo "📦 4/5: Sestavljam APK paket..."

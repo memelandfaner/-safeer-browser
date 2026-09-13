@@ -34,4 +34,9 @@
     <string name="default_browser_unchanged">Privzeti brskalnik ni bil spremenjen</string>
     <string name="default_browser_unavailable">Izberite brskalnik v Androidovih nastavitvah privzetih aplikacij</string>
     <string name="btn_close">Zapri</string>
+    <string name="menu_cast_to_tv">Pošlji na TV</string>
+    <string name="cast_searching">Iščem televizorje v tvojem omrežju …</string>
+    <string name="cast_none_found">Televizorja ni bilo mogoče najti. Ali vozlišče Safeer Cast teče?</string>
+    <string name="cast_choose">Na kateri televizor naj pošljem?</string>
+    <string name="cast_sent">📺 Poslano na</string>
 </resources>

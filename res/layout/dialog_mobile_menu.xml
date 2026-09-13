@@ -114,6 +114,19 @@
                 <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="12dp" android:text="@string/menu_new_tab" android:textColor="@color/text_primary" android:textSize="14sp" />
             </LinearLayout>
 
+            <!-- Pošlji na TV (Safeer Cast) -->
+            <LinearLayout
+                android:id="@+id/rowMenuCastToTv"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:background="@drawable/bg_mobile_icon_button"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="10dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📺" android:textSize="16sp" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="12dp" android:text="@string/menu_cast_to_tv" android:textColor="@color/text_primary" android:textSize="14sp" />
+            </LinearLayout>
+
             <!-- Zaznamki -->
             <LinearLayout
                 android:id="@+id/rowMenuBookmarks"

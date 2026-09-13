@@ -900,6 +900,109 @@ class MainActivity : android.app.Activity() {
         }
     }
 
+    // ------------------------------------------------------------------
+    // Safeer Cast — pošiljanje trenutne strani na televizor v domačem omrežju
+    // ------------------------------------------------------------------
+
+    private var castClient: com.safeer.mobile.browser.cast.CastSenderClient? = null
+
+    /** Naslov vozlišča; shranjen, da ga ni treba vnašati vsakič. */
+    private fun castHubUrl(): String {
+        val prefs = getSharedPreferences("safeer_cast_prefs", MODE_PRIVATE)
+        return prefs.getString("hub_url", "ws://192.168.0.143:8990/cast/ws")
+            ?: "ws://192.168.0.143:8990/cast/ws"
+    }
+
+    private fun saveCastHubUrl(url: String) {
+        getSharedPreferences("safeer_cast_prefs", MODE_PRIVATE).edit().putString("hub_url", url).apply()
+    }
+
+    /**
+     * Pošlje trenutni naslov na televizor: poveže se na vozlišče, počaka na seznam
+     * prejemnikov in ponudi izbiro. Ob enem samem televizorju pošlje kar nanj.
+     */
+    private fun castCurrentPageToTv() {
+        val tab = tabManager.getActiveTab()
+        val url = tab?.webView?.url ?: tab?.url ?: ""
+        if (url.isBlank() || url.startsWith("file:///android_asset/")) {
+            Toast.makeText(this, getString(R.string.cast_none_found), Toast.LENGTH_SHORT).show()
+            return
+        }
+        val naslov = tab?.webView?.title
+
+        Toast.makeText(this, getString(R.string.cast_searching), Toast.LENGTH_SHORT).show()
+
+        castClient?.disconnect()
+        val client = com.safeer.mobile.browser.cast.CastSenderClient(castHubUrl())
+        castClient = client
+
+        var odgovorjeno = false
+        client.onDevicesChanged = { naprave ->
+            if (!odgovorjeno) {
+                odgovorjeno = true
+                runOnUiThread { showCastTargets(naprave, url, naslov) }
+            }
+        }
+        client.connect()
+
+        // Če v petih sekundah ni odgovora, vozlišča ni; ponudimo vnos naslova.
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            if (!odgovorjeno) {
+                odgovorjeno = true
+                runOnUiThread { askForCastHub() }
+            }
+        }, 5000)
+    }
+
+    private fun showCastTargets(
+        naprave: List<com.safeer.mobile.browser.cast.CastSenderClient.Device>,
+        url: String,
+        naslov: String?
+    ) {
+        val prejemniki = naprave.filter { it.role == "receiver" }
+        if (prejemniki.isEmpty()) {
+            Toast.makeText(this, getString(R.string.cast_none_found), Toast.LENGTH_LONG).show()
+            return
+        }
+        if (prejemniki.size == 1) {
+            posljiNaTv(prejemniki[0], url, naslov)
+            return
+        }
+        val imena = prejemniki.map { it.name }.toTypedArray()
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.cast_choose))
+            .setItems(imena) { _, izbrani -> posljiNaTv(prejemniki[izbrani], url, naslov) }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun posljiNaTv(
+        naprava: com.safeer.mobile.browser.cast.CastSenderClient.Device,
+        url: String,
+        naslov: String?
+    ) {
+        castClient?.sendUrl(naprava.id, url, naslov)
+        Toast.makeText(this, getString(R.string.cast_sent) + " " + naprava.name, Toast.LENGTH_SHORT).show()
+    }
+
+    /** Brez odgovora vozlišča: naj uporabnik vnese njegov naslov (IP je viden v Safeer Cast). */
+    private fun askForCastHub() {
+        val vnos = EditText(this)
+        vnos.setText(castHubUrl())
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.cast_none_found))
+            .setView(vnos)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val novi = vnos.text.toString().trim()
+                if (novi.isNotBlank()) {
+                    saveCastHubUrl(novi)
+                    castCurrentPageToTv()
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
     private fun showMobileMenu() {
         val dialog = Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -982,6 +1085,11 @@ class MainActivity : android.app.Activity() {
             dialog.dismiss()
             editUrl.requestFocus()
             showKeyboard()
+        }
+
+        dialog.findViewById<LinearLayout>(R.id.rowMenuCastToTv).setOnClickListener {
+            dialog.dismiss()
+            castCurrentPageToTv()
         }
 
         dialog.findViewById<LinearLayout>(R.id.rowMenuBookmarks).setOnClickListener {
