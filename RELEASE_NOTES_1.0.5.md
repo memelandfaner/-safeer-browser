@@ -6,8 +6,8 @@ The loopback proxy now preserves buffered request data, handles concurrent tunne
 
 Critical malware/C2 matches take priority over compatibility exceptions. Blocked subframes cannot replace the main page. Certificate errors still cancel the connection. Retry and reload retain the failed address. Native WebView darkening replaces a forced page-wide color-scheme override.
 
-Verification: signed APK build, JVM regression suite, HTTP/2 DNS probe on Samsung SM-S931B, successful BBC/RTV rendering, and live checks documented in tests/. Existing application data is preserved by the upgrade. This release does not constitute an exhaustive security audit or a test of every website and media provider.
+Verification: signed APK build, JVM regression suite, HTTP/2 DNS probe on a test phone, successful BBC/RTV rendering, and live checks documented in tests/. Existing application data is preserved by the upgrade. This release does not constitute an exhaustive security audit or a test of every website and media provider.
 
 Cosmetic filtering now collapses explicitly marked ad slots and common reserved ad wrappers, including BBC data-component/data-testid slots. Their padding and margins are removed too. CSS also covers slots inserted after page load; arbitrary empty content containers are not removed. Unrecognized site-specific ad wrappers may still need additional rules.
 
-YouTube checks on Samsung S25: home/search thumbnails, Faded and Alone mix transition, Get Lucky playback, persistent pause/resume and fullscreen/back. No visible ads or player errors during this sample. Removed a failing preconnect to bare googlevideo.com (certificate hostname mismatch) and limited the YouTube supervisor to exact YouTube host boundaries.
+YouTube checks on a test phone: home/search thumbnails, Faded and Alone mix transition, Get Lucky playback, persistent pause/resume and fullscreen/back. No visible ads or player errors during this sample. Removed a failing preconnect to bare googlevideo.com (certificate hostname mismatch) and limited the YouTube supervisor to exact YouTube host boundaries.
