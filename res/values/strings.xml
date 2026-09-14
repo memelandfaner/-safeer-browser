@@ -16,6 +16,7 @@
     <string name="menu_adblock">Built-in AdBlock &amp; Botnet Shield</string>
     <string name="menu_threat_stats">Security Shield (ThreatFox/URLhaus)</string>
     <string name="menu_cast_to_tv">Send to TV</string>
+    <string name="menu_safeer_link">Safeer Link</string>
     <string name="cast_searching">Looking for televisions in your network…</string>
     <string name="cast_none_found">No television found. Is the Safeer Cast hub running?</string>
     <string name="cast_choose">Send to which television?</string>

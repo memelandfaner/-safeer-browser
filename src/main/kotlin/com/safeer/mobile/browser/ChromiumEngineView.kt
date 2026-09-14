@@ -377,6 +377,37 @@ class ChromiumEngineView @JvmOverloads constructor(
 
     private fun setupClients() {
         webChromeClient = object : WebChromeClient() {
+            // Okna JavaScripta: privzeti WebChromeClient jih tiho preklice, zato jih
+            // narisemo sami -- sicer prijave in potrditve na straneh ne delujejo.
+            override fun onJsAlert(
+                view: android.webkit.WebView?,
+                url: String?,
+                message: String?,
+                result: android.webkit.JsResult?
+            ): Boolean = JsOkna.alert(view, url, message, result)
+
+            override fun onJsConfirm(
+                view: android.webkit.WebView?,
+                url: String?,
+                message: String?,
+                result: android.webkit.JsResult?
+            ): Boolean = JsOkna.confirm(view, url, message, result)
+
+            override fun onJsPrompt(
+                view: android.webkit.WebView?,
+                url: String?,
+                message: String?,
+                defaultValue: String?,
+                result: android.webkit.JsPromptResult?
+            ): Boolean = JsOkna.prompt(view, url, message, defaultValue, result)
+
+            override fun onJsBeforeUnload(
+                view: android.webkit.WebView?,
+                url: String?,
+                message: String?,
+                result: android.webkit.JsResult?
+            ): Boolean = JsOkna.predZapustitvijo(view, url, message, result)
+
             override fun onCreateWindow(
                 view: WebView?,
                 isDialog: Boolean,

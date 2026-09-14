@@ -907,14 +907,29 @@ class MainActivity : android.app.Activity() {
     private var castClient: com.safeer.mobile.browser.cast.CastSenderClient? = null
 
     /** Naslov vozlišča; shranjen, da ga ni treba vnašati vsakič. */
-    private fun castHubUrl(): String {
-        val prefs = getSharedPreferences("safeer_cast_prefs", MODE_PRIVATE)
-        return prefs.getString("hub_url", "ws://192.168.0.143:8990/cast/ws")
-            ?: "ws://192.168.0.143:8990/cast/ws"
-    }
+    /** Naslov vozlišča, če ga je uporabnik nastavil. Privzetega ni -- Hub je nadgradnja. */
+    private fun castHubUrl(): String =
+        getSharedPreferences("safeer_cast_prefs", MODE_PRIVATE).getString("hub_url", "") ?: ""
+
+    /** Ali ima ta telefon sploh Safeer Hub. Brez njega casting ostane skrit. */
+    private fun hasCastHub(): Boolean = castHubUrl().isNotBlank()
 
     private fun saveCastHubUrl(url: String) {
         getSharedPreferences("safeer_cast_prefs", MODE_PRIVATE).edit().putString("hub_url", url).apply()
+    }
+
+    /** Zeton Safeer Controla; z njim odjemalec dobi enokratno vstopnico za vozlisce. */
+    private fun castToken(): String? =
+        getSharedPreferences("safeer_cast_prefs", MODE_PRIVATE).getString("control_token", null)
+
+    /** Pot do vstopnice, kot jo je objavil Hub. */
+    private fun castTicketPath(): String =
+        getSharedPreferences("safeer_cast_prefs", MODE_PRIVATE)
+            .getString("hub_ticket_path", "/cast/ticket") ?: "/cast/ticket"
+
+    private fun saveCastToken(token: String) {
+        getSharedPreferences("safeer_cast_prefs", MODE_PRIVATE).edit()
+            .putString("control_token", token.trim()).apply()
     }
 
     /**
@@ -933,7 +948,7 @@ class MainActivity : android.app.Activity() {
         Toast.makeText(this, getString(R.string.cast_searching), Toast.LENGTH_SHORT).show()
 
         castClient?.disconnect()
-        val client = com.safeer.mobile.browser.cast.CastSenderClient(castHubUrl())
+        val client = com.safeer.mobile.browser.cast.CastSenderClient(castHubUrl(), castToken(), castTicketPath())
         castClient = client
 
         var odgovorjeno = false
@@ -987,20 +1002,133 @@ class MainActivity : android.app.Activity() {
 
     /** Brez odgovora vozlišča: naj uporabnik vnese njegov naslov (IP je viden v Safeer Cast). */
     private fun askForCastHub() {
-        val vnos = EditText(this)
-        vnos.setText(castHubUrl())
+        val naslov = EditText(this)
+        naslov.setText(castHubUrl())
+        naslov.hint = "ws://naslov:8990/cast/ws"
+
+        val zeton = EditText(this)
+        zeton.setText(castToken() ?: "")
+        zeton.hint = "Žeton Safeer Controla (neobvezno)"
+
+        val stolpec = android.widget.LinearLayout(this)
+        stolpec.orientation = android.widget.LinearLayout.VERTICAL
+        val rob = (16 * resources.displayMetrics.density).toInt()
+        stolpec.setPadding(rob, rob, rob, 0)
+        stolpec.addView(naslov)
+        stolpec.addView(zeton)
+
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.cast_none_found))
-            .setView(vnos)
+            .setView(stolpec)
             .setPositiveButton(android.R.string.ok) { _, _ ->
-                val novi = vnos.text.toString().trim()
-                if (novi.isNotBlank()) {
-                    saveCastHubUrl(novi)
-                    castCurrentPageToTv()
-                }
+                val noviNaslov = naslov.text.toString().trim()
+                if (noviNaslov.isNotBlank()) saveCastHubUrl(noviNaslov)
+                saveCastToken(zeton.text.toString())
+                if (noviNaslov.isNotBlank()) castCurrentPageToTv()
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
+    }
+
+    /**
+     * Seznanitev s Safeer Hubom: koda se pokaze tu, potrdi pa se v Safeer Controlu.
+     * Ce ne uspe, ostane vse, kot je bilo -- brskalnik deluje naprej.
+     */
+    private fun seznaniSHubom() {
+        var okno: AlertDialog? = null
+        com.safeer.mobile.browser.cast.HubPairing.pair(
+            this, castHubUrl(),
+            "phone-" + android.os.Build.MODEL.replace(Regex("\\s+"), "-").lowercase(),
+            "Safeer (" + android.os.Build.MODEL + ")",
+            { koda ->
+                okno = AlertDialog.Builder(this)
+                    .setTitle("Povezava s Safeer Hubom")
+                    .setMessage("V Safeer Controlu potrdi kodo:\n\n" + koda)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
+            },
+            { uspelo ->
+                okno?.dismiss()
+                if (uspelo) {
+                    Toast.makeText(this, "Telefon je povezan s Safeer Hubom.", Toast.LENGTH_SHORT).show()
+                }
+            })
+    }
+
+    // ------------------------------------------------------------------
+    // Safeer Link — naprave, pošiljanje in sinhronizacija na enem mestu
+    // ------------------------------------------------------------------
+
+    private var linkOkno: Dialog? = null
+    private var linkMost: com.safeer.mobile.browser.link.LinkMost? = null
+
+    /**
+     * Odpre Safeer Link v svojem pogledu.
+     *
+     * Pogled je locen od zavihkov in nalozi samo stran iz aplikacije, zato most, ki ga
+     * ima, ni dosegljiv nobeni spletni strani. Zaradi istega razloga pogled ne sme
+     * nikamor navigirati: vse, kar ni domaca stran, zavrnemo.
+     */
+    private fun odpriSafeerLink() {
+        try {
+            val pogled = android.webkit.WebView(this)
+            pogled.settings.javaScriptEnabled = true
+            pogled.settings.domStorageEnabled = true
+            pogled.settings.allowFileAccess = false
+            pogled.settings.allowContentAccess = false
+            pogled.settings.setSupportMultipleWindows(false)
+            pogled.settings.javaScriptCanOpenWindowsAutomatically = false
+            pogled.setBackgroundColor(android.graphics.Color.parseColor("#0b1017"))
+
+            val okno = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+            okno.setContentView(pogled)
+
+            // Naslov strani preberemo tu, na glavni niti. Most ga bo vprasal z druge
+            // niti, kjer WebView svojih metod ne da brati (url bi bil null).
+            val zavihek = tabManager.getActiveTab()
+            val naslovStrani = zavihek?.webView?.url ?: zavihek?.url ?: ""
+            val imeStrani = zavihek?.webView?.title
+
+            val most = com.safeer.mobile.browser.link.LinkMost(
+                this,
+                pogled,
+                { Pair(naslovStrani, imeStrani) },
+                { okno.dismiss() },
+                { naslov -> openUrlInBrowser(naslov) }
+            )
+            linkMost = most
+            pogled.addJavascriptInterface(most, "SafeerLink")
+
+            pogled.webViewClient = object : android.webkit.WebViewClient() {
+                override fun shouldOverrideUrlLoading(
+                    view: android.webkit.WebView?,
+                    request: android.webkit.WebResourceRequest?
+                ): Boolean {
+                    // Ta pogled ne sme nikamor: naslove odpira brskalnik, ne Link.
+                    val naslov = request?.url?.toString() ?: return true
+                    if (naslov.startsWith("file:///android_asset/link/")) return false
+                    okno.dismiss()
+                    if (naslov.startsWith("http://") || naslov.startsWith("https://")) {
+                        openUrlInBrowser(naslov)
+                    }
+                    return true
+                }
+            }
+
+            okno.setOnDismissListener {
+                try { most.pospravi() } catch (_: Exception) {}
+                try { pogled.destroy() } catch (_: Exception) {}
+                linkOkno = null
+                linkMost = null
+            }
+
+            pogled.loadUrl("file:///android_asset/link/index.html")
+            linkOkno = okno
+            okno.show()
+        } catch (e: Exception) {
+            Toast.makeText(this, "Safeer Linka ni bilo mogoče odpreti.", Toast.LENGTH_SHORT).show()
+            android.util.Log.w("SafeerLink", "Zaslon se ni odprl: " + e.message)
+        }
     }
 
     private fun showMobileMenu() {
@@ -1087,7 +1215,31 @@ class MainActivity : android.app.Activity() {
             showKeyboard()
         }
 
-        dialog.findViewById<LinearLayout>(R.id.rowMenuCastToTv).setOnClickListener {
+        // Safeer Link je nadgradnja: brez Huba ga ne omenjamo.
+        val vrsticaLink = dialog.findViewById<LinearLayout>(R.id.rowMenuSafeerLink)
+        vrsticaLink.visibility = if (hasCastHub()) View.VISIBLE else View.GONE
+        vrsticaLink.setOnClickListener {
+            dialog.dismiss()
+            odpriSafeerLink()
+        }
+
+        // Brez Safeer Huba casting sploh ne obstaja: vrstice ne pokazemo.
+        val vrsticaCast = dialog.findViewById<LinearLayout>(R.id.rowMenuCastToTv)
+        vrsticaCast.visibility = if (hasCastHub()) View.VISIBLE else View.GONE
+        if (!hasCastHub()) {
+            // Huba se ne poznamo: poiscemo ga v ozadju. Ce se oglasi, medtem ko je meni odprt,
+            // se vrstica pokaze; ce ga ni, uporabnik o njem ne izve nicesar.
+            com.safeer.mobile.browser.cast.HubDiscovery.discover(this) { naslov ->
+                if (naslov != null && dialog.isShowing) {
+                    vrsticaCast.visibility = View.VISIBLE
+                    vrsticaLink.visibility = View.VISIBLE
+                }
+            }
+        } else if (castToken() == null) {
+            // Hub poznamo, on nas pa se ne: ob prvem odprtju menija se seznanimo.
+            seznaniSHubom()
+        }
+        vrsticaCast.setOnClickListener {
             dialog.dismiss()
             castCurrentPageToTv()
         }

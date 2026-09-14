@@ -3,7 +3,11 @@ package com.safeer.mobile.browser.cast
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
@@ -25,7 +29,15 @@ import java.util.concurrent.TimeUnit
  */
 class CastSenderClient(
     private val hubWsUrl: String,
-    private val senderId: String = "phone-" + UUID.randomUUID().toString().take(8)
+    private val controlToken: String? = null,
+    private val ticketPath: String = "/cast/ticket",
+    private val senderId: String = "phone-" + UUID.randomUUID().toString().take(8),
+    /**
+     * Ali ta naprava sinhronizira. Zmoznost "sync" prijavimo Hubu samo, kadar je
+     * vklopljena -- Hub sync sporocila poslje le napravam, ki jo prijavijo, zato
+     * izklopljena naprava tujih zaznamkov niti ne prejme niti jih ne oddaja.
+     */
+    private val sinhronizira: Boolean = false
 ) {
     companion object {
         private const val TAG = "SafeerCastSender"
@@ -47,6 +59,9 @@ class CastSenderClient(
         val duration: Double
     )
 
+    /** Prejeti podatki sinhronizacije: kategorija, razlicica, casovni zig in vsebina. */
+    var onSyncData: ((String, Long, Double, JSONObject) -> Unit)? = null
+
     var onDevicesChanged: ((List<Device>) -> Unit)? = null
     var onPlaybackStatus: ((PlaybackStatus) -> Unit)? = null
     var onConnectedStateChanged: ((Boolean) -> Unit)? = null
@@ -62,7 +77,11 @@ class CastSenderClient(
 
     fun connect() {
         Log.i(TAG, "Povezujem se na Safeer Cast Hub: $hubWsUrl")
-        val request = Request.Builder().url(hubWsUrl).build()
+        zVstopnico(hubWsUrl, controlToken) { naslov -> odpriPovezavo(naslov) }
+    }
+
+    private fun odpriPovezavo(naslov: String) {
+        val request = Request.Builder().url(naslov).build()
 
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(ws: WebSocket, response: Response) {
@@ -78,6 +97,9 @@ class CastSenderClient(
                         put("device_id", senderId)
                         put("name", "Safeer Mobile Phone")
                         put("role", "sender")
+                        if (sinhronizira) {
+                            put("capabilities", JSONArray().put("sync"))
+                        }
                     })
                 }
                 ws.send(registerMsg.toString())
@@ -100,6 +122,59 @@ class CastSenderClient(
             }
         })
     }
+
+
+    /**
+     * Vzame enokratno vstopnico pri Safeer Controlu in sele nato odpre WebSocket.
+     *
+     * Vstopnica velja 30 sekund in se porabi ob prvi uporabi, zato jo vzamemo pri vsaki
+     * povezavi posebej. Ce zetona ni, se povezemo brez nje (staro vozlisce) in to povemo
+     * v dnevniku -- nezasciteno pot pustimo vidno, ne tiho.
+     */
+    private fun zVstopnico(wsUrl: String, token: String?, naprej: (String) -> Unit) {
+        if (token.isNullOrBlank()) {
+            Log.w(TAG, "Zeton za Safeer Control ni nastavljen - povezujem se BREZ avtentikacije.")
+            naprej(wsUrl)
+            return
+        }
+        val osnova = wsUrl.replace(Regex("^wss"), "https").replace(Regex("^ws"), "http")
+            .substringBefore("/cast/ws").substringBefore("/link/ws").substringBefore("/safeer/ws")
+            .trimEnd('/')
+        val zahteva = Request.Builder()
+            .url("$osnova${ticketPath()}")
+            .addHeader("X-Safeer-Token", token)
+            .post("".toRequestBody("application/json".toMediaTypeOrNull()))
+            .build()
+        client.newCall(zahteva).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: java.io.IOException) {
+                Log.w(TAG, "Vstopnice ni bilo mogoce dobiti: ${e.message}")
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.use {
+                    val telo = it.body?.string().orEmpty()
+                    if (!it.isSuccessful) {
+                        Log.w(TAG, "Control je zavrnil zahtevo za vstopnico (${it.code}).")
+                        return
+                    }
+                    val vstopnica = try {
+                        JSONObject(telo).optString("ticket")
+                    } catch (e: Exception) {
+                        ""
+                    }
+                    if (vstopnica.isBlank()) {
+                        Log.w(TAG, "Odgovor Controla ne vsebuje vstopnice.")
+                        return
+                    }
+                    val locilo = if (wsUrl.contains("?")) "&" else "?"
+                    naprej("$wsUrl${locilo}ticket=$vstopnica")
+                }
+            }
+        })
+    }
+
+
+    private fun ticketPath(): String = ticketPath
 
     private fun handleMessage(text: String) {
         try {
@@ -129,6 +204,17 @@ class CastSenderClient(
                         )
                     }
                     mainHandler.post { onDevicesChanged?.invoke(devicesList) }
+                }
+
+                "sync.data" -> {
+                    val payload = json.optJSONObject("payload") ?: JSONObject()
+                    val kategorija = payload.optString("category", "")
+                    val razlicica = payload.optLong("version", 0L)
+                    val zig = payload.optDouble("timestamp", 0.0)
+                    val vsebina = payload.optJSONObject("data") ?: JSONObject()
+                    if (kategorija.isNotEmpty()) {
+                        mainHandler.post { onSyncData?.invoke(kategorija, razlicica, zig, vsebina) }
+                    }
                 }
 
                 "cast.status" -> {
@@ -173,6 +259,38 @@ class CastSenderClient(
                 put("action", action)
                 if (position != null) put("position", position)
                 if (volume != null) put("volume", volume)
+            })
+        }
+        webSocket?.send(msg.toString())
+    }
+
+    /**
+     * Poslje svoje stanje kategorije vsem, ki sinhronizirajo, in Hubu, ki ga shrani.
+     * Vsebina je poljuben JSON; pomen pozna samo naprava, Hub ga ne odpira.
+     */
+    fun posljiSinhronizacijo(kategorija: String, razlicica: Long, vsebina: JSONObject) {
+        val msg = JSONObject().apply {
+            put("id", UUID.randomUUID().toString())
+            put("type", "sync.data")
+            put("target", "all")
+            put("payload", JSONObject().apply {
+                put("category", kategorija)
+                put("version", razlicica)
+                put("timestamp", System.currentTimeMillis() / 1000.0)
+                put("data", vsebina)
+            })
+        }
+        webSocket?.send(msg.toString())
+    }
+
+    /** Vprasa Hub za zadnje znano stanje kategorije (npr. ob prvem vklopu). */
+    fun zahtevajSinhronizacijo(kategorija: String, odRazlicice: Long? = null) {
+        val msg = JSONObject().apply {
+            put("id", UUID.randomUUID().toString())
+            put("type", "sync.request")
+            put("payload", JSONObject().apply {
+                put("category", kategorija)
+                if (odRazlicice != null) put("since_version", odRazlicice)
             })
         }
         webSocket?.send(msg.toString())

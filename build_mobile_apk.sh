@@ -70,7 +70,9 @@ if [ "${#KT_VIRI[@]}" -eq 0 ]; then
 fi
 
 echo "☕ 2/5: Prevajam Kotlin izvorno kodo (kotlinc)..."
-"$KOTLINC" -cp "$TOOLS_DIR/android.jar:$BUILD_DIR/gen$LIB_CLASSPATH" \
+# Kotlin je pri rasti kode zmanjkalo kopice (OutOfMemoryError, koda 137). Mejo povemo izrecno,
+# da gradnja ni odvisna od tega, koliko je na racunalniku trenutno prostega.
+"$KOTLINC" -J-Xmx3g -cp "$TOOLS_DIR/android.jar:$BUILD_DIR/gen$LIB_CLASSPATH" \
     -d "$BUILD_DIR/classes" \
     -jvm-target 1.8 \
     "${KT_VIRI[@]}" \
