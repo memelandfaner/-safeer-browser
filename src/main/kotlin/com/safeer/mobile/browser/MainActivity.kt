@@ -1235,10 +1235,9 @@ class MainActivity : android.app.Activity() {
                     vrsticaLink.visibility = View.VISIBLE
                 }
             }
-        } else if (castToken() == null) {
-            // Hub poznamo, on nas pa se ne: ob prvem odprtju menija se seznanimo.
-            seznaniSHubom()
         }
+        // Seznanitve NE sprozimo ob odprtju menija -- to je uporabnikova izbira.
+        // Kodo za seznanitev pokaze Safeer Link, ko uporabnik pritisne "Poveži".
         vrsticaCast.setOnClickListener {
             dialog.dismiss()
             castCurrentPageToTv()
