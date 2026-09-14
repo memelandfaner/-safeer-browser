@@ -431,18 +431,6 @@ class LinkMost(
     fun jeTelevizor(): Boolean = false
 
     /** Naslov konzole Safeer Controla, izpeljan iz naslova Huba. */
-    @JavascriptInterface
-    fun naslovKonzole(): String {
-        val naslov = hubUrl()
-        if (naslov.isBlank()) return ""
-        return try {
-            val brezSheme = naslov.replace(Regex("^wss?://"), "")
-            val gostitelj = brezSheme.substringBefore("/")
-            "http://$gostitelj/console"
-        } catch (e: Throwable) {
-            ""
-        }
-    }
 
     /** Ob zaprtju zaslona pospravi povezavo. */
     fun pospravi() {
