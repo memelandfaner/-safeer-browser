@@ -81,6 +81,47 @@ class LinkMost(
      * Stanje brez omrezja: ali Hub poznamo, ali nas ze pozna in kako se ta naprava imenuje.
      * Stran tako nariše pravi zaslon takoj, brez cakanja.
      */
+
+    /**
+     * Jezik, ki ga ima uporabnik na napravi -- stran govori v njem.
+     * Vrnemo samo dvocrkovno oznako; stran zna slovensko in anglesko.
+     */
+    @JavascriptInterface
+    fun jezik(): String = try {
+        val jeziki = dejavnost.resources.configuration.locales
+        val prvi = if (jeziki.size() > 0) jeziki.get(0) else java.util.Locale.getDefault()
+        (prvi.language ?: "").lowercase().take(2)
+    } catch (e: Throwable) {
+        ""
+    }
+
+    /**
+     * Odklopi TO napravo od Safeer Linka: pozabi zeton in naslov.
+     *
+     * Namenoma ne posegamo v druge naprave -- to je odlocitev za napravo, ki jo ima
+     * uporabnik v roki. Ostale se odstrani v Safeer Controlu.
+     */
+    @JavascriptInterface
+    fun pozabiNapravo() {
+        try {
+            odjemalec?.disconnect()
+        } catch (e: Throwable) {
+            android.util.Log.w(TAG, "Zapiranja povezave ni bilo mogoce dokoncati: ${e.message}")
+        }
+        odjemalec = null
+        try {
+            nastavitve().edit()
+                .remove("control_token")
+                .remove("hub_url")
+                .remove("hub_ticket_path")
+                .remove("hub_last_seen")
+                .apply()
+        } catch (e: Throwable) {
+            android.util.Log.w(TAG, "Nastavitev ni bilo mogoce pocistiti: ${e.message}")
+        }
+        odziv("pozabljeno", true)
+    }
+
     @JavascriptInterface
     fun stanje(): String {
         return try {
