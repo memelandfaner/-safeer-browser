@@ -2,7 +2,7 @@
 
 ### **Safeer Browser v1.0.4 — Stable Release**
 *Open-source Android browser with local malware, phishing, C2, tracker protection and Instant YouTube Music Engine.*
-*Novosti v1.0.4: Instant YouTube Music Engine (takojšnji zagon predvajanja brez oglasov in čakanja, odprava telemetričnih zamikov, optimizacija prenosa za 85 % manj porabe podatkov pri 100 % zvočni kakovosti), hitra gumba za osvežitev (🔄) in priljubljene (⭐) na orodni vrstici ter polna podpora za Android 16 (Edge-to-Edge).*
+*Novosti v1.0.4: Instant YouTube Music Engine (takojšnji zagon predvajanja brez čakanja, odprava telemetričnih zamikov, optimizacija prenosa za 85 % manj porabe podatkov pri 100 % zvočni kakovosti), hitra gumba za osvežitev (🔄) in priljubljene (⭐) na orodni vrstici ter polna podpora za Android 16 (Edge-to-Edge).*
 
 🌐 **Uradna spletna stran & predstavitveni portal:** [https://memelandfaner.github.io/-safeer-browser/](https://memelandfaner.github.io/-safeer-browser/)
 
