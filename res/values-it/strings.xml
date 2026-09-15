@@ -51,4 +51,16 @@
     <string name="proxy_failed">Impossibile attivare le connessioni sicure. Aggiorna Android System WebView o controlla le impostazioni di rete.</string>
     <string name="link_open_failed">Impossibile aprire Safeer Link.</string>
     <string name="cast_token_hint">Token di Safeer Control (facoltativo)</string>
+    <string name="menu_cast_to_tv">Invia alla TV</string>
+    <string name="menu_safeer_link">Safeer Link</string>
+    <string name="cast_searching">Ricerca di televisori nella tua rete…</string>
+    <string name="cast_none_found">Nessun televisore trovato. L\'hub Safeer Cast è in esecuzione?</string>
+    <string name="cast_choose">A quale televisore inviare?</string>
+    <string name="cast_sent">📺 Inviato a</string>
+    <string name="btn_go">Vai o cerca</string>
+    <string name="menu_default_browser">Imposta come browser predefinito</string>
+    <string name="default_browser_active">Safeer è il tuo browser predefinito</string>
+    <string name="default_browser_unchanged">Il browser predefinito non è stato modificato</string>
+    <string name="default_browser_unavailable">Scegli il tuo browser nelle impostazioni delle app predefinite di Android</string>
+    <string name="btn_close">Chiudi</string>
 </resources>

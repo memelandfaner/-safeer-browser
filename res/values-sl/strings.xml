@@ -62,4 +62,5 @@
     <string name="proxy_failed">Varne povezave ni mogoče vključiti. Posodobite Android System WebView ali preverite omrežne nastavitve.</string>
     <string name="link_open_failed">Safeer Linka ni bilo mogoče odpreti.</string>
     <string name="cast_token_hint">Žeton Safeer Controla (neobvezno)</string>
+    <string name="menu_safeer_link">Safeer Link</string>
 </resources>
