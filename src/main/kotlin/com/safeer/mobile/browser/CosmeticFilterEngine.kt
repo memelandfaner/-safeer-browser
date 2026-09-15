@@ -100,19 +100,30 @@ object CosmeticFilterEngine {
         } catch (_: Exception) {
             null
         }
-        // Posebna pravila veljajo samo za Delo in njegove poddomene.
+        // Posebna pravila veljajo samo za posamezno hiso in njene poddomene.
         // CSS skrije tudi oglasne okvirje, dodane po nalaganju strani.
-        val publisherRules = if (
-            host == "delo.si" || host?.endsWith(".delo.si") == true
-        ) {
-            listOf(
+        fun jeDomena(vrhnja: String) = host == vrhnja || host?.endsWith(".$vrhnja") == true
+
+        val publisherRules = when {
+            jeDomena("delo.si") -> listOf(
                 ".adzone",
                 "#iprom_branded_bg_anchor",
                 "[id^='iprom_adtag_']",
                 "[data-iadserver-zone]"
             )
-        } else {
-            emptyList()
+            // 24ur rezervira prostor za oglas vnaprej. Ko oglas blokiramo, ostane
+            // prazna crna luknja sredi strani; te razrede uporabljajo samo oglasna
+            // mesta (preverjeno na zivi strani: vsi so prazni ali 300x250).
+            jeDomena("24ur.com") -> listOf(
+                ".banner-placeholder",
+                ".banner-sticky",
+                ".sidebar__banner",
+                "div.banner",
+                "div[class^='banner_']",
+                "div[class*=' banner_']",
+                "[class*='banner__']"
+            )
+            else -> emptyList()
         }
         val selectors = (
             GENERIC_ELEMENT_HIDING_RULES + publisherRules
