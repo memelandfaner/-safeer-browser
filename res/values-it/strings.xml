@@ -64,4 +64,7 @@
     <string name="default_browser_unavailable">Scegli il tuo browser nelle impostazioni delle app predefinite di Android</string>
     <string name="btn_close">Chiudi</string>
     <string name="tab_reload_after_crash">La pagina si è chiusa inaspettatamente. Ricarica</string>
+    <!-- Safeer Link: obvestilo storitve, ki gosti povezavo z drugimi napravami -->
+    <string name="hub_obvestilo_naslov">Safeer Link</string>
+    <string name="hub_obvestilo_besedilo">Questo telefono può ricevere pagine, file e musica dai tuoi altri dispositivi.</string>
 </resources>

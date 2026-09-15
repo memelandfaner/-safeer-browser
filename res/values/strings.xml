@@ -64,4 +64,7 @@
     <string name="link_open_failed">Safeer Link could not be opened.</string>
     <string name="cast_token_hint">Safeer Control token (optional)</string>
     <string name="tab_reload_after_crash">The page closed unexpectedly. Reload</string>
+    <!-- Safeer Link: obvestilo storitve, ki gosti povezavo z drugimi napravami -->
+    <string name="hub_obvestilo_naslov">Safeer Link</string>
+    <string name="hub_obvestilo_besedilo">This phone can receive pages, files and music from your other devices.</string>
 </resources>

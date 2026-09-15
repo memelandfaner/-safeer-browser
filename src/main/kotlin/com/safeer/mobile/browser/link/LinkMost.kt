@@ -439,9 +439,134 @@ class LinkMost(
 
     /** Naslov konzole Safeer Controla, izpeljan iz naslova Huba. */
 
+    // ------------------------------------------------------------------
+    // Ta telefon kot sredisce (Hub)
+    //
+    // Doslej je znal gostiti samo televizor. Ce ga ni bilo prizganega, telefon ni imel kam
+    // poslati - niti na racunalnik. Zdaj lahko gosti tudi telefon: takrat se druge naprave
+    // povezejo nanj. Koda gostitelja je ista kot na televizorju.
+    // ------------------------------------------------------------------
+
+    @JavascriptInterface
+    fun hubStanje(): String {
+        pripniPoslusalce()
+        return try {
+            com.safeer.mobile.browser.cast.HubKrmilnik.stanjeJson(dejavnost)
+        } catch (e: Throwable) {
+            "{\"tece\":false,\"zazelen\":false}"
+        }
+    }
+
+    @JavascriptInterface
+    fun hubVklopi() {
+        try {
+            val uspelo = com.safeer.mobile.browser.cast.HubStoritev.vklopi(dejavnost)
+            pripniPoslusalce()
+            if (!uspelo) napaka("hub_ni_zagnan", "Huba ni bilo mogoce zagnati.")
+            odziv("hub-tu", JSONObject(hubStanje()))
+        } catch (e: Throwable) {
+            napaka("hub_ni_zagnan", "Huba ni bilo mogoce zagnati: ${e.message}")
+        }
+    }
+
+    @JavascriptInterface
+    fun hubIzklopi() {
+        try {
+            com.safeer.mobile.browser.cast.HubStoritev.izklopi(dejavnost)
+            odziv("hub-tu", JSONObject(hubStanje()))
+        } catch (e: Throwable) {
+            napaka("hub_ni_ustavljen", "Huba ni bilo mogoce ustaviti: ${e.message}")
+        }
+    }
+
+    /** Naprave, ki cakajo na potrditev: ime in sestmestna koda, ki jo kazejo na svojem zaslonu. */
+    @JavascriptInterface
+    fun hubPrijave(): String = try {
+        val u = com.safeer.mobile.browser.cast.HubKrmilnik.usmerjevalnik
+        JSONArray().apply {
+            u?.cakajocePrijave()?.forEach { p ->
+                put(JSONObject().apply {
+                    put("id", p.pairId)
+                    put("ime", p.ime)
+                    put("koda", p.pin)
+                    put("naslov", p.naslov)
+                    put("starost", p.starostSekund)
+                })
+            }
+        }.toString()
+    } catch (e: Throwable) {
+        "[]"
+    }
+
+    @JavascriptInterface
+    fun hubPotrdi(idPrijave: String) {
+        val u = com.safeer.mobile.browser.cast.HubKrmilnik.usmerjevalnik
+        if (u == null) {
+            napaka("hub_ne_tece", "Hub ne tece.")
+            return
+        }
+        if (!u.potrdiPrijavo(idPrijave)) {
+            napaka("prijava_potekla", "Prijave ni vec ali pa je poteklo.")
+        }
+        odziv("hub-prijave", JSONArray(hubPrijave()))
+    }
+
+    @JavascriptInterface
+    fun hubZavrni(idPrijave: String) {
+        com.safeer.mobile.browser.cast.HubKrmilnik.usmerjevalnik?.zavrniPrijavo(idPrijave)
+        odziv("hub-prijave", JSONArray(hubPrijave()))
+    }
+
+    /** Naprave, ki jim je uporabnik ze dovolil. */
+    @JavascriptInterface
+    fun hubSeznanjene(): String = try {
+        val u = com.safeer.mobile.browser.cast.HubKrmilnik.usmerjevalnik
+        JSONArray().apply {
+            u?.seznanjeneNaprave()?.forEach { n ->
+                put(JSONObject().apply {
+                    put("id", n.deviceId)
+                    put("ime", n.ime)
+                    put("od", n.seznanjenaOb)
+                })
+            }
+        }.toString()
+    } catch (e: Throwable) {
+        "[]"
+    }
+
+    /** Odvzame dostop napravi in jo, ce je povezana, odklopi. */
+    @JavascriptInterface
+    fun hubPreklici(idNaprave: String) {
+        val u = com.safeer.mobile.browser.cast.HubKrmilnik.usmerjevalnik
+        if (u == null) {
+            napaka("hub_ne_tece", "Hub ne tece.")
+            return
+        }
+        u.prekliciNapravo(idNaprave)
+        odziv("hub-seznanjene", JSONArray(hubSeznanjene()))
+    }
+
+    /** Usmerjevalnik javi spremembe strani, da se nova prijava pokaze takoj. */
+    private fun pripniPoslusalce() {
+        val u = com.safeer.mobile.browser.cast.HubKrmilnik.usmerjevalnik ?: return
+        u.naSpremembePrijav = { odziv("hub-prijave", JSONArray(hubPrijave())) }
+        u.naSpremembeNaprav = {
+            odziv("hub-tu", JSONObject(com.safeer.mobile.browser.cast.HubKrmilnik.stanjeJson(dejavnost)))
+        }
+    }
+
     /** Ob zaprtju zaslona pospravi povezavo. */
     fun pospravi() {
         try { odjemalec?.disconnect() } catch (_: Throwable) {}
         odjemalec = null
+        // Hub namenoma tece naprej, ce ga je uporabnik prizgal: telefon je takrat sredisce
+        // za druge naprave tudi, ko ta zaslon ni odprt. Odklopimo samo poslusalca.
+        try {
+            val u = com.safeer.mobile.browser.cast.HubKrmilnik.usmerjevalnik
+            u?.naSpremembePrijav = null
+            u?.naSpremembeNaprav = null
+        } catch (e: Throwable) {
+            android.util.Log.w(TAG, "Poslusalcev ni bilo mogoce odkljuciti: ${e.message}")
+        }
     }
 }

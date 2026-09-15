@@ -22,6 +22,8 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <!-- Safeer Link: telefon lahko gosti povezavo za druge naprave v hisi -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
 
     <uses-feature android:name="android.hardware.touchscreen" android:required="true" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
@@ -87,6 +89,12 @@
             android:name="com.safeer.mobile.browser.MediaPlaybackService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
+
+        <!-- Safeer Link (Hub): tece, dokler ga uporabnik ne ugasne, tudi ko brskalnik ni odprt -->
+        <service
+            android:name="com.safeer.mobile.browser.cast.HubStoritev"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
 
         <provider
             android:name="com.safeer.mobile.browser.MobileFileProvider"

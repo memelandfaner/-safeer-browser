@@ -64,4 +64,7 @@
     <string name="cast_token_hint">Žeton Safeer Controla (neobvezno)</string>
     <string name="menu_safeer_link">Safeer Link</string>
     <string name="tab_reload_after_crash">Stran se je nepričakovano zaprla. Naloži znova</string>
+    <!-- Safeer Link: obvestilo storitve, ki gosti povezavo z drugimi napravami -->
+    <string name="hub_obvestilo_naslov">Safeer Link</string>
+    <string name="hub_obvestilo_besedilo">Ta telefon lahko sprejema strani, datoteke in glasbo z drugih tvojih naprav.</string>
 </resources>
