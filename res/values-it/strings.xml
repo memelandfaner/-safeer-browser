@@ -63,4 +63,5 @@
     <string name="default_browser_unchanged">Il browser predefinito non è stato modificato</string>
     <string name="default_browser_unavailable">Scegli il tuo browser nelle impostazioni delle app predefinite di Android</string>
     <string name="btn_close">Chiudi</string>
+    <string name="tab_reload_after_crash">La pagina si è chiusa inaspettatamente. Ricarica</string>
 </resources>

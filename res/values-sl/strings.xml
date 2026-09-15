@@ -63,4 +63,5 @@
     <string name="link_open_failed">Safeer Linka ni bilo mogoče odpreti.</string>
     <string name="cast_token_hint">Žeton Safeer Controla (neobvezno)</string>
     <string name="menu_safeer_link">Safeer Link</string>
+    <string name="tab_reload_after_crash">Stran se je nepričakovano zaprla. Naloži znova</string>
 </resources>

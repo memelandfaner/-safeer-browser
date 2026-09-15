@@ -110,11 +110,12 @@ class MainActivity : android.app.Activity() {
         // ⚙️ Naloži shranjene nastavitve iz PreferencesManager
         AdBlockEngine.isEnabled = PreferencesManager.isAdBlockEnabled(this)
         isDarkModeActive = PreferencesManager.isDarkModeEnabled(this)
+        val appContext = applicationContext
         AdBlockEngine.onAdBlocked = {
-            PreferencesManager.incrementAdsBlocked(this)
+            PreferencesManager.incrementAdsBlocked(appContext)
         }
         ThreatBlockEngine.onThreatBlocked = { _, _, _, _ ->
-            PreferencesManager.incrementThreatsBlocked(this)
+            PreferencesManager.incrementThreatsBlocked(appContext)
         }
 
         initViews()
@@ -192,9 +193,10 @@ class MainActivity : android.app.Activity() {
             }
         }
 
-        val finalUrl = targetUrl ?: if (isInitial) "file:///android_asset/brave_home.html" else null
+        val restored = isInitial && tabManager.restoreSession()
+        val finalUrl = targetUrl ?: if (isInitial && !restored) TabSessionCodec.HOME else null
         if (finalUrl != null) {
-            if (isInitial) {
+            if (isInitial && !restored) {
                 tabManager.createTab(this, finalUrl, true)
             } else {
                 // Keep the page the user was reading when another app opens a link.
@@ -286,14 +288,14 @@ class MainActivity : android.app.Activity() {
             MediaPlaybackService.start(this, mediaTitle(playing), playing = true)
             return
         }
-        tabManager.getActiveTab()?.webView?.onPause()
+        tabManager.getActiveTab()?.loadedWebView?.onPause()
     }
 
     override fun onResume() {
         super.onResume()
         inForeground = true
         MediaPlaybackService.stop(this)
-        tabManager.getActiveTab()?.webView?.onResume()
+        tabManager.getActiveTab()?.loadedWebView?.onResume()
     }
 
     private fun mediaTitle(tab: TabModel): String {
@@ -323,7 +325,17 @@ class MainActivity : android.app.Activity() {
     }
 
     override fun onStop() {
+        tabManager.saveSession()
         super.onStop()
+    }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        if (::tabManager.isInitialized && (level == android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW ||
+                level == android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL ||
+                level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)) {
+            tabManager.suspendInactiveTabs(memoryPressure = true)
+        }
     }
 
     override fun onDestroy() {
@@ -331,6 +343,7 @@ class MainActivity : android.app.Activity() {
         MediaPlaybackService.pauseHandler = null
         MediaPlaybackService.stop(this)
         DoHProxyEngine.stopServer()
+        if (::tabManager.isInitialized) tabManager.dispose()
         super.onDestroy()
     }
 
@@ -439,10 +452,16 @@ class MainActivity : android.app.Activity() {
         tabManager = TabManager(webViewContainer) { count, activeTab ->
             btnTabCount.text = count.toString()
             if (activeTab != null) {
-                activeTab.webView.isDarkMode = isDarkModeActive
-                attachTabListeners(activeTab)
-                updateOmniboxDisplay(activeTab.url, activeTab.webView.title)
+                updateOmniboxDisplay(activeTab.url, activeTab.title)
+                if (activeTab.loadedWebView == null) {
+                    tvSecurityLock.text = "⚠️"
+                    pageProgressBar.visibility = View.GONE
+                }
             }
+        }
+        tabManager.onViewCreated = { tab ->
+            tab.webView.isDarkMode = isDarkModeActive
+            attachTabListeners(tab)
         }
     }
 
@@ -462,6 +481,7 @@ class MainActivity : android.app.Activity() {
 
         wv.onUrlChanged = { newUrl ->
             tab.url = newUrl
+            tabManager.scheduleSave()
             if (tabManager.getActiveTab()?.id == tab.id) {
                 updateOmniboxDisplay(newUrl, wv.title)
             }
@@ -470,6 +490,7 @@ class MainActivity : android.app.Activity() {
         wv.onPageLoaded = { finalUrl, pageTitle ->
             tab.url = finalUrl
             tab.title = pageTitle
+            tabManager.scheduleSave()
             if (finalUrl.isNotEmpty() && !finalUrl.startsWith("about:", ignoreCase = true)) {
                 val cleanTitle = if (pageTitle.isNotEmpty()) pageTitle else finalUrl
                 repository.addHistory(cleanTitle, finalUrl)
@@ -478,6 +499,7 @@ class MainActivity : android.app.Activity() {
 
         wv.onTitleChanged = { title ->
             tab.title = title
+            tabManager.scheduleSave()
             if (tabManager.getActiveTab()?.id == tab.id) {
                 updateOmniboxDisplay(tab.url, title)
             }
@@ -1100,6 +1122,12 @@ class MainActivity : android.app.Activity() {
             pogled.addJavascriptInterface(most, "SafeerLink")
 
             pogled.webViewClient = object : android.webkit.WebViewClient() {
+                override fun onRenderProcessGone(view: android.webkit.WebView?, detail: android.webkit.RenderProcessGoneDetail?): Boolean {
+                    // This local dialog can share a renderer with browser tabs.
+                    okno.dismiss()
+                    return true
+                }
+
                 override fun shouldOverrideUrlLoading(
                     view: android.webkit.WebView?,
                     request: android.webkit.WebResourceRequest?
@@ -1117,6 +1145,7 @@ class MainActivity : android.app.Activity() {
 
             okno.setOnDismissListener {
                 try { most.pospravi() } catch (_: Exception) {}
+                (pogled.parent as? ViewGroup)?.removeView(pogled)
                 try { pogled.destroy() } catch (_: Exception) {}
                 linkOkno = null
                 linkMost = null
@@ -1273,6 +1302,7 @@ class MainActivity : android.app.Activity() {
             val nextState = !cbDesktop.isChecked
             cbDesktop.isChecked = nextState
             activeTab?.isDesktop = nextState
+            tabManager.scheduleSave()
             wv?.isDesktopMode = nextState
             wv?.reload()
             dialog.dismiss()
@@ -1306,7 +1336,7 @@ class MainActivity : android.app.Activity() {
             cbDark.isChecked = isDarkModeActive
             PreferencesManager.setDarkModeEnabled(this, isDarkModeActive)
             tabManager.getAllTabs().forEach { t ->
-                t.webView.applyDarkMode(isDarkModeActive)
+                t.loadedWebView?.applyDarkMode(isDarkModeActive)
             }
             Toast.makeText(
                 this,
@@ -1756,8 +1786,9 @@ class MainActivity : android.app.Activity() {
                     .setPositiveButton(I18n.t(this@MainActivity, "btn_clear")) { _, _ ->
                         android.webkit.CookieManager.getInstance().removeAllCookies(null)
                         android.webkit.WebStorage.getInstance().deleteAllData()
-                        tabManager.getAllTabs().forEach { it.webView.clearCache(true) }
+                        tabManager.getAllTabs().forEach { it.loadedWebView?.clearCache(true) }
                         repository.clearHistory()
+                        tabManager.closeAllTabs(this@MainActivity)
                         Toast.makeText(this@MainActivity, I18n.t(this@MainActivity, "toast_data_cleared"), Toast.LENGTH_SHORT).show()
                     }
                     .setNegativeButton(I18n.t(this@MainActivity, "btn_cancel"), null)
@@ -1768,7 +1799,8 @@ class MainActivity : android.app.Activity() {
 
         // 4. Info
         val tvInfo = TextView(this).apply {
-            text = "\nSafeer Mobile Browser v1.0.10 • Target SDK 36\nSafeer is a security layer, not a guarantee against all online threats."
+            val version = packageManager.getPackageInfo(packageName, 0).versionName
+            text = "\nSafeer Mobile Browser v$version • Target SDK 36\nSafeer is a security layer, not a guarantee against all online threats."
             textSize = 11f
             setTextColor(Color.parseColor("#64748b"))
             setPadding(0, 16, 0, 0)
@@ -1805,14 +1837,14 @@ class MainActivity : android.app.Activity() {
                 val newDark = cbDarkMode.isChecked
                 PreferencesManager.setDarkModeEnabled(this, newDark)
                 isDarkModeActive = newDark
-                tabManager.getAllTabs().forEach { it.webView.applyDarkMode(newDark) }
+                tabManager.getAllTabs().forEach { it.loadedWebView?.applyDarkMode(newDark) }
 
                 val zoomCheckedId = rgZoom.checkedRadioButtonId
                 val zoomCheckedRb = rgZoom.findViewById<RadioButton>(zoomCheckedId)
                 val zoomIdx = rgZoom.indexOfChild(zoomCheckedRb)
                 val selZoom = if (zoomIdx in zoomKeys.indices) zoomKeys[zoomIdx] else 100
                 PreferencesManager.setTextZoom(this, selZoom)
-                tabManager.getAllTabs().forEach { it.webView.settings.textZoom = selZoom }
+                tabManager.getAllTabs().forEach { it.loadedWebView?.settings?.textZoom = selZoom }
 
                 // 🎨 Tema
                 val themeCheckedId = rgTheme.checkedRadioButtonId
@@ -1828,28 +1860,28 @@ class MainActivity : android.app.Activity() {
                 val fontIdx = rgFont.indexOfChild(fontCheckedRb)
                 val selFont = if (fontIdx in fontKeys.indices) fontKeys[fontIdx] else "system"
                 PreferencesManager.setFontFamily(this, selFont)
-                tabManager.getAllTabs().forEach { it.webView.applyFontFamily(selFont) }
+                tabManager.getAllTabs().forEach { it.loadedWebView?.applyFontFamily(selFont) }
 
                 // 🦁 Brave način
                 val newBraveMode = cbBraveMode.isChecked
                 PreferencesManager.setBraveModeEnabled(this, newBraveMode)
                 tabManager.getAllTabs().forEach { tab ->
-                    val curUrl = tab.webView.url ?: ""
+                    val curUrl = tab.loadedWebView?.url ?: ""
                     if (curUrl.startsWith("file:///android_asset/brave_home.html")) {
-                        tab.webView.evaluateJavascript("if (window.setBraveMode) { window.setBraveMode($newBraveMode); }", null)
+                        tab.loadedWebView?.evaluateJavascript("if (window.setBraveMode) { window.setBraveMode($newBraveMode); }", null)
                     }
                 }
 
                 val newThirdParty = cbThirdPartyCookies.isChecked
                 PreferencesManager.setThirdPartyCookiesEnabled(this, newThirdParty)
                 tabManager.getAllTabs().forEach {
-                    android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(it.webView, newThirdParty)
+                    it.loadedWebView?.let { view -> android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(view, newThirdParty) }
                 }
 
                 val newJs = cbJs.isChecked
                 PreferencesManager.setJavaScriptEnabled(this, newJs)
                 tabManager.getAllTabs().forEach {
-                    it.webView.settings.javaScriptEnabled = newJs
+                    it.loadedWebView?.settings?.javaScriptEnabled = newJs
                 }
 
                 PreferencesManager.setAdguardProtectionEnabled(this, cbAdguard.isChecked)
@@ -1911,6 +1943,7 @@ class MainActivity : android.app.Activity() {
                 """
                 Varnostni ščit varuje vašo napravo pred nevarnimi C2 strežniki in zlonamerno kodo:
                 
+                Statistika v tem zagonu:
                 • Blokiranih C2 Botnet strežnikov: $c2
                 • Blokiranih Malware prenosov: $malware
                 • Blokiranih Phishing strani: $phishing
@@ -1923,9 +1956,14 @@ class MainActivity : android.app.Activity() {
             )
             .setPositiveButton("Posodobi sezname") { _, _ ->
                 Toast.makeText(this, "🔄 Posodabljam varnostne sezname...", Toast.LENGTH_SHORT).show()
-                ThreatFeedsUpdater.updateFeedsAsync(this) { added ->
+                ThreatFeedsUpdater.updateFeedsAsync(this) { result ->
                     runOnUiThread {
-                        Toast.makeText(this@MainActivity, "✅ Seznami preverjeni: $added varnostnih pravil v uporabi", Toast.LENGTH_LONG).show()
+                        if (!isFinishing && !isDestroyed) {
+                            val message = if (result.successful) "Seznami uspešno preverjeni: ${result.totalRules} varnostnih pravil v uporabi"
+                                else "Posodobitev ni v celoti uspela. Prejšnji veljavni seznami ostajajo v uporabi."
+                            Toast.makeText(this@MainActivity, message, Toast.LENGTH_LONG).show()
+                            showThreatStatsDialog()
+                        }
                     }
                 }
                 SignedThreatIntel.requestUpdate { installed ->

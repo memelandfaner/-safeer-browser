@@ -57,9 +57,11 @@ fun main() {
     fun blocked(url: String, page: String? = "https://news.example/story", type: ResourceType? = null): Boolean =
         set.decide(request(url, page, type ?: ResourceType.guess(url, null, false)))?.block == true
 
-    test("compiles EasyList syntax, skips comments, cosmetic rules and unsupported options") {
+    test("compiles network and cosmetic rules, skips comments and unsupported options") {
         check(set.size == 18) { "size ${set.size}" }
-        check(set.skipped == 5) { "skipped ${set.skipped}" }
+        check(set.skipped == 3) { "skipped ${set.skipped}" } // redirect, csp and unknown option
+        check(set.cosmetic.size == 2) { "cosmetic rules were discarded" }
+        check(set.cosmetic.selectorsFor("example.com").isEmpty()) { "cosmetic exception must cancel the hide rule" }
         check(FilterListEngine.parse("! comment") == null && FilterListEngine.parse("site.example##.ad") == null)
         check(FilterListEngine.parse("||x.example^\$popup") == null) { "popup rules are not navigation blocks" }
     }

@@ -4,6 +4,12 @@ TEST_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$TEST_DIR")"
 SOURCE_DIR="$PROJECT_DIR/src/main/kotlin/com/safeer/mobile/browser"
 KOTLINC="${KOTLINC:-$PROJECT_DIR/../streamN-TV2/android_tv/.tools/kotlinc/bin/kotlinc}"
+if [ -n "${JAVA_HOME:-}" ]; then export PATH="$JAVA_HOME/bin:$PATH"; fi
+JAVA_MAJOR="$(java -XshowSettings:properties -version 2>&1 | awk '/java.specification.version =/ {print $3}')"
+if ! [[ "$JAVA_MAJOR" =~ ^[0-9]+$ ]] || [ "$JAVA_MAJOR" -lt 17 ]; then
+    echo "NAPAKA: testi zahtevajo JDK 17 ali novejši (Ed25519). Nastavite JAVA_HOME."
+    exit 1
+fi
 TEST_OUTPUT="$(mktemp -d /tmp/safeer-tests.XXXXXX)"
 trap 'rm -rf "$TEST_OUTPUT"' EXIT
 "$KOTLINC" "$SOURCE_DIR/UrlSanitizer.kt" "$SOURCE_DIR/AuthenticationPages.kt" "$TEST_DIR/LoginPolicyTest.kt" -include-runtime -d "$TEST_OUTPUT/login.jar"
@@ -28,3 +34,8 @@ DNS_CLASSPATH="$ANDROID_JAR"
 for lib in "$PROJECT_DIR"/libs/*.jar; do DNS_CLASSPATH="$DNS_CLASSPATH:$lib"; done
 "$KOTLINC" -cp "$DNS_CLASSPATH" "$SOURCE_DIR/DoHProxyEngine.kt" "$SOURCE_DIR/LocalDnsProxy.kt" "$SOURCE_DIR/Http2DnsTransport.kt" "$TEST_DIR"/dns-stubs/*.kt "$TEST_DIR/DoHResolverTest.kt" -include-runtime -d "$TEST_OUTPUT/dns.jar"
 java -cp "$TEST_OUTPUT/dns.jar:$DNS_CLASSPATH" com.safeer.mobile.browser.DoHResolverTestKt
+
+"$KOTLINC" "$SOURCE_DIR/TabSession.kt" "$TEST_DIR/TabSessionTest.kt" -include-runtime -d "$TEST_OUTPUT/session.jar"
+java -jar "$TEST_OUTPUT/session.jar"
+"$KOTLINC" "$TEST_DIR"/browser-stubs/*.kt "$SOURCE_DIR/PreferencesManager.kt" "$SOURCE_DIR/AuthenticationPages.kt" "$SOURCE_DIR/TabSession.kt" "$SOURCE_DIR/TabManager.kt" "$TEST_DIR/BrowserStateTest.kt" -include-runtime -d "$TEST_OUTPUT/browser-state.jar"
+java -jar "$TEST_OUTPUT/browser-state.jar"

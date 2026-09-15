@@ -63,4 +63,5 @@
     <string name="proxy_failed">Secure connections could not be enabled. Update Android System WebView or check your network settings.</string>
     <string name="link_open_failed">Safeer Link could not be opened.</string>
     <string name="cast_token_hint">Safeer Control token (optional)</string>
+    <string name="tab_reload_after_crash">The page closed unexpectedly. Reload</string>
 </resources>

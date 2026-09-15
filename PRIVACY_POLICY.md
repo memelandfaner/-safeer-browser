@@ -14,6 +14,10 @@ Safeer Browser je zasnovan z načelom popolne ničelne telemetrije (Zero-Telemet
 
 ---
 
+## 1a. Lokalna zgodovina in obnova zavihkov
+
+Zgodovina, zaznamki in nastavitve se hranijo v zasebni shrambi aplikacije. Za obnovo po ponovnem zagonu se od različice 1.0.19 lokalno shranijo še naslovi in imena največ 200 odprtih zavihkov, njihov vrstni red, izbrani zavihek in namizni način. Ta zapis ne vsebuje vrednosti obrazcev, vsebine strani ali teles zahtevkov POST; spletni naslovi lahko vsebujejo parametre poizvedbe. Aplikacija tega zapisa samodejno ne pošilja na strežnik. Brisanje podatkov brskanja zapre zavihke in izbriše prejšnjo shranjeno sejo.
+
 ## 2. 🛡️ Lokalno Procesiranje Varnostnih Filtrov
 Vsa zaščita deluje izključno lokalno na vaši napravi:
 - **Threat Shield**: Preverjanje domen zoper Botnet C2, zlonamerno kodo (Malware) in spletno ribarjenje (Phishing) poteka v lokalnem pomnilniku prek hitrega drevesa pripon (*Domain Suffix Trie*). Nobena poizvedba o obiskani domeni se ne pošilja v oblak.
@@ -23,12 +27,14 @@ Vsa zaščita deluje izključno lokalno na vaši napravi:
 ---
 
 ## 3. 🌐 Varnostni Seznami Tretjih Oseb (Threat Intelligence Feeds)
-Za zaznavanje novih spletnih groženj brskalnik občasno (največ enkrat na 24 ur) prenese javno dostopne varnostne sezname neposredno prek šifrirane HTTPS povezave iz zaupanja vrednih virov:
+Za zaznavanje novih spletnih groženj brskalnik med delovanjem praviloma vsakih 6 ur preveri javno dostopne varnostne sezname neposredno prek šifrirane HTTPS povezave iz zaupanja vrednih virov:
 - **abuse.ch** (ThreatFox IOC, URLhaus)
 - **Phishing Army Extended**
 - **HaGeZi DNS Blocklists** (Threat Intelligence Feeds – mini, Fake) prek omrežja jsDelivr
 - **SI-CERT** (seznam potrjenih phishing domen, www.cert.si)
 - **EasyList** (pravila za blokiranje oglasov, easylist.to)
+
+Ob prvem zagonu se najprej naložijo shranjeni seznami, omrežno preverjanje pa se začne z zamikom. Po napaki se preverjanje ponovi približno čez eno uro; uporabnik ga lahko sproži tudi ročno. Čas zadnjega uspešnega preverjanja in napaka za vsak vir se shranita lokalno.
 
 Ob prenosu se izračuna kriptografska kontrolna vsota SHA-256 za preverjanje celovitosti podatkov. Ti seznami ne vsebujejo nobenih osebnih podatkov in se uporabljajo izključno za posodobitev lokalnega registra groženj.
 

@@ -241,6 +241,31 @@ fun main() {
         check(server.conditional.get() == conditionalBefore + 1) { "sent a validator for the damaged list" }
         check(a.lists.size == 2 && !a.lists[0].entries.contains("injected.example"))
     }
+    test("per-source freshness: 304 succeeds, errors keep last success, restart preserves status") {
+        val statusDir = Files.createTempDirectory("safeer-list-status").toFile()
+        var now = 1000L
+        val a = agent(statusDir, server, clock = { now })
+        a.refresh(force = true)
+        check(a.statuses.all { it.lastSuccessEpochSeconds == 1000L && it.error.isEmpty() })
+        now = 2000L
+        a.refresh(force = true)
+        check(a.statuses.all { it.lastSuccessEpochSeconds == 2000L }) { "304 did not update freshness" }
+        server.brokenHosts = true
+        now = 3000L
+        a.refresh(force = true)
+        val failed = a.statuses.first { it.sourceId == "urlhaus" }
+        check(failed.lastAttemptEpochSeconds == 3000L && failed.lastSuccessEpochSeconds == 2000L && failed.error.isNotEmpty())
+        check(a.statuses.first { it.sourceId == "phishing-army" }.lastSuccessEpochSeconds == 3000L)
+        val b = agent(statusDir, server)
+        b.loadSaved()
+        check(b.statuses.first { it.sourceId == "urlhaus" } == failed)
+        server.brokenHosts = false
+        now = 4000L
+        a.refresh(force = true)
+        check(a.statuses.all { it.lastSuccessEpochSeconds == 4000L && it.error.isEmpty() })
+        check(!a.isRefreshing)
+        statusDir.deleteRecursively()
+    }
     test("server offline keeps every list") {
         server.stop()
         val a = agent(dir, server)

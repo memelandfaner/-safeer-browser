@@ -1,6 +1,6 @@
 # Safeer Mobile regression checks
 
-Run `./tests/run_tests.sh` from the project. The transport tests use local sockets; they need permission to bind loopback ports. Set KOTLINC and ANDROID_JAR to override the local Android toolchain paths.
+Use **JDK 17 or newer** (the Ed25519 reference checks need it); set `JAVA_HOME` to select it. Run `./tests/run_tests.sh` from the project. The transport tests use local sockets; they need permission to bind loopback ports. Set KOTLINC and ANDROID_JAR to override the local Android toolchain paths.
 
 The tests exercise:
 
@@ -22,3 +22,9 @@ Phone UI checks passed: BBC and RTV with Quad9 enabled, Google search, Wikipedia
 BBC cosmetic follow-up: installed signed APK on the test phone and visually confirmed the reserved banner above the BBC header disappears while the header, story image/text and cookie controls remain visible. Screenshot: `evidence/bbc-collapsed-ad-slots-1.0.5.png`. General rules cover explicitly marked ad wrappers; this does not establish coverage of every website.
 
 YouTube live checks: Faded → Alone mix, persistent pause at 0:34, resume, fullscreen/back, search for Get Lucky and active unmuted AAudio playback. Get Lucky content was visible 2.48 seconds after its result was clicked (one sample, not a benchmark). Removed failing bare-googlevideo.com preconnect after independently reproducing certificate hostname mismatch. Final APK replay checked after reinstall. No visible ads or player errors observed in the sampled tracks; this does not guarantee future YouTube ad coverage.
+
+Browser state checks cover session serialization, invalid/unsafe URLs, lazy restore, tab removal, renderer recovery, background audio, edited forms, memory pressure and concurrent persistent counters. The tab lifecycle checks use a simulated Android environment; rendering still needs device verification.
+
+## Isolated Android lifecycle test
+
+After `tools/gradnja-ci.sh`, run `JAVA_HOME=/path/to/jdk17 python3 tests/run_android_lifecycle.py --device SERIAL` with the chosen **test phone** connected. The runner refuses to replace an existing review/test package, installs separate package IDs, serves account-free local fixture pages, and removes the test apps and port forwarding afterward. It verifies the actual WebView bridge counter, strict mixed-content setting, form/audio protection, save/restore, lazy activity restart and recovery from `chrome://crash`. Results are saved to `build-ci/android-lifecycle-results.txt`. The ordinary installed browser is not modified.

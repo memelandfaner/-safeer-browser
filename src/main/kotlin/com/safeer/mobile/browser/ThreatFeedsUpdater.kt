@@ -78,16 +78,40 @@ object ThreatFeedsUpdater {
         listAgent.start()
     }
 
-    /** Takojšnje preverjanje (gumb "Posodobi sezname"); [onComplete] dobi število pravil v uporabi. */
-    fun updateFeedsAsync(context: Context, force: Boolean = true, onComplete: ((totalRules: Int) -> Unit)? = null) {
+    data class UpdateResult(val totalRules: Int, val failedSources: Int, val error: String) {
+        val successful: Boolean get() = failedSources == 0 && error.isEmpty()
+    }
+
+    /** Reports partial failure while keeping every previously valid list in use. */
+    fun updateFeedsAsync(context: Context, onComplete: ((UpdateResult) -> Unit)? = null) {
         start(context)
-        val requested = agent?.requestUpdate { onComplete?.invoke(ruleCount) } ?: false
-        if (!requested) onComplete?.invoke(ruleCount)
+        val current = agent
+        val requested = current?.requestUpdate {
+            val failed = current.statuses.count { it.error.isNotEmpty() || it.lastSuccessEpochSeconds == 0L }
+            onComplete?.invoke(UpdateResult(ruleCount, failed, current.lastError))
+        } ?: false
+        if (!requested) onComplete?.invoke(UpdateResult(ruleCount, SOURCES.size, "Preverjanja ni mogoče zagnati"))
     }
 
     fun statusLine(): String {
         val lists = agent?.lists.orEmpty()
-        if (lists.isEmpty()) return "Seznami groženj: prvi prenos poteka v ozadju"
-        return "Seznami groženj: ${lists.filter { !it.source.raw }.sumOf { it.entries.size }} pravil (${lists.size}/${SOURCES.size} virov); EasyList: $filterRuleCount pravil, ${AdBlockEngine.cosmeticRuleCount} za skrivanje"
+        val formatter = java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.SHORT, java.text.DateFormat.SHORT)
+        val now = System.currentTimeMillis() / 1000
+        val statuses = agent?.statuses.orEmpty().associateBy { it.sourceId }
+        val details = SOURCES.joinToString("\n\n") { source ->
+            val status = statuses[source.id]
+            val success = status?.lastSuccessEpochSeconds ?: 0
+            val last = if (success > 0) formatter.format(java.util.Date(success * 1000)) else "še nikoli"
+            val state = when {
+                !status?.error.isNullOrEmpty() -> "Zadnji poskus ni uspel: ${status?.error}"
+                success == 0L -> "Čaka na prvi uspešen prenos"
+                now - success > 24 * 3600 -> "Seznam ni bil uspešno preverjen več kot 24 ur"
+                else -> "Preverjeno"
+            }
+            val count = lists.find { it.source.id == source.id }?.entries?.size ?: 0
+            "${source.name}: $count pravil\nZadnje uspešno preverjanje: $last\n$state"
+        }
+        val running = if (agent?.isRefreshing == true) "\nPreverjanje poteka …" else ""
+        return "Seznami: ${lists.size}/${SOURCES.size} virov; EasyList: $filterRuleCount pravil, ${AdBlockEngine.cosmeticRuleCount} za skrivanje$running\n\n$details"
     }
 }

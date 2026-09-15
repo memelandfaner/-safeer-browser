@@ -62,6 +62,13 @@ data class PlainListSource(
 
 class PlainList(val source: PlainListSource, val entries: List<String>, val fetchedAtEpochSeconds: Long)
 
+data class ListStatus(
+    val sourceId: String,
+    val lastAttemptEpochSeconds: Long = 0,
+    val lastSuccessEpochSeconds: Long = 0,
+    val error: String = "",
+)
+
 class ListRejectedException(message: String) : IOException(message)
 
 data class ConditionalResponse(val notModified: Boolean, val body: ByteArray?, val etag: String?, val lastModified: String?)
@@ -192,6 +199,11 @@ class ThreatListAgent(
     @Volatile var lastError: String = ""
         private set
 
+    @Volatile var statuses: List<ListStatus> = sources.map { ListStatus(it.id) }
+        private set
+    @Volatile var isRefreshing: Boolean = false
+        private set
+
     private class Meta(val sha256: String, val count: Int, val fetchedAt: Long, val etag: String?, val lastModified: String?)
 
     private val validators = HashMap<String, Meta>()
@@ -229,7 +241,10 @@ class ThreatListAgent(
     fun requestUpdate(callback: ((changedLists: Int) -> Unit)? = null): Boolean {
         val service = executor ?: return false
         service.execute {
-            val changed = try { refresh(force = true) } catch (e: Exception) { 0 }
+            val changed = try { refresh(force = true) } catch (e: Exception) {
+                lastError = e.message ?: e.javaClass.simpleName
+                0
+            }
             try { callback?.invoke(changed) } catch (e: Exception) { /* ignore */ }
         }
         return true
@@ -254,6 +269,12 @@ class ThreatListAgent(
             }
         }
         lists = loaded
+        statuses = sources.map { source ->
+            val old = readStatus(source.id)
+            val saved = loaded.find { it.source.id == source.id }
+            if (saved != null) old ?: ListStatus(source.id, lastSuccessEpochSeconds = saved.fetchedAtEpochSeconds)
+            else (old ?: ListStatus(source.id)).copy(error = "No valid saved list")
+        }
         loaded
     }
 
@@ -261,47 +282,73 @@ class ThreatListAgent(
     fun refresh(force: Boolean = false): Int = synchronized(lock) {
         val now = clock()
         if (!force && now - lastCheck() in 0 until minCheckIntervalSeconds && lists.size == sources.size) return 0
-        val current = lists.associateBy { it.source.id }.toMutableMap()
-        val errors = ArrayList<String>()
-        var changed = 0
-        for (source in sources) {
-            val known = validators[source.id]?.takeIf { current.containsKey(source.id) }
-            try {
-                val response = fetcher.fetch(source.url, source.maxBytes, known?.etag, known?.lastModified)
-                if (response.notModified) {
-                    if (known == null) throw IOException("304 without a saved list")
-                    continue
-                }
-                val entries = PlainListParser.parse(response.body ?: throw IOException("empty body"), source)
-                val bytes = entries.joinToString("\n").toByteArray(Charsets.UTF_8)
-                val meta = Meta(sha256(bytes), entries.size, now, response.etag?.take(200), response.lastModified?.take(100))
-                if (known != null && known.sha256 == meta.sha256) {
-                    writeMeta(source.id, meta) // same content, new validators
-                    validators[source.id] = meta
-                    continue
-                }
-                ensureDirectory()
-                atomicWrite(listFile(source.id), bytes)
-                writeMeta(source.id, meta)
-                validators[source.id] = meta
-                current[source.id] = PlainList(source, entries, now)
-                changed++
-            } catch (e: Exception) {
-                errors.add("${source.id}: ${e.javaClass.simpleName}: ${e.message}")
-            } catch (e: OutOfMemoryError) {
-                errors.add("${source.id}: out of memory")
-            }
-        }
-        lastError = errors.joinToString("; ")
+        isRefreshing = true
         try {
-            ensureDirectory()
-            atomicWrite(stateFile, "lastCheck=$now\n".toByteArray(Charsets.US_ASCII))
-        } catch (e: IOException) { /* throttle is best effort */ }
-        if (changed > 0) {
-            lists = sources.mapNotNull { current[it.id] }
-            notifyLists()
-        }
-        changed
+            val current = lists.associateBy { it.source.id }.toMutableMap()
+            val errors = ArrayList<String>()
+            var changed = 0
+            for (source in sources) {
+                val known = validators[source.id]?.takeIf { current.containsKey(source.id) }
+                val previous = statuses.find { it.sourceId == source.id } ?: ListStatus(source.id)
+                var failure = ""
+                try {
+                    val response = fetcher.fetch(source.url, source.maxBytes, known?.etag, known?.lastModified)
+                    if (response.notModified) {
+                        if (known == null) throw IOException("304 without a saved list")
+                        continue
+                    }
+                    val entries = PlainListParser.parse(response.body ?: throw IOException("empty body"), source)
+                    val bytes = entries.joinToString("\n").toByteArray(Charsets.UTF_8)
+                    val meta = Meta(sha256(bytes), entries.size, now, response.etag?.take(200), response.lastModified?.take(100))
+                    if (known != null && known.sha256 == meta.sha256) {
+                        writeMeta(source.id, meta) // same content, new validators
+                        validators[source.id] = meta
+                        continue
+                    }
+                    ensureDirectory()
+                    atomicWrite(listFile(source.id), bytes)
+                    writeMeta(source.id, meta)
+                    validators[source.id] = meta
+                    current[source.id] = PlainList(source, entries, now)
+                    changed++
+                } catch (e: Exception) {
+                    failure = "${e.javaClass.simpleName}: ${e.message}".take(240)
+                    errors.add("${source.id}: $failure")
+                } catch (e: OutOfMemoryError) {
+                    failure = "Out of memory"
+                    errors.add("${source.id}: $failure")
+                } finally {
+                    // 304 is a successful freshness check too; never advance success after an error.
+                    val status = ListStatus(source.id, now,
+                        if (failure.isEmpty()) now else previous.lastSuccessEpochSeconds, failure)
+                    statuses = statuses.map { if (it.sourceId == source.id) status else it }
+                    try { writeStatus(status) } catch (_: IOException) { /* status storage is best effort */ }
+                }
+            }
+            lastError = errors.joinToString("; ")
+            try {
+                ensureDirectory()
+                atomicWrite(stateFile, "lastCheck=$now\n".toByteArray(Charsets.US_ASCII))
+            } catch (e: IOException) { /* throttle is best effort */ }
+            if (changed > 0) {
+                lists = sources.mapNotNull { current[it.id] }
+                notifyLists()
+            }
+            changed
+        } finally { isRefreshing = false }
+    }
+
+    private fun readStatus(id: String): ListStatus? = try {
+        val values = File(directory, "$id.status").readLines().filter { '=' in it }
+            .associate { it.substringBefore('=') to it.substringAfter('=') }
+        ListStatus(id, values["attempt"]?.toLong() ?: 0, values["success"]?.toLong() ?: 0, values["error"].orEmpty())
+    } catch (_: Exception) { null }
+
+    private fun writeStatus(status: ListStatus) {
+        ensureDirectory()
+        val error = status.error.replace("\n", " ").replace("\r", " ").take(240)
+        atomicWrite(File(directory, "${status.sourceId}.status"),
+            "attempt=${status.lastAttemptEpochSeconds}\nsuccess=${status.lastSuccessEpochSeconds}\nerror=$error\n".toByteArray(Charsets.UTF_8))
     }
 
     fun lastCheck(): Long = try {

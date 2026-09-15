@@ -75,6 +75,10 @@ class ChromiumEngineView @JvmOverloads constructor(
     var isPlayingAudio: Boolean = false
     var onAudioStateChanged: ((Boolean) -> Unit)? = null
 
+    var onRendererGone: (() -> Unit)? = null
+    @Volatile var hasEditedForm: Boolean = false
+        private set
+
     private var customView: View? = null
     private var customViewCallback: WebChromeClient.CustomViewCallback? = null
 
@@ -139,7 +143,7 @@ class ChromiumEngineView @JvmOverloads constructor(
             allowFileAccess = false
             allowContentAccess = false
             mediaPlaybackRequiresUserGesture = false
-            mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+            mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
             setSupportMultipleWindows(true)
             javaScriptCanOpenWindowsAutomatically = true
             
@@ -171,13 +175,9 @@ class ChromiumEngineView @JvmOverloads constructor(
 
         @android.webkit.JavascriptInterface
         fun getStats(): String {
-            val sessionAds = AdBlockEngine.blockedAdsCount.get().toLong()
-            val savedAds = PreferencesManager.getTotalAdsBlocked(context)
-            val totalAds = savedAds + sessionAds
-
-            val sessionThreats = ThreatBlockEngine.totalBlockedThreats.get().toLong()
-            val savedThreats = PreferencesManager.getTotalThreatsBlocked(context)
-            val totalThreats = savedThreats + sessionThreats
+            // Each block is already persisted by the engine callback.
+            val totalAds = PreferencesManager.getTotalAdsBlocked(context)
+            val totalThreats = PreferencesManager.getTotalThreatsBlocked(context)
 
             val totalSavedKb = (totalAds * 45L) + (totalThreats * 120L)
             val dataMb = if (totalSavedKb >= 1024) {
@@ -239,6 +239,11 @@ class ChromiumEngineView @JvmOverloads constructor(
             } else {
                 webView.post(runner)
             }
+        }
+
+        @android.webkit.JavascriptInterface
+        fun markFormEdited() {
+            (webView as? ChromiumEngineView)?.hasEditedForm = true
         }
 
         @android.webkit.JavascriptInterface
@@ -725,6 +730,7 @@ class ChromiumEngineView @JvmOverloads constructor(
 
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
+                hasEditedForm = false
                 bankCheckGeneration++ // prekliči preverjanje prejšnje strani
                 url?.let { interceptPageUrl = it }
                 url?.let {
@@ -733,6 +739,7 @@ class ChromiumEngineView @JvmOverloads constructor(
                     onSecurityChanged?.invoke(it.startsWith("https://", ignoreCase = true))
                     view?.let { wv ->
                         UserScriptManager.injectEarlyScript(wv, isDesktopMode)
+                        installFormProtection(wv)
                     }
                 }
             }
@@ -748,6 +755,7 @@ class ChromiumEngineView @JvmOverloads constructor(
                     if (it != "safeer://offline") onPageLoaded?.invoke(it, pageTitle)
                     view?.let { wv ->
                         UserScriptManager.injectOnPageFinished(wv, isDarkMode, isDesktopMode)
+                        installFormProtection(wv)
                     }
                 }
             }
@@ -760,6 +768,16 @@ class ChromiumEngineView @JvmOverloads constructor(
                     onUrlChanged?.invoke(visibleUrl(it))
                     onSecurityChanged?.invoke(it.startsWith("https://", ignoreCase = true))
                 }
+            }
+
+            override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {
+                // Android calls this for every WebView that shared the dead renderer.
+                // The manager removes and destroys this exact view; never reuse it.
+                val handler = onRendererGone ?: return false
+                bankCheckGeneration++
+                onSecurityChanged?.invoke(false)
+                handler()
+                return true
             }
 
             override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
@@ -808,6 +826,7 @@ class ChromiumEngineView @JvmOverloads constructor(
             wv.evaluateJavascript(com.safeer.threatfeed.BankGuard.PAGE_SCRIPT) { json ->
                 if (generation != bankCheckGeneration || !sameHost(wv.url, host)) return@evaluateJavascript
                 val match = ThreatBlockEngine.checkFakeBankPage(url, json) ?: return@evaluateJavascript
+                hasEditedForm = false
                 bankCheckGeneration++ // eno opozorilo na stran
                 ThreatBlockEngine.recordBlock(match)
                 ThreatBlockEngine.onThreatBlocked?.invoke(match.matchedDomain, match.category ?: "", match.sourceFeed ?: "", true)
@@ -1015,6 +1034,35 @@ class ChromiumEngineView @JvmOverloads constructor(
         </body>
         </html>
         """.trimIndent()
+    }
+
+    fun canSuspendSafely(callback: (Boolean) -> Unit) {
+        if (!settings.javaScriptEnabled || hasEditedForm) { callback(false); return }
+        evaluateJavascript("""
+            (function(){
+                // Cross-origin frames may contain music or edited forms that the top page cannot inspect.
+                if(document.querySelector('iframe,frame'))return false;
+                if(Array.from(document.querySelectorAll('video,audio')).some(function(m){return !m.paused&&!m.ended;}))return false;
+                if(document.querySelector('[contenteditable="true"]'))return false;
+                return !Array.from(document.querySelectorAll('input,textarea,select')).some(function(e){
+                    if(e.tagName==='SELECT')return Array.from(e.options).some(function(o){return o.selected!==o.defaultSelected;});
+                    if(e.type==='checkbox'||e.type==='radio')return e.checked!==e.defaultChecked;
+                    return e.value!==e.defaultValue;
+                });
+            })();
+        """.trimIndent()) { result -> callback(result == "true") }
+    }
+
+    private fun installFormProtection(view: WebView) {
+        view.evaluateJavascript("""
+            (function(){
+                if(window.__safeerFormProtection)return;
+                window.__safeerFormProtection=true;
+                document.addEventListener('input',function(){
+                    if(window.SafeerBridge)SafeerBridge.markFormEdited();
+                },true);
+            })();
+        """.trimIndent(), null)
     }
 
     fun isFullscreenVideoActive(): Boolean = customView != null

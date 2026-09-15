@@ -63,4 +63,5 @@
     <string name="default_browser_unchanged">Standardbrowser wurde nicht geändert</string>
     <string name="default_browser_unavailable">Wählen Sie Ihren Browser in den Android-Einstellungen für Standard-Apps</string>
     <string name="btn_close">Schließen</string>
+    <string name="tab_reload_after_crash">Die Seite wurde unerwartet geschlossen. Neu laden</string>
 </resources>

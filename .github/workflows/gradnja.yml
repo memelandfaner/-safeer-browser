@@ -45,6 +45,11 @@ jobs:
           KOTLINC: /tmp/kotlinc/bin/kotlinc
         run: bash tools/preveri-motor.sh
 
+      - name: Celotni regresijski testi (DNS, prijave, podpisi, seznami in zavihki)
+        env:
+          KOTLINC: /tmp/kotlinc/bin/kotlinc
+        run: ANDROID_JAR="$ANDROID_HOME/platforms/android-36/android.jar" bash tests/run_tests.sh
+
       - name: Nepodpisan APK (brez kljuca)
         env:
           KOTLINC: /tmp/kotlinc/bin/kotlinc

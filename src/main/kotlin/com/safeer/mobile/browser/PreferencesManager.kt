@@ -164,6 +164,7 @@ object PreferencesManager {
         return getPrefs(context).getLong(KEY_TOTAL_ADS_BLOCKED, 0L)
     }
 
+    @Synchronized
     fun incrementAdsBlocked(context: Context, count: Long = 1L) {
         val current = getTotalAdsBlocked(context)
         getPrefs(context).edit().putLong(KEY_TOTAL_ADS_BLOCKED, current + count).apply()
@@ -173,6 +174,7 @@ object PreferencesManager {
         return getPrefs(context).getLong(KEY_TOTAL_THREATS_BLOCKED, 0L)
     }
 
+    @Synchronized
     fun incrementThreatsBlocked(context: Context, count: Long = 1L) {
         val current = getTotalThreatsBlocked(context)
         getPrefs(context).edit().putLong(KEY_TOTAL_THREATS_BLOCKED, current + count).apply()

@@ -1,8 +1,10 @@
 # 🛡️ Safeer Browser (Mobile Security Edition)
 
-### **Safeer Browser v1.0.4 — Stable Release**
+### **Safeer Browser v1.0.19 — izvorna koda**
 *Open-source Android browser with local malware, phishing, C2, tracker protection and Instant YouTube Music Engine.*
-*Novosti v1.0.4: Instant YouTube Music Engine (takojšnji zagon predvajanja brez čakanja, odprava telemetričnih zamikov, optimizacija prenosa za 85 % manj porabe podatkov pri 100 % zvočni kakovosti), hitra gumba za osvežitev (🔄) in priljubljene (⭐) na orodni vrstici ter polna podpora za Android 16 (Edge-to-Edge).*
+*Novosti v1.0.19: stroga zaščita mešanih vsebin na HTTPS, pravilna statistika blokad, obnova odprtih zavihkov, uspavanje neaktivnih strani in prikaz uspešnosti posodabljanja seznamov.*
+
+Različica nameščenega APK je navedena v nastavitvah aplikacije. Spremembe izvorne kode same po sebi ne posodobijo že objavljenih APK datotek. [Podrobnosti in omejitve različice 1.0.19](RELEASE_NOTES_1.0.19.md).
 
 🌐 **Uradna spletna stran & predstavitveni portal:** [https://memelandfaner.github.io/-safeer-browser/](https://memelandfaner.github.io/-safeer-browser/)
 
@@ -80,7 +82,7 @@
 
 ### 6. 🎨 Vgrajeno Kozmetično Filtriranje & Optimizacija Medijev
 - Vgrajena CSS pravila za skrivanje oglasnih elementov (Element Hiding Rules po vzoru EasyList selektorjev), ki brez zunanjih odvisnosti odstranijo prazne oglasne okvirje (`.adsbygoogle`, `iframe[src*="doubleclick"]` ipd.).
-- Baterijsko optimiziran cikel: aplikacija ne uporablja agresivnih WakeLock zaklepov in spoštuje sistemski življenjski cikel Android WebView.
+- Neaktivni zavihki se po 10 minutah lahko uspavajo; aktivna stran, zaznano predvajanje, urejeni obrazci in prijavne strani ostanejo naloženi. Ob pritisku se zavihek obnovi.
 - Brezkompromisen varnostni način `MIXED_CONTENT_NEVER_ALLOW`, ki onemogoča kakršnokoli nalaganje nešifriranih elementov na zaščitenih spletnih straneh.
 
 ### 7. ⚙️ Uporabniške Nastavitve, Persistenca & Podpora za Intente (v1.1)
@@ -134,6 +136,12 @@ adb install -r Safeer-Browser.apk
 
 ```bash
 ./build_mobile_apk.sh
+```
+
+Regresijski testi zahtevajo **JDK 17 ali novejši**, Kotlin in Android SDK. `JAVA_HOME`, `KOTLINC` in `ANDROID_JAR` omogočajo izbiro orodij. Celotni paket se izvaja tudi v GitHub Actions:
+
+```bash
+bash tests/run_tests.sh
 ```
 
 Skripta samostojno prevede vire z AAPT2, prevede Kotlin kodo s `kotlinc`, generira DEX z `D8`, podpiše paket z `uber-apk-signer` ter samodejno osveži kontrolne vsote `SHA256SUMS`. Lokacijo orodij je mogoče prilagoditi prek okoljske spremenljivke `ANDROID_BUILD_TOOLS`.
