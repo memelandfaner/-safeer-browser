@@ -2,6 +2,7 @@ build/
 *.tmp
 .DS_Store
 tv_test/
+__pycache__/
 
 # 🔒 Privacy & Security: Ignore sensitive files, credentials and local settings
 *.env*
@@ -17,6 +18,8 @@ local.properties
 # 🧪 Test scripts, test directories & temporary benchmarks
 test_*.py
 yt_*/
+# Regresijski testi zaznave so del repozitorija
+!tests/test_zaznaj.py
 
 # 📸 Media and Log files
 *.log
@@ -26,6 +29,9 @@ yt_*/
 *.mp4
 *.webm
 !res/**/*.png
+# Vzorci za regresijske teste
+!tests/vzorci/
+!tests/vzorci/*.png
 
 # 💻 IDE files
 .idea/
