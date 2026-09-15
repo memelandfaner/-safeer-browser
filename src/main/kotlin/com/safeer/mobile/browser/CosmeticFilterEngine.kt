@@ -125,9 +125,16 @@ object CosmeticFilterEngine {
             )
             else -> emptyList()
         }
+        // Pravila iz seznamov (EasyList in drugi), vezana na to domeno. Doslej smo jih
+        // prenesli in zavrgli; zaradi njih so na tujih straneh ostajale prazne luknje.
+        val listRules = try {
+            AdBlockEngine.cosmeticSelectors(pageUrl)
+        } catch (_: Exception) {
+            emptyList()
+        }
         val selectors = (
-            GENERIC_ELEMENT_HIDING_RULES + publisherRules
-        ).joinToString(", ")
+            GENERIC_ELEMENT_HIDING_RULES + publisherRules + listRules
+        ).distinct().joinToString(", ")
         return """
             $selectors {
                 display: none !important;
