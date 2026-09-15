@@ -773,6 +773,8 @@ class ChromiumEngineView @JvmOverloads constructor(
             override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {
                 // Android calls this for every WebView that shared the dead renderer.
                 // The manager removes and destroys this exact view; never reuse it.
+                android.util.Log.w("SafeerTabs", "renderer gone: crash=" + (detail?.didCrash() ?: false) +
+                    ", handler=" + (onRendererGone != null))
                 val handler = onRendererGone ?: return false
                 bankCheckGeneration++
                 onSecurityChanged?.invoke(false)

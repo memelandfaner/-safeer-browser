@@ -299,14 +299,14 @@ class MainActivity : android.app.Activity() {
     }
 
     private fun mediaTitle(tab: TabModel): String {
-        val title = try { tab.webView.title?.trim().orEmpty() } catch (_: Exception) { "" }
+        val title = try { (tab.loadedWebView?.title ?: tab.title).trim() } catch (_: Exception) { "" }
         if (title.isNotEmpty() && title != "Nov zavihek") return title
         return try { android.net.Uri.parse(tab.url).host ?: I18n.t(this, "media_background_title", "Safeer") } catch (_: Exception) { "Safeer" }
     }
 
     private fun mediaCommand(script: String) {
         val tab = tabManager.getPlayingTab() ?: tabManager.getActiveTab() ?: return
-        runOnUiThread { try { tab.webView.evaluateJavascript(script, null) } catch (_: Exception) {} }
+        runOnUiThread { try { tab.loadedWebView?.evaluateJavascript(script, null) } catch (_: Exception) {} }
     }
 
     private fun setupMediaPlaybackService() {
@@ -662,7 +662,7 @@ class MainActivity : android.app.Activity() {
                 btnClearUrl.visibility = View.GONE
                 historySuggestions?.dismiss()
                 val activeTab = tabManager.getActiveTab()
-                updateOmniboxDisplay(activeTab?.url ?: "", activeTab?.webView?.title)
+                updateOmniboxDisplay(activeTab?.url ?: "", activeTab?.loadedWebView?.title ?: activeTab?.title)
             }
         }
 
@@ -789,7 +789,7 @@ class MainActivity : android.app.Activity() {
                     btnStar.text = "☆"
                     Toast.makeText(this, getString(R.string.toast_bookmark_removed), Toast.LENGTH_SHORT).show()
                 } else {
-                    repository.addBookmark(activeTab?.webView?.title ?: "Zaznamek", curUrl)
+                    repository.addBookmark(activeTab?.loadedWebView?.title ?: activeTab?.title ?: "Zaznamek", curUrl)
                     btnStar.text = "⭐"
                     Toast.makeText(this, getString(R.string.toast_bookmark_added), Toast.LENGTH_SHORT).show()
                 }
@@ -960,12 +960,12 @@ class MainActivity : android.app.Activity() {
      */
     private fun castCurrentPageToTv() {
         val tab = tabManager.getActiveTab()
-        val url = tab?.webView?.url ?: tab?.url ?: ""
+        val url = tab?.loadedWebView?.url ?: tab?.url ?: ""
         if (url.isBlank() || url.startsWith("file:///android_asset/")) {
             Toast.makeText(this, getString(R.string.cast_none_found), Toast.LENGTH_SHORT).show()
             return
         }
-        val naslov = tab?.webView?.title
+        val naslov = tab?.loadedWebView?.title ?: tab?.title
 
         Toast.makeText(this, getString(R.string.cast_searching), Toast.LENGTH_SHORT).show()
 
@@ -1108,8 +1108,8 @@ class MainActivity : android.app.Activity() {
             // Naslov strani preberemo tu, na glavni niti. Most ga bo vprasal z druge
             // niti, kjer WebView svojih metod ne da brati (url bi bil null).
             val zavihek = tabManager.getActiveTab()
-            val naslovStrani = zavihek?.webView?.url ?: zavihek?.url ?: ""
-            val imeStrani = zavihek?.webView?.title
+            val naslovStrani = zavihek?.loadedWebView?.url ?: zavihek?.url ?: ""
+            val imeStrani = zavihek?.loadedWebView?.title ?: zavihek?.title
 
             val most = com.safeer.mobile.browser.link.LinkMost(
                 this,

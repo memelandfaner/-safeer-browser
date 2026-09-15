@@ -24,6 +24,8 @@ class TabModel(
     val webView: ChromiumEngineView get() = loadedWebView ?: createView()
     internal var savedState: Bundle? = null
     internal var lastUsed = SystemClock.elapsedRealtime()
+    /** Po sesutju izrisovalnika: stran se ne nalozi sama, ceka na uporabnikov gumb. */
+    internal var crashed = false
 }
 
 class TabManager(
@@ -92,7 +94,8 @@ class TabManager(
         val state = tab.savedState
         tab.savedState = null
         val restored = state != null && try { view.restoreState(state) != null } catch (_: Exception) { false }
-        if (!restored && tab.url.isNotEmpty() && tab.url != "about:blank") view.loadUrl(tab.url)
+        // Po sesutju ne nalagamo sami: uporabnik se odloci, kdaj poskusiti znova.
+        if (!restored && !tab.crashed && tab.url.isNotEmpty() && tab.url != "about:blank") view.loadUrl(tab.url)
         return view
     }
 
@@ -110,7 +113,10 @@ class TabManager(
         }
         activeTabId = tabId
         target.lastUsed = SystemClock.elapsedRealtime()
+        val ponovniPoskus = target.crashed
+        target.crashed = false
         val view = ensureView(target)
+        if (ponovniPoskus && target.url.isNotEmpty() && target.url != "about:blank") view.loadUrl(target.url)
         attach(view)
         view.onResume()
         notifyUpdated()
@@ -176,9 +182,14 @@ class TabManager(
     }
 
     private fun rendererGone(tab: TabModel, view: ChromiumEngineView) {
-        if (tab.loadedWebView !== view) return
+        if (tab.loadedWebView !== view) {
+            android.util.Log.w("SafeerTabs", "renderer gone for a view the tab no longer holds")
+            return
+        }
+        android.util.Log.w("SafeerTabs", "tab " + tab.id + ": view released after renderer crash")
         view.exitFullscreenVideo()
         tab.savedState = null
+        tab.crashed = true
         release(tab, view)
         onAudioStateChanged?.invoke(tab, false)
         if (tab.id == activeTabId) {
