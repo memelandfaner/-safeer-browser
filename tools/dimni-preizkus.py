@@ -91,6 +91,21 @@ class Naprava:
         time.sleep(1)
         self.adb("shell", "am", "start", "-n", DEJAVNOST)
 
+    def zaslon_spi(self) -> bool:
+        r = self.adb("shell", "dumpsys", "power", timeout=30)
+        return "mWakefulness=Asleep" in r.stdout or "mWakefulness=Dozing" in r.stdout
+
+    def prebudi(self):
+        """Vrne True, ce je bil zaslon prej ugasnjen (in ga je treba na koncu vrniti)."""
+        if not self.zaslon_spi():
+            return False
+        self.adb("shell", "input", "keyevent", "KEYCODE_WAKEUP")
+        time.sleep(3)
+        return True
+
+    def uspavaj(self):
+        self.adb("shell", "input", "keyevent", "KEYCODE_SLEEP")
+
     def odpri(self, url):
         """Vedno svez zagon: ce je ista stran ze odprta, Android namere ne dostavi
         kot novega nalaganja in zahtevkov sploh ni -- preizkus bi bil nakljucen."""
@@ -100,6 +115,11 @@ class Naprava:
                  "-d", url, "-n", DEJAVNOST)
 
     def zaslon(self) -> Image.Image:
+        # Naprava lahko zaspi sredi preizkusa (lasten casovnik): tedaj bi bili vsi
+        # posnetki crni in preizkus bi padel po krivem.
+        if self.zaslon_spi():
+            self.adb("shell", "input", "keyevent", "KEYCODE_WAKEUP")
+            time.sleep(3)
         p = subprocess.run(["adb", "-s", self.naslov, "exec-out", "screencap", "-p"],
                            capture_output=True, timeout=60)
         return Image.open(io.BytesIO(p.stdout))
@@ -223,6 +243,10 @@ def main() -> int:
             print(f"Naprave {naslov} ni. Nisem preizkusil nicesar.")
             return 0
 
+    spal = n.prebudi()
+    if spal:
+        print("Zaslon je spal; prebudil sem ga in ga bom na koncu spet ugasnil.")
+
     print(f"Preizkusam na {naslov}, razlicica {n.razlicica()}\n")
     padlo = []
     for ime, preizkus in PREIZKUSI:
@@ -231,6 +255,9 @@ def main() -> int:
         print(f"      {sporocilo}")
         if not vredu:
             padlo.append(ime)
+
+    if spal:
+        n.uspavaj()
 
     print()
     if padlo:
