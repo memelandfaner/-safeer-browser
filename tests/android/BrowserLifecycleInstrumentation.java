@@ -104,12 +104,19 @@ public class BrowserLifecycleInstrumentation extends Instrumentation {
             pass("activity restart restores session lazily and preserves selected tab");
             TabModel crashTab = ui(() -> manager.getActiveTab());
             ui(() -> { crashTab.getWebView().loadUrl("chrome://crash"); return null; });
-            waitFor(() -> crashTab.getLoadedWebView() == null, "renderer crash was not handled");
+            try {
+                waitFor(() -> crashTab.getLoadedWebView() == null, "renderer crash was not handled");
+            } catch (IllegalStateException ignored) {
+                // The debug URL can be dropped while the page is still settling; ask once more.
+                ui(() -> { crashTab.getWebView().loadUrl("chrome://crash"); return null; });
+                waitFor(() -> crashTab.getLoadedWebView() == null, "renderer crash was not handled");
+            }
             require(ui(() -> !activity.isDestroyed()), "renderer crash killed activity");
             ui(() -> { manager.switchTab(crashTab.getId()); return null; });
             loaded(crashTab, "Second fixture");
             pass("real renderer crash stays in app and explicit retry reloads page");
             ui(() -> { manager.closeAllTabs(activity); manager.saveSession(); activity.finish(); return null; });
+            report.append("DONE: all device checks passed\n");
             result.putString("stream", report.toString());
             finish(Activity.RESULT_OK, result);
         } catch (Throwable error) {

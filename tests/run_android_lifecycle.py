@@ -102,7 +102,9 @@ def main():
                 run([java, '-jar', tools / 'uber-apk-signer.jar', '--apks', apk, '--out', signed])
             adb('reverse', 'tcp:18769', 'tcp:18769')
             for name, package in (('review', REVIEW), ('tests', TEST)):
-                apk = next(signed.glob(name + '*signed.apk'))
+                # uber-apk-signer: '<ime>-aligned-debugSigned.apk' (velika S)
+                apk = next(p for p in sorted(signed.glob(name + '*.apk'))
+                           if 'signed' in p.name.lower())
                 adb('install', '-r', str(apk))
                 installed.append(package)
             adb('shell', 'pm', 'grant', REVIEW, 'android.permission.POST_NOTIFICATIONS')
@@ -110,7 +112,8 @@ def main():
             print(result.stdout, flush=True)
             log = ROOT / 'build-ci/android-lifecycle-results.txt'
             log.write_text(result.stdout + result.stderr)
-            if 'FAIL:' in result.stdout or 'INSTRUMENTATION_CODE: -1' not in result.stdout:
+            # This device prints only the report stream, without INSTRUMENTATION_CODE.
+            if 'FAIL:' in result.stdout or 'DONE:' not in result.stdout:
                 raise SystemExit('Device lifecycle tests failed; see ' + str(log))
     except subprocess.CalledProcessError as exc:
         print(exc.stdout or '')

@@ -21,6 +21,8 @@ test_*.py
 yt_*/
 # Regresijski testi zaznave so del repozitorija
 !tests/test_zaznaj.py
+# Lokalni dnevniki testnih tekov
+tests/.astra/
 
 # 📸 Media and Log files
 *.log
