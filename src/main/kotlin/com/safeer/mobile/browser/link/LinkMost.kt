@@ -71,7 +71,14 @@ class LinkMost(
         }
     }
 
-    private fun napaka(sporocilo: String) = odziv("napaka", sporocilo)
+    /**
+     * Napaka za stran. [koda] je stabilna oznaka, ki jo stran prevede v jezik naprave;
+     * [sporocilo] ostane zraven kot rezerva in za diagnostiko, ce kode ne pozna.
+     */
+    private fun napaka(koda: String, sporocilo: String) = odziv(
+        "napaka",
+        JSONObject().put("koda", koda).put("sporocilo", sporocilo)
+    )
 
     // ------------------------------------------------------------------
     // Stanje
@@ -156,7 +163,7 @@ class LinkMost(
                 })
             }
         } catch (e: Throwable) {
-            napaka("Iskanja ni bilo mogoce zagnati: ${e.message}")
+            napaka("iskanje_ni_steklo", "Iskanja ni bilo mogoce zagnati: ${e.message}")
         }
     }
 
@@ -165,7 +172,7 @@ class LinkMost(
     fun seznani() {
         val naslov = hubUrl()
         if (naslov.isBlank()) {
-            napaka("Hub ni znan. Najprej ga poisci.")
+            napaka("hub_ni_znan", "Hub ni znan. Najprej ga poisci.")
             return
         }
         try {
@@ -175,7 +182,7 @@ class LinkMost(
                 { uspelo -> odziv("seznanitev", uspelo) }
             )
         } catch (e: Throwable) {
-            napaka("Seznanitve ni bilo mogoce zaceti: ${e.message}")
+            napaka("seznanitev_ni_stekla", "Seznanitve ni bilo mogoce zaceti: ${e.message}")
         }
     }
 
@@ -208,7 +215,7 @@ class LinkMost(
                             put("vklopljena", true)
                         })
                     } catch (e: Throwable) {
-                        napaka("Zdruzevanja zaznamkov ni bilo mogoce koncati: ${e.message}")
+                        napaka("zdruzevanje_ni_koncano", "Zdruzevanja zaznamkov ni bilo mogoce koncati: ${e.message}")
                     }
                 }.start()
             }
@@ -246,13 +253,13 @@ class LinkMost(
     fun poveziSe() {
         val o = odjemalec()
         if (o == null) {
-            napaka("Hub ni znan.")
+            napaka("hub_ni_znan", "Hub ni znan.")
             return
         }
         try {
             o.connect()
         } catch (e: Throwable) {
-            napaka("Povezava ni uspela: ${e.message}")
+            napaka("povezava_ni_uspela", "Povezava ni uspela: ${e.message}")
         }
     }
 
@@ -280,7 +287,7 @@ class LinkMost(
     fun posljiTrenutno(idNaprave: String) {
         val (url, naslov) = trenutnaStran()
         if (url.isBlank() || url.startsWith("file:///android_asset/")) {
-            napaka("Ta stran ni primerna za posiljanje.")
+            napaka("stran_ni_primerna", "Ta stran ni primerna za posiljanje.")
             return
         }
         poslji(idNaprave, url, naslov ?: "")
@@ -291,12 +298,12 @@ class LinkMost(
     fun poslji(idNaprave: String, url: String, naslov: String) {
         val o = odjemalec()
         if (o == null) {
-            napaka("Hub ni znan.")
+            napaka("hub_ni_znan", "Hub ni znan.")
             return
         }
         val cist = url.trim()
         if (!cist.startsWith("http://") && !cist.startsWith("https://")) {
-            napaka("Poslati je mogoce samo naslove http in https.")
+            napaka("samo_http", "Poslati je mogoce samo naslove http in https.")
             return
         }
         try {
@@ -306,7 +313,7 @@ class LinkMost(
                 put("url", cist)
             })
         } catch (e: Throwable) {
-            napaka("Posiljanje ni uspelo: ${e.message}")
+            napaka("posiljanje_ni_uspelo", "Posiljanje ni uspelo: ${e.message}")
         }
     }
 
@@ -315,7 +322,7 @@ class LinkMost(
     fun nadzor(idNaprave: String, ukaz: String, vrednost: Double) {
         val o = odjemalec()
         if (o == null) {
-            napaka("Hub ni znan.")
+            napaka("hub_ni_znan", "Hub ni znan.")
             return
         }
         try {
@@ -325,7 +332,7 @@ class LinkMost(
                 else -> o.sendControl(idNaprave, ukaz)
             }
         } catch (e: Throwable) {
-            napaka("Ukaz ni uspel: ${e.message}")
+            napaka("ukaz_ni_uspel", "Ukaz ni uspel: ${e.message}")
         }
     }
 
@@ -394,7 +401,7 @@ class LinkMost(
                 poveziSe()
                 return
             }
-            val o = odjemalec() ?: run { napaka("Hub ni znan."); return }
+            val o = odjemalec() ?: run { napaka("hub_ni_znan", "Hub ni znan."); return }
             o.connect()
             // Povezava potrebuje trenutek; sele nato ima smisel karkoli poslati.
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
@@ -414,15 +421,15 @@ class LinkMost(
                                 put("skupaj", ZaznamkiSync.stevilo(repo))
                             })
                         } catch (e: Throwable) {
-                            napaka("Zaznamkov ni bilo mogoce poslati: ${e.message}")
+                            napaka("zaznamki_niso_poslani", "Zaznamkov ni bilo mogoce poslati: ${e.message}")
                         }
                     }.start()
                 } catch (e: Throwable) {
-                    napaka("Sinhronizacije ni bilo mogoce zaceti: ${e.message}")
+                    napaka("sync_ni_stekla", "Sinhronizacije ni bilo mogoce zaceti: ${e.message}")
                 }
             }, 1500L)
         } catch (e: Throwable) {
-            napaka("Sinhronizacije ni bilo mogoce nastaviti: ${e.message}")
+            napaka("sync_ni_nastavljena", "Sinhronizacije ni bilo mogoce nastaviti: ${e.message}")
         }
     }
 
