@@ -19,6 +19,7 @@ object PreferencesManager {
     private const val KEY_DESKTOP_DEFAULT = "pref_desktop_default"
     private const val KEY_THIRD_PARTY_COOKIES = "pref_third_party_cookies"
     private const val KEY_JAVASCRIPT_ENABLED = "pref_javascript_enabled"
+    private const val KEY_POPUP_BLOCK_ENABLED = "pref_popup_block_enabled"
     private const val KEY_TOTAL_ADS_BLOCKED = "pref_total_ads_blocked"
     private const val KEY_TOTAL_THREATS_BLOCKED = "pref_total_threats_blocked"
     private const val KEY_DOH_ENABLED = "pref_doh_enabled"
@@ -228,6 +229,17 @@ object PreferencesManager {
 
     fun setAdguardProtectionEnabled(context: Context, enabled: Boolean) {
         getPrefs(context).edit().putBoolean(KEY_ADGUARD_PROTECTION_ENABLED, enabled).apply()
+    }
+
+    // --- 10. Preprecevanje pojavnih oken ---
+    // Privzeto vklopljeno: nic se ne odpre, cesar uporabnik ni zahteval. Kdor to hoce
+    // izklopiti (npr. zaradi strani, ki novo okno res potrebuje), to stori v meniju.
+    fun isPopupBlockEnabled(context: Context): Boolean {
+        return getPrefs(context).getBoolean(KEY_POPUP_BLOCK_ENABLED, true)
+    }
+
+    fun setPopupBlockEnabled(context: Context, enabled: Boolean) {
+        getPrefs(context).edit().putBoolean(KEY_POPUP_BLOCK_ENABLED, enabled).apply()
     }
 
     // --- 10. SponsorBlock (preskakovanje sponzorskih odsekov na YouTubu) ---

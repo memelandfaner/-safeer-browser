@@ -72,4 +72,7 @@
     <string name="popup_pokazi">Odpri</string>
     <string name="popup_zapri">Skrij</string>
     <string name="btn_reload">Osveži stran</string>
+    <string name="menu_popup_block">Prepreči pojavna okna</string>
+    <string name="toast_popup_block_on">Pojavna okna so preprečena</string>
+    <string name="toast_popup_block_off">Pojavna okna so dovoljena</string>
 </resources>

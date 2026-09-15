@@ -162,11 +162,14 @@ object UserScriptManager {
         })();
     """
 
-    private const val ANTI_POPUNDER_SHIELD_JS = """
-        /* 🛡️ Safeer Anti-Popunder, Anti-Clickjacking & Streaming Shield Engine */
+    /**
+     * Nevtralizacija window.open. Loceno od ostalega stita, ker to uporabnik lahko izklopi
+     * v meniju (Prepreci pojavna okna). Privzeto je vklopljeno.
+     */
+    private const val WINDOW_OPEN_SHIELD_JS = """
         (function() {
-            if (window._safeer_popunder_shield_active) return;
-            window._safeer_popunder_shield_active = true;
+            if (window._safeer_window_open_shield) return;
+            window._safeer_window_open_shield = true;
 
             /* Nevtralizacija window.open.
                Strani s filmi porabijo prav prvi klik na predvajalnik: isti klik odpre oglasno
@@ -188,6 +191,14 @@ object UserScriptManager {
                 };
                 try { Object.freeze(window.open); } catch (e) {}
             } catch (e) {}
+        })();
+    """
+
+    private const val ANTI_POPUNDER_SHIELD_JS = """
+        /* 🛡️ Safeer Anti-Popunder, Anti-Clickjacking & Streaming Shield Engine */
+        (function() {
+            if (window._safeer_popunder_shield_active) return;
+            window._safeer_popunder_shield_active = true;
 
             function isPlayerElement(el) {
                 if (!el || el.nodeType !== 1) return true;
@@ -1761,6 +1772,9 @@ object UserScriptManager {
             webView.evaluateJavascript(WINDOWS_CHROME_ENVIRONMENT_JS, null)
         }
         webView.evaluateJavascript(ANTI_POPUNDER_SHIELD_JS, null)
+        if (PreferencesManager.isPopupBlockEnabled(webView.context)) {
+            webView.evaluateJavascript(WINDOW_OPEN_SHIELD_JS, null)
+        }
         val isYt = isYouTubeDomain(currentUrl)
         if (isYt) {
             webView.evaluateJavascript(BACKGROUND_PLAYBACK_JS, null)
@@ -1794,6 +1808,9 @@ object UserScriptManager {
             webView.evaluateJavascript(WINDOWS_CHROME_ENVIRONMENT_JS, null)
         }
         webView.evaluateJavascript(ANTI_POPUNDER_SHIELD_JS, null)
+        if (PreferencesManager.isPopupBlockEnabled(webView.context)) {
+            webView.evaluateJavascript(WINDOW_OPEN_SHIELD_JS, null)
+        }
         val isYt = isYouTubeDomain(currentUrl)
         if (isYt) {
             webView.evaluateJavascript(BACKGROUND_PLAYBACK_JS, null)

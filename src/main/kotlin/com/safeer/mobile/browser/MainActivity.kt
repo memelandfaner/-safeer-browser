@@ -546,10 +546,18 @@ class MainActivity : android.app.Activity() {
             val transport = resultMsg.obj as? android.webkit.WebView.WebViewTransport
             if (!isUserGesture || transport == null) false
             else {
-                // Nobenega zavihka: okno dobi zacasen skrit pogled samo zato, da izvemo
-                // naslov, nato ga vratar unici. Stevec zavihkov se ne premakne.
-                PopUpVratar.prestrezi(this, mainRoot, resultMsg) { naslov ->
-                    tabManager.createTab(this, naslov, true)
+                if (!PreferencesManager.isPopupBlockEnabled(this)) {
+                    // Uporabnik je zascito izklopil: okno se odpre kot v navadnem brskalniku.
+                    val novTab = tabManager.createTab(this, "about:blank", true)
+                    transport.webView = novTab.webView
+                    resultMsg.sendToTarget()
+                    true
+                } else {
+                    // Nobenega zavihka: okno dobi zacasen skrit pogled samo zato, da izvemo
+                    // naslov, nato ga vratar unici. Stevec zavihkov se ne premakne.
+                    PopUpVratar.prestrezi(this, mainRoot, resultMsg) { naslov ->
+                        tabManager.createTab(this, naslov, true)
+                    }
                 }
             }
         }
@@ -1324,6 +1332,21 @@ class MainActivity : android.app.Activity() {
             Toast.makeText(
                 this,
                 if (AdBlockEngine.isEnabled) I18n.t(this, "toast_adblock_on") else I18n.t(this, "toast_adblock_off"),
+                Toast.LENGTH_SHORT
+            ).show()
+            wv?.reload()
+            dialog.dismiss()
+        }
+
+        val cbPopupBlock = dialog.findViewById<CheckBox>(R.id.cbPopupBlock)
+        cbPopupBlock.isChecked = PreferencesManager.isPopupBlockEnabled(this)
+        dialog.findViewById<LinearLayout>(R.id.rowMenuPopupBlock).setOnClickListener {
+            val vklopljeno = !PreferencesManager.isPopupBlockEnabled(this)
+            PreferencesManager.setPopupBlockEnabled(this, vklopljeno)
+            cbPopupBlock.isChecked = vklopljeno
+            Toast.makeText(
+                this,
+                if (vklopljeno) getString(R.string.toast_popup_block_on) else getString(R.string.toast_popup_block_off),
                 Toast.LENGTH_SHORT
             ).show()
             wv?.reload()

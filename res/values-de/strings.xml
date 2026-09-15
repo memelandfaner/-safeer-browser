@@ -72,4 +72,7 @@
     <string name="popup_pokazi">Öffnen</string>
     <string name="popup_zapri">Ausblenden</string>
     <string name="btn_reload">Seite neu laden</string>
+    <string name="menu_popup_block">Pop-up-Fenster blockieren</string>
+    <string name="toast_popup_block_on">Pop-up-Fenster werden blockiert</string>
+    <string name="toast_popup_block_off">Pop-up-Fenster sind erlaubt</string>
 </resources>

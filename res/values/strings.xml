@@ -72,4 +72,7 @@
     <string name="popup_pokazi">Open</string>
     <string name="popup_zapri">Hide</string>
     <string name="btn_reload">Reload page</string>
+    <string name="menu_popup_block">Block pop-up windows</string>
+    <string name="toast_popup_block_on">Pop-up windows are blocked</string>
+    <string name="toast_popup_block_off">Pop-up windows are allowed</string>
 </resources>

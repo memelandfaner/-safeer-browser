@@ -72,4 +72,7 @@
     <string name="popup_pokazi">Apri</string>
     <string name="popup_zapri">Nascondi</string>
     <string name="btn_reload">Ricarica la pagina</string>
+    <string name="menu_popup_block">Blocca le finestre pop-up</string>
+    <string name="toast_popup_block_on">Le finestre pop-up sono bloccate</string>
+    <string name="toast_popup_block_off">Le finestre pop-up sono consentite</string>
 </resources>
