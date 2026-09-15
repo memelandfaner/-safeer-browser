@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Preizkus pojavnih oken</title>
+<style>
+  body{background:#0d1117;color:#e6edf3;font:16px/1.5 system-ui,sans-serif;margin:0;padding:24px}
+  h1{font-size:20px;margin:0 0 4px}
+  p{color:#9fb0a6;margin:0 0 20px}
+  button{display:block;width:100%;margin:12px 0;padding:18px;font-size:17px;border:0;border-radius:12px;
+         background:#1f6feb;color:#fff}
+  button.oglas{background:#8957e5}
+  #dnevnik{margin-top:20px;padding:12px;border:1px solid #30363d;border-radius:10px;
+           white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:13px;color:#7ee787}
+</style>
+</head>
+<body>
+<h1>Preizkus pojavnih oken</h1>
+<p>Ta stran posnema trik, ki ga uporabljajo strani s filmi: uporabnikov klik na gumb
+sproži <code>window.open</code> na povsem drug naslov.</p>
+
+<button id="navaden">1. Klik → okno na aliexpress.com (nosilec: navadna stran)</button>
+<button id="oglasni" class="oglas">2. Klik → okno na oglasno domeno (doubleclick.net)</button>
+<button id="brezklika">3. Okno brez klika (čez 2 sekundi)</button>
+
+<div id="dnevnik">pripravljeno</div>
+
+<script>
+  var dnevnik = document.getElementById('dnevnik');
+  function zapisi(besedilo) {
+    dnevnik.textContent += "\n" + besedilo;
+  }
+  function poskusi(ime, naslov) {
+    var okno = window.open(naslov, '_blank');
+    zapisi(ime + ": window.open -> " + (okno ? "vrnjeno okno" : "null"));
+  }
+  document.getElementById('navaden').addEventListener('click', function () {
+    poskusi("navadna domena", "https://www.aliexpress.com/item/1005006000000.html");
+  });
+  document.getElementById('oglasni').addEventListener('click', function () {
+    poskusi("oglasna domena", "https://doubleclick.net/pagead/ads?preizkus=1");
+  });
+  document.getElementById('brezklika').addEventListener('click', function () {
+    zapisi("cez 2 s poskusim brez uporabnikovega klika ...");
+    setTimeout(function () {
+      poskusi("brez klika", "https://www.aliexpress.com/item/1005006000001.html");
+    }, 2000);
+  });
+</script>
+</body>
+</html>

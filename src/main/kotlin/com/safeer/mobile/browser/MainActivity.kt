@@ -546,10 +546,11 @@ class MainActivity : android.app.Activity() {
             val transport = resultMsg.obj as? android.webkit.WebView.WebViewTransport
             if (!isUserGesture || transport == null) false
             else {
-                val newTab = tabManager.createTab(this, "about:blank", true)
-                transport.webView = newTab.webView
-                resultMsg.sendToTarget()
-                true
+                // Nobenega zavihka: okno dobi zacasen skrit pogled samo zato, da izvemo
+                // naslov, nato ga vratar unici. Stevec zavihkov se ne premakne.
+                PopUpVratar.prestrezi(this, mainRoot, resultMsg) { naslov ->
+                    tabManager.createTab(this, naslov, true)
+                }
             }
         }
 

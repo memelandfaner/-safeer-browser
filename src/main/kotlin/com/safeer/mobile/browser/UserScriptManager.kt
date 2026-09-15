@@ -168,6 +168,27 @@ object UserScriptManager {
             if (window._safeer_popunder_shield_active) return;
             window._safeer_popunder_shield_active = true;
 
+            /* Nevtralizacija window.open.
+               Strani s filmi porabijo prav prvi klik na predvajalnik: isti klik odpre oglasno
+               okno. Klik mora pognati film, ne okna. Namesto null vrnemo neskodljiv priklopek:
+               nekateri predvajalniki ob null vrzejo napako in se ustavijo. */
+            try {
+                var praznoOkno = {
+                    closed: true,
+                    close: function() {},
+                    focus: function() {},
+                    blur: function() {},
+                    postMessage: function() {},
+                    document: { write: function() {}, writeln: function() {}, close: function() {} },
+                    location: { href: '', replace: function() {}, assign: function() {} }
+                };
+                window.open = function(url) {
+                    console.log('[Safeer] Prepreceno pojavno okno:', url);
+                    return praznoOkno;
+                };
+                try { Object.freeze(window.open); } catch (e) {}
+            } catch (e) {}
+
             function isPlayerElement(el) {
                 if (!el || el.nodeType !== 1) return true;
                 var tag = (el.tagName || '').toUpperCase();

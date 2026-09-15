@@ -67,4 +67,9 @@
     <!-- Safeer Link: obvestilo storitve, ki gosti povezavo z drugimi napravami -->
     <string name="hub_obvestilo_naslov">Safeer Link</string>
     <string name="hub_obvestilo_besedilo">Questo telefono può ricevere pagine, file e musica dai tuoi altri dispositivi.</string>
+    <!-- Vratar pred pojavnimi okni: nic se ne odpre, cesar uporabnik ni zahteval -->
+    <string name="popup_vprasanje">Nuova finestra bloccata: %1$s</string>
+    <string name="popup_pokazi">Apri</string>
+    <string name="popup_zapri">Nascondi</string>
+    <string name="btn_reload">Ricarica la pagina</string>
 </resources>
