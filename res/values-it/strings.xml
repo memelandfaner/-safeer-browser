@@ -28,4 +28,27 @@
     <string name="toast_bookmark_removed">🗑️ Rimosso dai segnalibri</string>
     <string name="toast_link_copied">📋 Link copiato negli appunti</string>
     <string name="toast_download_started">📥 Download avviato</string>
+    <string name="perm_request_title">Richiesta di autorizzazione</string>
+    <string name="perm_request_msg">Il sito %1$s chiede accesso alle seguenti risorse del dispositivo:\n\n%2$s\n\nConsentire l’accesso?</string>
+    <string name="perm_allow">Consenti</string>
+    <string name="perm_deny">Rifiuta</string>
+    <string name="geo_request_title">Richiesta di posizione</string>
+    <string name="geo_request_msg">Il sito %1$s chiede accesso alla tua posizione attuale.\n\nConsentire l’accesso?</string>
+    <string name="ssl_warning_title">Avviso di sicurezza (SSL)</string>
+    <string name="ssl_warning_msg">Una connessione sicura a %1$s non è possibile perché il certificato di sicurezza non è valido o è scaduto.\n\nL’accesso è stato interrotto per proteggere i tuoi dati.</string>
+    <string name="ssl_this_site">Questo sito web</string>
+    <string name="toast_prev_tab">◀ Scheda precedente</string>
+    <string name="toast_next_tab">Scheda successiva ▶</string>
+    <string name="toast_downloading">📥 Download: %1$s</string>
+    <string name="toast_download_error">❌ Errore di download: %1$s</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Annulla</string>
+    <string name="dialog_dont_show">Non mostrare altre finestre di questa pagina</string>
+    <string name="dialog_leave_page">Esci dalla pagina</string>
+    <string name="dialog_stay">Resta</string>
+    <string name="dialog_leave_msg">La pagina chiede se vuoi davvero uscire. I dati non salvati andranno persi.</string>
+    <string name="dialog_this_page">Questa pagina</string>
+    <string name="proxy_failed">Impossibile attivare le connessioni sicure. Aggiorna Android System WebView o controlla le impostazioni di rete.</string>
+    <string name="link_open_failed">Impossibile aprire Safeer Link.</string>
+    <string name="cast_token_hint">Token di Safeer Control (facoltativo)</string>
 </resources>

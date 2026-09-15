@@ -40,4 +40,27 @@
     <string name="default_browser_unchanged">Default browser was not changed</string>
     <string name="default_browser_unavailable">Choose your browser in Android default app settings</string>
     <string name="btn_close">Close</string>
+    <string name="perm_request_title">Permission request</string>
+    <string name="perm_request_msg">The website %1$s wants access to the following device resources:\n\n%2$s\n\nAllow access?</string>
+    <string name="perm_allow">Allow</string>
+    <string name="perm_deny">Deny</string>
+    <string name="geo_request_title">Location request</string>
+    <string name="geo_request_msg">The website %1$s wants access to your current location.\n\nAllow access?</string>
+    <string name="ssl_warning_title">Security warning (SSL)</string>
+    <string name="ssl_warning_msg">A secure connection to %1$s is not possible because the security certificate is invalid or has expired.\n\nAccess was stopped to protect your data.</string>
+    <string name="ssl_this_site">This website</string>
+    <string name="toast_prev_tab">◀ Previous tab</string>
+    <string name="toast_next_tab">Next tab ▶</string>
+    <string name="toast_downloading">📥 Downloading: %1$s</string>
+    <string name="toast_download_error">❌ Download error: %1$s</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_dont_show">Don’t show more dialogs from this page</string>
+    <string name="dialog_leave_page">Leave page</string>
+    <string name="dialog_stay">Stay</string>
+    <string name="dialog_leave_msg">The page asks whether you really want to leave it. Unsaved entries will be lost.</string>
+    <string name="dialog_this_page">This page</string>
+    <string name="proxy_failed">Secure connections could not be enabled. Update Android System WebView or check your network settings.</string>
+    <string name="link_open_failed">Safeer Link could not be opened.</string>
+    <string name="cast_token_hint">Safeer Control token (optional)</string>
 </resources>

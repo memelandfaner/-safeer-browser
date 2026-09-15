@@ -28,4 +28,27 @@
     <string name="toast_bookmark_removed">🗑️ Supprimé des favoris</string>
     <string name="toast_link_copied">📋 Lien copié dans le presse-papiers</string>
     <string name="toast_download_started">📥 Téléchargement commencé</string>
+    <string name="perm_request_title">Demande d’autorisation</string>
+    <string name="perm_request_msg">Le site %1$s demande l’accès aux ressources suivantes de l’appareil :\n\n%2$s\n\nAutoriser l’accès ?</string>
+    <string name="perm_allow">Autoriser</string>
+    <string name="perm_deny">Refuser</string>
+    <string name="geo_request_title">Demande de localisation</string>
+    <string name="geo_request_msg">Le site %1$s demande l’accès à votre position actuelle.\n\nAutoriser l’accès ?</string>
+    <string name="ssl_warning_title">Avertissement de sécurité (SSL)</string>
+    <string name="ssl_warning_msg">Une connexion sécurisée à %1$s est impossible car le certificat de sécurité est invalide ou expiré.\n\nL’accès a été interrompu pour protéger vos données.</string>
+    <string name="ssl_this_site">Ce site web</string>
+    <string name="toast_prev_tab">◀ Onglet précédent</string>
+    <string name="toast_next_tab">Onglet suivant ▶</string>
+    <string name="toast_downloading">📥 Téléchargement : %1$s</string>
+    <string name="toast_download_error">❌ Erreur de téléchargement : %1$s</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Annuler</string>
+    <string name="dialog_dont_show">Ne plus afficher les boîtes de dialogue de cette page</string>
+    <string name="dialog_leave_page">Quitter la page</string>
+    <string name="dialog_stay">Rester</string>
+    <string name="dialog_leave_msg">La page demande si vous voulez vraiment la quitter. Les saisies non enregistrées seront perdues.</string>
+    <string name="dialog_this_page">Cette page</string>
+    <string name="proxy_failed">Impossible d’activer les connexions sécurisées. Mettez à jour Android System WebView ou vérifiez vos paramètres réseau.</string>
+    <string name="link_open_failed">Impossible d’ouvrir Safeer Link.</string>
+    <string name="cast_token_hint">Jeton Safeer Control (facultatif)</string>
 </resources>

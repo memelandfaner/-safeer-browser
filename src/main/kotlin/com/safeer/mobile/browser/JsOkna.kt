@@ -46,9 +46,15 @@ object JsOkna {
         utisano = false
     }
 
-    private fun izvor(url: String?): String {
+    /** Besedilo iz virov; ce konteksta ni, ostane zasilni angleski zapis. */
+    private fun niz(view: View?, id: Int, zasilno: String): String {
+        val c = view?.context ?: return zasilno
+        return try { c.getString(id) } catch (e: Throwable) { zasilno }
+    }
+
+    private fun izvor(c: Context?, url: String?): String {
         val u = try { Uri.parse(url ?: "") } catch (e: Throwable) { null }
-        val gostitelj = u?.host ?: return "Ta stran"
+        val gostitelj = u?.host ?: return (try { c?.getString(R.string.dialog_this_page) } catch (e: Throwable) { null }) ?: "This page"
         val shema = u.scheme ?: ""
         return if (shema == "https") gostitelj else "$shema://$gostitelj"
     }
@@ -134,7 +140,7 @@ object JsOkna {
         var utisaj: CheckBox? = null
         if (stevec >= PRAG_ZA_UTISANJE) {
             val c = CheckBox(dejavnost)
-            c.text = "Ne prikazuj več oken s te strani"
+            c.text = niz(view, R.string.dialog_dont_show, "Don’t show more dialogs from this page")
             val lp = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -154,7 +160,7 @@ object JsOkna {
 
         try {
             val graditelj = AlertDialog.Builder(dejavnost)
-                .setTitle(izvor(url))
+                .setTitle(izvor(dejavnost, url))
                 .setView(vsebina)
                 .setCancelable(true)
                 .setPositiveButton(potrdiNapis) { _, _ -> odgovori(true) }
@@ -174,14 +180,14 @@ object JsOkna {
 
     fun alert(view: WebView?, url: String?, sporocilo: String?, rezultat: JsResult?): Boolean {
         if (rezultat == null) return false
-        return pokazi(view, url, sporocilo, null, false, "V redu", null) { _, _ ->
+        return pokazi(view, url, sporocilo, null, false, niz(view, R.string.dialog_ok, "OK"), null) { _, _ ->
             rezultat.confirm()
         }
     }
 
     fun confirm(view: WebView?, url: String?, sporocilo: String?, rezultat: JsResult?): Boolean {
         if (rezultat == null) return false
-        return pokazi(view, url, sporocilo, null, false, "V redu", "Prekliči") { potrjeno, _ ->
+        return pokazi(view, url, sporocilo, null, false, niz(view, R.string.dialog_ok, "OK"), niz(view, R.string.dialog_cancel, "Cancel")) { potrjeno, _ ->
             if (potrjeno) rezultat.confirm() else rezultat.cancel()
         }
     }
@@ -194,7 +200,7 @@ object JsOkna {
         rezultat: JsPromptResult?
     ): Boolean {
         if (rezultat == null) return false
-        return pokazi(view, url, sporocilo, privzeto, true, "V redu", "Prekliči") { potrjeno, besedilo ->
+        return pokazi(view, url, sporocilo, privzeto, true, niz(view, R.string.dialog_ok, "OK"), niz(view, R.string.dialog_cancel, "Cancel")) { potrjeno, besedilo ->
             if (potrjeno) rezultat.confirm(besedilo ?: "") else rezultat.cancel()
         }
     }
@@ -207,11 +213,11 @@ object JsOkna {
     ): Boolean {
         if (rezultat == null) return false
         val besedilo = if (sporocilo.isNullOrBlank()) {
-            "Stran sprašuje, ali jo res želiš zapustiti. Neshranjeni vnosi bodo izgubljeni."
+            niz(view, R.string.dialog_leave_msg, "The page asks whether you really want to leave it. Unsaved entries will be lost.")
         } else {
             sporocilo
         }
-        return pokazi(view, url, besedilo, null, false, "Zapusti stran", "Ostani") { potrjeno, _ ->
+        return pokazi(view, url, besedilo, null, false, niz(view, R.string.dialog_leave_page, "Leave page"), niz(view, R.string.dialog_stay, "Stay")) { potrjeno, _ ->
             if (potrjeno) rezultat.confirm() else rezultat.cancel()
         }
     }

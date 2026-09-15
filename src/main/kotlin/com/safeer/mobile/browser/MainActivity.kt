@@ -551,9 +551,9 @@ class MainActivity : android.app.Activity() {
             runOnUiThread {
                 try {
                     AlertDialog.Builder(this)
-                        .setTitle("Zahteva za dovoljenje")
-                        .setMessage("Spletno mesto '$host' želi dostop do naslednjih virov naprave:\n\n$labels\n\nAli dovolite dostop?")
-                        .setPositiveButton("Dovoli") { _, _ ->
+                        .setTitle(getString(R.string.perm_request_title))
+                        .setMessage(getString(R.string.perm_request_msg, host, labels))
+                        .setPositiveButton(getString(R.string.perm_allow)) { _, _ ->
                             val neededSystem = mutableListOf<String>()
                             if (resources.contains(PermissionRequest.RESOURCE_AUDIO_CAPTURE) &&
                                 checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -571,7 +571,7 @@ class MainActivity : android.app.Activity() {
                                 request.grant(resources)
                             }
                         }
-                        .setNegativeButton("Zavrni") { _, _ ->
+                        .setNegativeButton(getString(R.string.perm_deny)) { _, _ ->
                             request.deny()
                         }
                         .setOnCancelListener {
@@ -588,9 +588,9 @@ class MainActivity : android.app.Activity() {
             runOnUiThread {
                 try {
                     AlertDialog.Builder(this)
-                        .setTitle("Zahteva za lokacijo")
-                        .setMessage("Spletno mesto '$origin' želi dostop do vaše trenutne geografske lokacije.\n\nAli dovolite dostop?")
-                        .setPositiveButton("Dovoli") { _, _ ->
+                        .setTitle(getString(R.string.geo_request_title))
+                        .setMessage(getString(R.string.geo_request_msg, origin))
+                        .setPositiveButton(getString(R.string.perm_allow)) { _, _ ->
                             if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                                 pendingGeoOrigin = origin
                                 pendingGeoCallback = callback
@@ -605,7 +605,7 @@ class MainActivity : android.app.Activity() {
                                 callback.invoke(origin, true, false)
                             }
                         }
-                        .setNegativeButton("Zavrni") { _, _ ->
+                        .setNegativeButton(getString(R.string.perm_deny)) { _, _ ->
                             callback.invoke(origin, false, false)
                         }
                         .setOnCancelListener {
@@ -832,10 +832,10 @@ class MainActivity : android.app.Activity() {
                 ) {
                     if (diffX > 0) {
                         tabManager.switchToPrevTab()
-                        Toast.makeText(this@MainActivity, "◀ Prejšnji zavihek", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@MainActivity, getString(R.string.toast_prev_tab), Toast.LENGTH_SHORT).show()
                     } else {
                         tabManager.switchToNextTab()
-                        Toast.makeText(this@MainActivity, "Naslednji zavihek ▶", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@MainActivity, getString(R.string.toast_next_tab), Toast.LENGTH_SHORT).show()
                     }
                     return true
                 }
@@ -1008,7 +1008,7 @@ class MainActivity : android.app.Activity() {
 
         val zeton = EditText(this)
         zeton.setText(castToken() ?: "")
-        zeton.hint = "Žeton Safeer Controla (neobvezno)"
+        zeton.hint = getString(R.string.cast_token_hint)
 
         val stolpec = android.widget.LinearLayout(this)
         stolpec.orientation = android.widget.LinearLayout.VERTICAL
@@ -1126,7 +1126,7 @@ class MainActivity : android.app.Activity() {
             linkOkno = okno
             okno.show()
         } catch (e: Exception) {
-            Toast.makeText(this, "Safeer Linka ni bilo mogoče odpreti.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.link_open_failed), Toast.LENGTH_SHORT).show()
             android.util.Log.w("SafeerLink", "Zaslon se ni odprl: " + e.message)
         }
     }

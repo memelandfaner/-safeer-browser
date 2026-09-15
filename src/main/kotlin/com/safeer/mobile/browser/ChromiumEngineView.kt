@@ -481,12 +481,12 @@ class ChromiumEngineView @JvmOverloads constructor(
                 act.runOnUiThread {
                     try {
                         android.app.AlertDialog.Builder(context)
-                            .setTitle("Zahteva za lokacijo")
-                            .setMessage("Spletno mesto '$targetOrigin' želi dostop do vaše trenutne geografske lokacije.\n\nAli dovolite dostop?")
-                            .setPositiveButton("Dovoli") { _, _ ->
+                            .setTitle(context.getString(R.string.geo_request_title))
+                            .setMessage(context.getString(R.string.geo_request_msg, targetOrigin))
+                            .setPositiveButton(context.getString(R.string.perm_allow)) { _, _ ->
                                 callback.invoke(origin, true, false)
                             }
-                            .setNegativeButton("Zavrni") { _, _ ->
+                            .setNegativeButton(context.getString(R.string.perm_deny)) { _, _ ->
                                 callback.invoke(origin, false, false)
                             }
                             .setOnCancelListener {
@@ -528,12 +528,12 @@ class ChromiumEngineView @JvmOverloads constructor(
                 act.runOnUiThread {
                     try {
                         android.app.AlertDialog.Builder(context)
-                            .setTitle("Zahteva za dovoljenje")
-                            .setMessage("Spletno mesto '$host' želi dostop do naslednjih virov naprave:\n\n$labels\n\nAli dovolite dostop?")
-                            .setPositiveButton("Dovoli") { _, _ ->
+                            .setTitle(context.getString(R.string.perm_request_title))
+                            .setMessage(context.getString(R.string.perm_request_msg, host, labels))
+                            .setPositiveButton(context.getString(R.string.perm_allow)) { _, _ ->
                                 request.grant(resources)
                             }
-                            .setNegativeButton("Zavrni") { _, _ ->
+                            .setNegativeButton(context.getString(R.string.perm_deny)) { _, _ ->
                                 request.deny()
                             }
                             .setOnCancelListener {
@@ -759,12 +759,12 @@ class ChromiumEngineView @JvmOverloads constructor(
                     try {
                         val host = error?.url?.let {
                             try { java.net.URI(it).host } catch (_: Exception) { null }
-                        } ?: "To spletno mesto"
+                        } ?: context.getString(R.string.ssl_this_site)
 
                         android.app.AlertDialog.Builder(context)
-                            .setTitle("Varnostno opozorilo (SSL)")
-                            .setMessage("Varna povezava z '$host' ni mogoča, ker je varnostni certifikat neveljaven ali potekel.\n\nDostop je bil zaradi zaščite vaših podatkov prekinjen.")
-                            .setPositiveButton("V redu", null)
+                            .setTitle(context.getString(R.string.ssl_warning_title))
+                            .setMessage(context.getString(R.string.ssl_warning_msg, host))
+                            .setPositiveButton(context.getString(R.string.dialog_ok), null)
                             .show()
                     } catch (_: Exception) {}
                 }

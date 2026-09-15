@@ -28,4 +28,27 @@
     <string name="toast_bookmark_removed">🗑️ Eliminado de marcadores</string>
     <string name="toast_link_copied">📋 Enlace copiado al portapapeles</string>
     <string name="toast_download_started">📥 Descarga iniciada</string>
+    <string name="perm_request_title">Solicitud de permiso</string>
+    <string name="perm_request_msg">El sitio web %1$s quiere acceder a los siguientes recursos del dispositivo:\n\n%2$s\n\n¿Permitir el acceso?</string>
+    <string name="perm_allow">Permitir</string>
+    <string name="perm_deny">Denegar</string>
+    <string name="geo_request_title">Solicitud de ubicación</string>
+    <string name="geo_request_msg">El sitio web %1$s quiere acceder a tu ubicación actual.\n\n¿Permitir el acceso?</string>
+    <string name="ssl_warning_title">Aviso de seguridad (SSL)</string>
+    <string name="ssl_warning_msg">No es posible una conexión segura con %1$s porque el certificado de seguridad no es válido o ha caducado.\n\nSe ha interrumpido el acceso para proteger tus datos.</string>
+    <string name="ssl_this_site">Este sitio web</string>
+    <string name="toast_prev_tab">◀ Pestaña anterior</string>
+    <string name="toast_next_tab">Pestaña siguiente ▶</string>
+    <string name="toast_downloading">📥 Descargando: %1$s</string>
+    <string name="toast_download_error">❌ Error de descarga: %1$s</string>
+    <string name="dialog_ok">Aceptar</string>
+    <string name="dialog_cancel">Cancelar</string>
+    <string name="dialog_dont_show">No mostrar más diálogos de esta página</string>
+    <string name="dialog_leave_page">Salir de la página</string>
+    <string name="dialog_stay">Quedarse</string>
+    <string name="dialog_leave_msg">La página pregunta si de verdad quieres salir. Se perderán los datos no guardados.</string>
+    <string name="dialog_this_page">Esta página</string>
+    <string name="proxy_failed">No se han podido activar las conexiones seguras. Actualiza Android System WebView o revisa la configuración de red.</string>
+    <string name="link_open_failed">No se ha podido abrir Safeer Link.</string>
+    <string name="cast_token_hint">Token de Safeer Control (opcional)</string>
 </resources>

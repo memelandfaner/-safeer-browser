@@ -34,9 +34,9 @@ class DownloadHandler(private val context: Context) {
 
             val dm = context.getSystemService(Context.DOWNLOAD_SERVICE) as? DownloadManager
             dm?.enqueue(request)
-            Toast.makeText(context, "📥 Prenašam: $filename", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.toast_downloading, filename), Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
-            Toast.makeText(context, "❌ Napaka pri prenosu: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, context.getString(R.string.toast_download_error, e.message ?: ""), Toast.LENGTH_LONG).show()
         }
     }
 }

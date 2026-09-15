@@ -39,4 +39,27 @@
     <string name="cast_none_found">Televizorja ni bilo mogoče najti. Ali vozlišče Safeer Cast teče?</string>
     <string name="cast_choose">Na kateri televizor naj pošljem?</string>
     <string name="cast_sent">📺 Poslano na</string>
+    <string name="perm_request_title">Zahteva za dovoljenje</string>
+    <string name="perm_request_msg">Spletno mesto %1$s želi dostop do naslednjih virov naprave:\n\n%2$s\n\nAli dovolite dostop?</string>
+    <string name="perm_allow">Dovoli</string>
+    <string name="perm_deny">Zavrni</string>
+    <string name="geo_request_title">Zahteva za lokacijo</string>
+    <string name="geo_request_msg">Spletno mesto %1$s želi dostop do vaše trenutne geografske lokacije.\n\nAli dovolite dostop?</string>
+    <string name="ssl_warning_title">Varnostno opozorilo (SSL)</string>
+    <string name="ssl_warning_msg">Varna povezava z %1$s ni mogoča, ker je varnostni certifikat neveljaven ali potekel.\n\nDostop je bil zaradi zaščite vaših podatkov prekinjen.</string>
+    <string name="ssl_this_site">To spletno mesto</string>
+    <string name="toast_prev_tab">◀ Prejšnji zavihek</string>
+    <string name="toast_next_tab">Naslednji zavihek ▶</string>
+    <string name="toast_downloading">📥 Prenašam: %1$s</string>
+    <string name="toast_download_error">❌ Napaka pri prenosu: %1$s</string>
+    <string name="dialog_ok">V redu</string>
+    <string name="dialog_cancel">Prekliči</string>
+    <string name="dialog_dont_show">Ne prikazuj več oken s te strani</string>
+    <string name="dialog_leave_page">Zapusti stran</string>
+    <string name="dialog_stay">Ostani</string>
+    <string name="dialog_leave_msg">Stran sprašuje, ali jo res želiš zapustiti. Neshranjeni vnosi bodo izgubljeni.</string>
+    <string name="dialog_this_page">Ta stran</string>
+    <string name="proxy_failed">Varne povezave ni mogoče vključiti. Posodobite Android System WebView ali preverite omrežne nastavitve.</string>
+    <string name="link_open_failed">Safeer Linka ni bilo mogoče odpreti.</string>
+    <string name="cast_token_hint">Žeton Safeer Controla (neobvezno)</string>
 </resources>

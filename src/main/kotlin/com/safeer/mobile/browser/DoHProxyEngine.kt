@@ -164,7 +164,7 @@ object DoHProxyEngine {
                 Runnable { Log.i(TAG, "WebView proxy active: $host:$port"); onReady() })
         } catch (e: Exception) {
             Log.e(TAG, "WebView proxy could not be enabled", e)
-            android.widget.Toast.makeText(context, "Varne povezave ni mogoče vključiti. Posodobite Android System WebView ali preverite omrežne nastavitve.", android.widget.Toast.LENGTH_LONG).show()
+            android.widget.Toast.makeText(context, context.getString(R.string.proxy_failed), android.widget.Toast.LENGTH_LONG).show()
         }
     }
 
